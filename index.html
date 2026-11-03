@@ -1280,21 +1280,6 @@ window.addEventListener('unhandledrejection', event => {
 
     <!-- TAB 4: FINAL CERTIFICATION -->
     <div id="tab-final-cert" class="tab-content" style="display:none;">
-      <!-- Exam Focus Blur Overlay -->
-      <div id="certBlurOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); backdrop-filter:blur(15px); z-index:999999; flex-direction:column; align-items:center; justify-content:center; color:#fff; text-align:center; padding:24px;">
-        <div style="font-size:48px; margin-bottom:16px;">⏸️</div>
-        <h2 style="font-size:24px; font-weight:800; margin-bottom:12px;">Тест призупинено (Втрата фокусу)</h2>
-        <p style="font-size:15px; color:#a1a1aa; max-width:540px; line-height:1.6; margin-bottom:14px;">
-          Вікно тестування втратило фокус. Щоб продовжити роботу над завданнями, поверніться до цієї вкладки.
-        </p>
-        <p id="certInfractionNotice" style="font-size:13.5px; color:var(--color-amber); margin-bottom:24px; font-weight:600;">
-          Увага: спроба перемикання вікна зафіксована античитом.
-        </p>
-        <button class="btn-pill btn-pill-primary" id="resumeCertFocusBtn" style="padding:12px 28px; font-size:15px;">
-          Продовжити тестування
-        </button>
-      </div>
-
       <!-- Welcome Box -->
       <div id="certWelcomeBox" class="supabase-card" style="text-align:center; max-width:800px; margin:0 auto;">
         <span style="font-size:40px; display:inline-block; margin-bottom:12px;">🎓</span>
@@ -1406,6 +1391,23 @@ window.addEventListener('unhandledrejection', event => {
       </div>
     </div>
 
+  </div>
+
+  <!-- Full-Screen Exam Anti-Cheat Blur Overlay (Root Level) -->
+  <div id="certBlurOverlay" style="display:none; position:fixed; inset:0; background:rgba(8, 8, 10, 0.94); backdrop-filter:blur(28px) saturate(190%); -webkit-backdrop-filter:blur(28px) saturate(190%); z-index:99999999; flex-direction:column; align-items:center; justify-content:center; color:#fff; text-align:center; padding:32px;">
+    <div style="font-size:56px; margin-bottom:16px;">⏸️</div>
+    <h2 style="font-size:26px; font-weight:800; margin-bottom:12px; letter-spacing:-0.02em;">Тест призупинено (Античит активний)</h2>
+    <p style="font-size:15px; color:#d4d4d8; max-width:580px; line-height:1.6; margin-bottom:16px;">
+      Екран розмито, оскільки вікно іспиту втратило фокус або зафіксовано спробу копіювання / переходу на іншу вкладку чи програму.
+    </p>
+    <div style="background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.4); border-radius:10px; padding:12px 20px; max-width:540px; margin-bottom:24px;">
+      <p id="certInfractionNotice" style="font-size:13.5px; color:var(--color-amber); margin:0; font-weight:600;">
+        Увага: втрату фокусу зафіксовано античитом. Усі порушення записуються у звіт викладача.
+      </p>
+    </div>
+    <button class="btn-pill btn-pill-primary" id="resumeCertFocusBtn" style="padding:14px 32px; font-size:15px; font-weight:700;">
+      ▶ Продовжити тестування
+    </button>
   </div>
 
   <!-- Student Profile Identification Modal -->
@@ -2058,18 +2060,93 @@ window.addEventListener('unhandledrejection', event => {
     let certInfractionsCount = 0;
 
     const certBlurOverlay = document.getElementById('certBlurOverlay');
+
+    function triggerExamBlur(reasonText) {
+      if (!certActive) return;
+      certInfractionsCount++;
+      const notice = document.getElementById('certInfractionNotice');
+      if (notice) {
+        notice.textContent = reasonText 
+          ? `${reasonText} (Зафіксовано порушень: ${certInfractionsCount})`
+          : `Увага: втрату фокусу вікна зафіксовано античитом (${certInfractionsCount} разів). Усі перемикання записуються у звіт викладача.`;
+      }
+      if (certBlurOverlay) certBlurOverlay.style.display = 'flex';
+      const container = document.querySelector('.app-container');
+      if (container) container.style.filter = 'blur(16px)';
+    }
+
+    function resumeExamFocus() {
+      if (certBlurOverlay) certBlurOverlay.style.display = 'none';
+      const container = document.querySelector('.app-container');
+      if (container) container.style.filter = 'none';
+      window.focus();
+    }
+
+    document.getElementById('resumeCertFocusBtn')?.addEventListener('click', resumeExamFocus);
+
+    // 1. Trigger blur on window blur
     window.addEventListener('blur', () => {
       if (certActive) {
-        certInfractionsCount++;
-        certBlurOverlay.style.display = 'flex';
-        document.getElementById('certInfractionNotice').textContent =
-          `Увага: втрату фокусу вікна зафіксовано античитом (${certInfractionsCount} разів). Усі перемикання записуються у звіт викладача.`;
+        triggerExamBlur('⚠️ Втрату фокусу вікна (перемикання додатку або робочого столу) зафіксовано античитом!');
       }
     });
 
-    document.getElementById('resumeCertFocusBtn')?.addEventListener('click', () => {
-      certBlurOverlay.style.display = 'none';
+    // 2. Trigger blur on tab visibility change (document.hidden)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && certActive) {
+        triggerExamBlur('⚠️ Перехід на іншу вкладку браузера зафіксовано античитом!');
+      }
     });
+
+    // 3. Navigation Lock: Prevent opening theory or trainer during active exam
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        if (certActive && btn.dataset.tab !== 'final-cert') {
+          e.preventDefault();
+          e.stopPropagation();
+          triggerExamBlur('⚠️ Навігацію заблоковано! Під час сертифікаційного іспиту заборонено відкривати теорію та тренажер.');
+        }
+      }, true);
+    });
+
+    // 4. Anti-Copypaste: Block paste and contextmenu in certCodeEditor
+    const certCodeEditorEl = document.getElementById('certCodeEditor');
+    if (certCodeEditorEl) {
+      certCodeEditorEl.addEventListener('paste', (e) => {
+        if (certActive) {
+          e.preventDefault();
+          triggerExamBlur('⚠️ Вставку коду (Paste) заблоковано! На сертифікаційному іспиті заборонено вставляти скопійований код. Пишіть розвʼязок самостійно.');
+        }
+      });
+      certCodeEditorEl.addEventListener('contextmenu', (e) => {
+        if (certActive) {
+          e.preventDefault();
+        }
+      });
+    }
+
+    // 5. Global Hotkeys Lock (Ctrl+V / Cmd+V, Ctrl+C / Cmd+C) during exam
+    document.addEventListener('keydown', (e) => {
+      if (!certActive) return;
+      const isMod = e.ctrlKey || e.metaKey;
+      if (isMod && (e.key === 'v' || e.key === 'V')) {
+        e.preventDefault();
+        triggerExamBlur('⚠️ Спробу вставки коду через комбінацію клавіш заблоковано античитом!');
+      }
+      if (isMod && (e.key === 'c' || e.key === 'C')) {
+        e.preventDefault();
+        triggerExamBlur('⚠️ Копіювання коду та матеріалів іспиту заблоковано античитом!');
+      }
+    });
+
+    // 6. Global copy event block during exam
+    document.addEventListener('copy', (e) => {
+      if (certActive) {
+        e.preventDefault();
+        triggerExamBlur('⚠️ Спробу копіювання тексту заблоковано античитом!');
+      }
+    });
+
 
     document.getElementById('startCertExamBtn')?.addEventListener('click', () => {
       if (!studentProfile || !studentProfile.surname || !studentProfile.name) {
@@ -2228,6 +2305,10 @@ window.addEventListener('unhandledrejection', event => {
       recordCertTaskTime();
       certActive = false;
       clearInterval(certTimer);
+
+      const container = document.querySelector('.app-container');
+      if (container) container.style.filter = 'none';
+      if (certBlurOverlay) certBlurOverlay.style.display = 'none';
 
       document.getElementById('certActiveBox').style.display = 'none';
       document.getElementById('certResultsBox').style.display = 'block';
