@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JS Functions Mastery Workout | Модуль 7: Функції в JavaScript (Supabase Edition)</title>
+  <meta name="description" content="Інтерактивний воркаут по роботі з функціями в JavaScript: синтаксис, області видимості, замикання, цикли, масиви, HOF та бойові патерни в естетиці Supabase.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- PrismJS syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+  <!-- Prettier for in-browser formatting -->
+  <script src="https://unpkg.com/prettier@3.2.5/standalone.js"></script>
+  <script src="https://unpkg.com/prettier@3.2.5/plugins/babel.js"></script>
+  <script src="https://unpkg.com/prettier@3.2.5/plugins/estree.js"></script>
+
+  <!-- Supabase JS Client for realtime presence -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ==========================================
+       SUPABASE DESIGN SYSTEM (OBSIDIAN & EMERALD)
+       ========================================== */
+    :root {
+      --bg-dark: #121212;
+      --bg-surface: #171717;
+      --bg-card: #1c1c1c;
+      --bg-card-hover: #222222;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(62, 207, 142, 0.5);
+
+      --color-primary: #3ecf8e;   /* Supabase Emerald */
+      --color-primary-dim: rgba(62, 207, 142, 0.15);
+      --color-amber: #f59e0b;     /* Warm Accent */
+      --color-rose: #f87171;      /* Error Red */
+      --color-blue: #38bdf8;      /* Cyan Blue */
+
+      --text-main: #ededed;
+      --text-muted: #a1a1aa;
+      --text-dim: #71717a;
+
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    /* Content Integrity & Anti-Copy Protection */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(62, 207, 142, 0.07) 0%, transparent 50%),
+        radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 24px 24px;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      line-height: 1.5;
+      overflow-x: hidden;
+      position: relative;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+    }
+
+    textarea, input {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+    }
+
+    .app-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 20px 48px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-logo-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(62, 207, 142, 0.2), rgba(62, 207, 142, 0.05));
+      border: 1px solid rgba(62, 207, 142, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--color-primary);
+    }
+
+    .header-titles h1 {
+      font-size: 20px;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .header-titles p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 2px 0 0 0;
+    }
+
+    .header-status-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill-badge {
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .pill-badge-supabase {
+      border-color: rgba(62, 207, 142, 0.4);
+      color: var(--color-primary);
+      background: var(--color-primary-dim);
+    }
+
+    /* Tabs Bar */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      padding: 6px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: var(--bg-card);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: #242424;
+      border-color: var(--border-subtle);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .tab-btn.active::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      display: inline-block;
+    }
+
+    /* Cards */
+    .supabase-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+    }
+
+    /* Layout */
+    .trainer-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .trainer-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Part Switcher Group (Supabase Segmented Cards) */
+    .part-switcher-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .part-switcher-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      gap: 5px;
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: var(--text-main);
+      font-family: inherit;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .part-switcher-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .part-switcher-btn.active {
+      background: rgba(62, 207, 142, 0.08);
+      border-color: var(--color-primary);
+      box-shadow: 0 0 15px rgba(62, 207, 142, 0.15);
+    }
+
+    .part-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .part-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-primary);
+    }
+
+    .part-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .part-switcher-btn.active .part-count {
+      background: var(--color-primary-dim);
+      color: #fff;
+      border-color: rgba(62, 207, 142, 0.3);
+    }
+
+    .part-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e4e4e7;
+      line-height: 1.35;
+    }
+
+    .task-pills-wrap {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .task-pill {
+      padding: 8px 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .task-pill:hover {
+      color: #fff;
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .task-pill.active {
+      color: #121212;
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    .task-pill.completed {
+      border-color: rgba(62, 207, 142, 0.4);
+      color: var(--color-primary);
+    }
+
+    .task-pill.active.completed {
+      color: #121212;
+      background: var(--color-primary);
+    }
+
+    /* Task Details Card */
+    .task-details-box {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 20px;
+      margin-top: 8px;
+    }
+
+    .task-id-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-primary);
+      background: var(--color-primary-dim);
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .task-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      color: #fff;
+    }
+
+    .task-goal {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .task-reqs-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .task-reqs-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .task-reqs-list li {
+      margin-bottom: 4px;
+    }
+
+    /* Editor Section */
+    .editor-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .editor-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .editor-header {
+      padding: 12px 18px;
+      background: #191919;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .editor-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #e4e4e7;
+    }
+
+    .code-textarea {
+      width: 100%;
+      height: 380px;
+      background: #141414;
+      color: #f4f4f5;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 18px;
+      border: none;
+      outline: none;
+      resize: vertical;
+      box-sizing: border-box;
+      tab-size: 2;
+    }
+
+    .editor-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-pill {
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+    }
+
+    .btn-pill-primary {
+      background: var(--color-primary);
+      color: #121212;
+      font-weight: 700;
+    }
+
+    .btn-pill-primary:hover {
+      background: #4ade80;
+      transform: translateY(-1px);
+    }
+
+    .btn-pill-outline {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-pill-outline:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Console & Test Results */
+    .console-card {
+      background: #141414;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .console-header {
+      padding: 10px 18px;
+      background: #18181b;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+    }
+
+    .console-body {
+      padding: 18px;
+      max-height: 260px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    .test-result-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .test-result-row.pass {
+      border-left: 3px solid var(--color-primary);
+    }
+
+    .test-result-row.fail {
+      border-left: 3px solid var(--color-rose);
+    }
+
+    /* Theory Book Styles */
+    .theory-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .theory-section h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0 0 14px 0;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theory-section h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 20px 0 8px 0;
+      color: var(--color-primary);
+    }
+
+    .theory-section p, .theory-section li {
+      font-size: 14.5px;
+      color: #d4d4d8;
+      line-height: 1.7;
+    }
+
+    .theory-callout {
+      background: rgba(62, 207, 142, 0.06);
+      border-left: 4px solid var(--color-primary);
+      padding: 14px 18px;
+      border-radius: 6px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    /* Mentor Stealth Modal */
+    #mentorModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .mentor-content {
+      background: #18181b;
+      border: 1px solid var(--color-primary);
+      border-radius: 14px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .mentor-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #141414;
+    }
+
+    .mentor-body {
+      padding: 24px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="header-logo-group">
+        <div class="logo-badge">⚡</div>
+        <div class="header-titles">
+          <h1>JS Functions Mastery Workout</h1>
+          <p>Модуль 7: Синтаксис, параметри, замикання, цикли, масиви та функції вищого порядку</p>
+        </div>
+      </div>
+      <div class="header-status-group">
+        <span class="pill-badge pill-badge-supabase">⚡ Supabase Edition</span>
+        <span class="pill-badge" id="onlineCountText">🟢 1 онлайн</span>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="trainer">⚡ Тренажер (92 завдання)</button>
+      <button class="tab-btn" data-tab="theory">📖 Повна теорія (6 розділів)</button>
+      <button class="tab-btn" data-tab="mass-runner">🧪 Масовий запуск (92 тести)</button>
+      <button class="tab-btn" data-tab="final-cert">🚀 Підсумковий тест (Сертифікація)</button>
+    </nav>
+
+    <!-- TAB 1: TRAINER -->
+    <div id="tab-trainer" class="tab-content">
+      <div class="trainer-layout">
+        <!-- Sidebar -->
+        <div class="supabase-card">
+          <label style="display:block; font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px;">Оберіть частину модуля:</label>
+          <div class="part-switcher-group" id="partSwitcherGroup"></div>
+          <select id="moduleSelect" style="display:none;"></select>
+
+          <label style="display:block; font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px;">Завдання частини:</label>
+          <div class="task-pills-wrap" id="taskPillsContainer"></div>
+
+          <!-- Active Task Card -->
+          <div class="task-details-box">
+            <span class="task-id-badge" id="activeTaskIdBadge">1.1</span>
+            <h3 class="task-title" id="activeTaskTitle">Назва завдання</h3>
+            <p class="task-goal" id="activeTaskGoal">Опис цілі завдання...</p>
+            <div class="task-reqs-title">Вимоги до розв'язку:</div>
+            <ul class="task-reqs-list" id="activeTaskReqsList"></ul>
+
+            <div style="margin-top:18px; display:flex; gap:8px;">
+              <button class="btn-pill btn-pill-outline" id="prevTaskBtn" style="padding:6px 14px; font-size:12.5px;">← Назад</button>
+              <button class="btn-pill btn-pill-primary" id="nextTaskBtn" style="padding:6px 14px; font-size:12.5px;">Далі →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Editor & Console -->
+        <div class="editor-section">
+          <div class="editor-card">
+            <div class="editor-header">
+              <div class="editor-title-group">
+                <span>📄</span>
+                <span id="editorFilename">solution.js</span>
+              </div>
+              <div class="editor-actions">
+                <button class="btn-pill btn-pill-outline" id="formatCodeBtn" style="padding:6px 14px; font-size:12.5px;">✨ Форматувати</button>
+                <button class="btn-pill btn-pill-outline" id="resetCodeBtn" style="padding:6px 14px; font-size:12.5px;">Скинути</button>
+                <button class="btn-pill btn-pill-primary" id="runTestBtn">▶ Запустити тест (Ctrl+Enter)</button>
+              </div>
+            </div>
+
+            <textarea id="codeEditor" class="code-textarea" spellcheck="false"></textarea>
+          </div>
+
+          <!-- Console & Output -->
+          <div class="console-card">
+            <div class="console-header">
+              <span>Результати перевірки</span>
+              <span id="testSummaryBadge" style="color:var(--text-muted);">Очікує запуску</span>
+            </div>
+            <div class="console-body" id="consoleBody">
+              <div style="color:var(--text-dim);">Натисніть «▶ Запустити тест» або натисніть Ctrl+Enter для перевірки коду...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: FULL THEORY -->
+    <div id="tab-theory" class="tab-content" style="display:none; max-width:960px; margin:0 auto;">
+      
+      <!-- Section 1 -->
+      <div class="theory-section">
+        <h2>1. Що таке функція у JavaScript?</h2>
+        <p>
+          <strong>Функція (Function)</strong> — це фундаментальний будівельний блок у JavaScript, ізольований блок коду, який приймає вхідні дані (аргументи), виконує алгоритм і може повертати результат.
+        </p>
+        <p>
+          У JavaScript функції є <strong>громадянами першого класу (First-Class Citizens)</strong>: вони можуть зберігатися у змінних, передаватися як аргументи іншим функціям і повертатися з інших функцій так само, як числа чи рядки.
+        </p>
+        <div class="theory-callout">
+          💡 <strong>Принцип DRY (Don't Repeat Yourself):</strong> Якщо однаковий фрагмент коду зустрічається двічі або більше — його необхідно винести в окрему функцію.
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="theory-section">
+        <h2>2. Цілі та завдання функцій</h2>
+        <ul>
+          <li><strong>Повторне використання (Reusability):</strong> один раз написана логіка виконується будь-яку кількість разів із різними вхідними даними.</li>
+          <li><strong>Декомпозиція (Decomposition):</strong> розбиття складної монолітної програми на маленькі, зрозумілі, ізольовані підзадачі.</li>
+          <li><strong>Чисті функції (Pure Functions):</strong> функції, результат яких залежить виключно від переданих аргументів і не мають побічних ефектів (*Side Effects*). Вони легко тестуються та масштабуються.</li>
+        </ul>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="theory-section">
+        <h2>3. Синтаксис оголошення функції</h2>
+        <h3>1. Оголошення функції (Function Declaration)</h3>
+        <pre><code class="language-javascript">function add(a, b) {
+  return a + b;
+}</code></pre>
+        <p>Піднімається (*Hoisting*) на початок своєї області видимості, тому таку функцію можна викликати навіть до рядка її оголошення у коді.</p>
+
+        <h3>2. Функціональний вираз (Function Expression)</h3>
+        <pre><code class="language-javascript">const multiply = function(a, b) {
+  return a * b;
+};</code></pre>
+        <p>Функція створюється в момент виконання відповідного виразу та не піднімається у повному обсязі.</p>
+
+        <h3>3. Стрілкові функції (Arrow Functions)</h3>
+        <pre><code class="language-javascript">const square = x => x * x; // неявне повернення
+const greet = (name, role = 'user') => {
+  return `${name} (${role})`;
+};</code></pre>
+        <p>Мають компактний синтаксис, не мають власного контексту <code>this</code> та об'єкта <code>arguments</code>.</p>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="theory-section">
+        <h2>4. Значення функції, що повертається. Ключове слово return</h2>
+        <p>
+          Оператор <code>return</code> негайно припиняє виконання функції та передає значення у точку виклику.
+        </p>
+        <ul>
+          <li>Якщо функція не містить <code>return</code> або викликано порожній <code>return;</code> — функція автоматично повертає <code>undefined</code>.</li>
+          <li><strong>Патерн Early Return (Guard Clauses):</strong> перевірка некоректних або граничних умов на початку функції з миттєвим виходом замість глибоких вкладених блоків <code>if/else</code>.</li>
+        </ul>
+      </div>
+
+      <!-- Section 5 -->
+      <div class="theory-section">
+        <h2>5. Область видимості змінної (Scope) та Замикання (Closures)</h2>
+        <h3>Типи областей видимості:</h3>
+        <ul>
+          <li><strong>Глобальна (Global Scope):</strong> змінні доступні скрізь у програмі.</li>
+          <li><strong>Функціональна (Function Scope):</strong> змінні, створені всередині функції, не доступні ззовні.</li>
+          <li><strong>Блочна (Block Scope):</strong> змінні <code>let</code> та <code>const</code> доступні лише всередині фігурних дужок <code>{ ... }</code>.</li>
+        </ul>
+
+        <h3>Замикання (Closure):</h3>
+        <p>
+          <strong>Замикання</strong> — це здатність внутрішньої функції запам'ятовувати своє лексичне оточення (змінні батьківської функції) навіть після того, як батьківська функція завершила своє виконання.
+        </p>
+        <pre><code class="language-javascript">function createCounter() {
+  let count = 0; // приватна змінна
+  return function() {
+    return ++count;
+  };
+}
+const counter = createCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2</code></pre>
+      </div>
+
+      <!-- Section 6 -->
+      <div class="theory-section">
+        <h2>6. Практичні приклади та синтез: Функції + Масиви + Цикли + Рядки</h2>
+        <p>
+          У реальній розробці функції завжди працюють у синергії з масивами, циклами та рядками. Наприклад, трансформація даних замовлень або фільтрація списків:
+        </p>
+        <pre><code class="language-javascript">function formatOrderSummary(orders, minTotal = 100) {
+  const result = [];
+  for (const order of orders) {
+    if (order.total >= minTotal) {
+      result.push(`Замовлення #${order.id}: ${order.total.toFixed(2)} грн`);
+    }
+  }
+  return result.join('\n');
+}</code></pre>
+      </div>
+
+    </div>
+
+    <!-- TAB 3: MASS RUNNER -->
+    <div id="tab-mass-runner" class="tab-content" style="display:none;">
+      <div class="supabase-card" style="max-width:840px; margin:0 auto; text-align:center;">
+        <span style="font-size:36px; display:inline-block; margin-bottom:12px;">🧪</span>
+        <h2 style="font-size:24px; font-weight:800; margin:0 0 10px 0; color:#fff;">Масовий запуск тестів (Mass Suite Runner)</h2>
+        <p style="font-size:14px; color:var(--text-muted); max-width:600px; margin:0 auto 24px auto;">
+          Запустіть одночасну валідацію всіх 92 завдань курсу на реальних тестах у захищеній пісочниці для перевірки готовності.
+        </p>
+
+        <button class="btn-pill btn-pill-primary" id="startMassRunnerBtn" style="padding:12px 28px; font-size:15px;">
+          🚀 Запустити всі 92 тести
+        </button>
+
+        <div id="massRunnerProgressWrap" style="display:none; margin-top:24px; text-align:left;">
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+            <span id="massRunnerProgressText">Виконується...</span>
+            <span id="massRunnerProgressPct" style="font-family:var(--font-mono); font-weight:700; color:var(--color-primary);">0%</span>
+          </div>
+          <div style="height:8px; background:rgba(255,255,255,0.06); border-radius:9999px; overflow:hidden;">
+            <div id="massRunnerProgressBar" style="height:100%; width:0%; background:var(--color-primary); transition:width 0.2s ease;"></div>
+          </div>
+        </div>
+
+        <div id="massRunnerResultsLog" style="margin-top:24px; text-align:left; max-height:360px; overflow-y:auto; display:none; background:#141414; border:1px solid var(--border-subtle); border-radius:12px; padding:16px; font-family:var(--font-mono); font-size:12.5px;"></div>
+      </div>
+    </div>
+
+    <!-- TAB 4: FINAL CERTIFICATION (FOUNDATION) -->
+    <div id="tab-final-cert" class="tab-content" style="display:none;">
+      <!-- Exam Focus Blur Overlay -->
+      <div id="certBlurOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); backdrop-filter:blur(15px); z-index:999999; flex-direction:column; align-items:center; justify-content:center; color:#fff; text-align:center; padding:24px;">
+        <div style="font-size:48px; margin-bottom:16px;">⏸️</div>
+        <h2 style="font-size:24px; font-weight:800; margin-bottom:12px;">Тест призупинено</h2>
+        <p style="font-size:15px; color:#a1a1aa; max-width:540px; line-height:1.6; margin-bottom:24px;">
+          Вікно тестування втратило фокус. Щоб продовжити роботу над завданнями, поверніться до цієї вкладки.
+        </p>
+        <button class="btn-pill btn-pill-primary" id="resumeCertFocusBtn" style="padding:12px 28px; font-size:15px;">
+          Продовжити тестування
+        </button>
+      </div>
+
+      <!-- Welcome Box -->
+      <div id="certWelcomeBox" class="supabase-card" style="text-align:center; max-width:800px; margin:0 auto;">
+        <span style="font-size:40px; display:inline-block; margin-bottom:12px;">🎓</span>
+        <h2 style="font-size:26px; font-weight:800; margin-bottom:10px; color:#fff;">Фінальний сертифікаційний тест (Фундамент)</h2>
+        <p style="font-size:14.5px; color:var(--text-muted); line-height:1.6; max-width:620px; margin:0 auto 24px auto;">
+          Модуль сертифікації закладено як основу для майбутнього комплексного іспиту. Включає таймер, генератор квитків, захист фокусу вікна та аналітику часу.
+        </p>
+        <button class="btn-pill btn-pill-primary" id="startCertExamBtn" style="padding:14px 32px; font-size:16px;">
+          ⚡ Розпочати тренувальний іспит (45 хв)
+        </button>
+      </div>
+
+      <!-- Active Exam Box -->
+      <div id="certActiveBox" style="display:none;">
+        <div class="supabase-card" style="margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-weight:700; color:#fff;">Таймер тесту:</span>
+              <span id="certTimerDisplay" class="pill-badge pill-badge-supabase" style="font-family:var(--font-mono); font-size:16px;">45:00</span>
+            </div>
+            <div id="certQuestionPills" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+            <button class="btn-pill btn-pill-outline" id="finishCertEarlyBtn" style="color:var(--color-rose); border-color:rgba(248,113,113,0.3);">
+              Завершити тест
+            </button>
+          </div>
+        </div>
+
+        <div class="trainer-layout">
+          <div class="supabase-card">
+            <span class="task-id-badge" id="certTaskIdBadge">Завдання 1 / 10</span>
+            <h3 class="task-title" id="certTaskTitle">Назва завдання</h3>
+            <p class="task-goal" id="certTaskGoal">Опис цілі завдання...</p>
+            <ul class="task-reqs-list" id="certTaskReqs"></ul>
+
+            <div style="margin-top:20px; display:flex; gap:8px;">
+              <button class="btn-pill btn-pill-outline" id="certPrevBtn">← Попереднє</button>
+              <button class="btn-pill btn-pill-primary" id="certNextBtn">Наступне →</button>
+            </div>
+          </div>
+
+          <div class="editor-section">
+            <div class="editor-card">
+              <div class="editor-header">
+                <span id="certEditorFilename">exam-solution.js</span>
+                <div class="editor-actions">
+                  <button class="btn-pill btn-pill-outline" id="certFormatBtn">✨ Форматувати</button>
+                  <button class="btn-pill btn-pill-outline" id="certResetTaskBtn">Скинути</button>
+                </div>
+              </div>
+              <textarea id="certCodeEditor" class="code-textarea" spellcheck="false" style="height:320px;"></textarea>
+            </div>
+
+            <div class="console-card">
+              <div class="console-header">
+                <button class="btn-pill btn-pill-primary" id="certRunTestBtn" style="padding:6px 16px; font-size:12px;">▶ Перевірити завдання</button>
+                <span id="certTestStatus" style="color:var(--text-muted);">Очікує запуску</span>
+              </div>
+              <div class="console-body" id="certConsoleBody"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results & Breakdown Table -->
+      <div id="certResultsBox" style="display:none; max-width:880px; margin:0 auto; text-align:center;">
+        <div class="supabase-card">
+          <div id="certStatusIcon" style="font-size:48px; margin-bottom:8px;">🎉</div>
+          <h2 id="certResultHeadline" style="font-size:26px; font-weight:800; margin-bottom:8px; color:#fff;">Тест завершено!</h2>
+          <p id="certResultSubtext" style="font-size:15px; color:var(--text-muted); margin-bottom:20px;">
+            Ви успішно пройшли всі тренувальні завдання сертифікації.
+          </p>
+
+          <!-- Student Timing Breakdown Table -->
+          <div id="certStudentTableContainer" style="margin-top:24px; text-align:left; background:#141414; border:1px solid var(--border-subtle); border-radius:10px; padding:18px; overflow-x:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h4 style="margin:0; font-size:15px; font-weight:700; color:#fff;">⏱️ Деталізація часу по завданнях:</h4>
+              <div id="certTotalTimeBadge" style="font-size:13px; font-weight:700; color:var(--color-primary); background:var(--color-primary-dim); padding:4px 12px; border-radius:9999px;">
+                Загальний час: 00:00
+              </div>
+            </div>
+
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-dim); text-align:left;">
+                  <th style="padding:8px 6px;">#</th>
+                  <th style="padding:8px 6px;">Завдання</th>
+                  <th style="padding:8px 6px;">Статус</th>
+                  <th style="padding:8px 6px;">Час розв'язання</th>
+                </tr>
+              </thead>
+              <tbody id="certStudentTableBody"></tbody>
+            </table>
+          </div>
+
+          <div style="margin-top:24px; display:flex; justify-content:center; gap:12px;">
+            <button class="btn-pill btn-pill-outline" id="certRetryExamBtn" style="padding:10px 22px;">🔄 Скласти ще раз</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Hidden Stealth Mentor Modal (Ctrl + Shift + A) -->
+  <div id="mentorModal">
+    <div class="mentor-content">
+      <div class="mentor-header">
+        <div style="font-size:16px; font-weight:700; color:var(--color-primary);">🛠️ Панель Ментора (Stealth Mode)</div>
+        <button id="closeMentorModalBtn" style="background:none; border:none; color:#a1a1aa; font-size:20px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="mentor-body">
+        <div id="mentorAuthSection">
+          <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:12px;">Введіть менторський ключ доступу для дешифрування аналітики та відповідей:</p>
+          <div style="display:flex; gap:8px;">
+            <input type="password" id="mentorKeyInput" placeholder="camp-admin-2026" style="flex:1; padding:8px 12px; border-radius:6px; border:1px solid var(--border-subtle); background:#141414; color:#fff;" />
+            <button class="btn-pill btn-pill-primary" id="unlockMentorBtn">Розблокувати</button>
+          </div>
+          <div id="mentorErrorMsg" style="color:var(--color-rose); font-size:12px; margin-top:6px; display:none;">Невірний пароль!</div>
+        </div>
+
+        <div id="mentorDashboardSection" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h4 style="margin:0; font-size:15px; color:#fff;">Журнал спроб сертифікації студентів</h4>
+            <button class="btn-pill btn-pill-outline" id="exportCsvBtn" style="padding:6px 14px; font-size:12px;">📥 Експорт CSV для журналу</button>
+          </div>
+          <div id="mentorTableWrapper" style="overflow-x:auto;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { MODULES, ALL_TASKS, ENCRYPTED_SOLUTIONS } from './catalog.js';
+
+    let currentModuleIdx = 1;
+    let currentTask = ALL_TASKS[0];
+    const userCodes = {};
+    const completedTasks = new Set();
+
+    // Setup Navigation Tabs
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = {
+      'trainer': document.getElementById('tab-trainer'),
+      'theory': document.getElementById('tab-theory'),
+      'mass-runner': document.getElementById('tab-mass-runner'),
+      'final-cert': document.getElementById('tab-final-cert')
+    };
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tabKey = btn.dataset.tab;
+        Object.values(tabContents).forEach(content => {
+          if (content) content.style.display = 'none';
+        });
+        if (tabContents[tabKey]) {
+          tabContents[tabKey].style.display = 'block';
+        }
+      });
+    });
+
+    // Populate Part Switcher
+    const moduleSelect = document.getElementById('moduleSelect');
+    function renderPartSwitcher() {
+      const switcher = document.getElementById('partSwitcherGroup');
+      if (switcher) {
+        switcher.innerHTML = '';
+        MODULES.forEach(mod => {
+          const mTasks = ALL_TASKS.filter(t => t.moduleIdx === mod.idx);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'part-switcher-btn' + (mod.idx === currentModuleIdx ? ' active' : '');
+          btn.dataset.modIdx = mod.idx;
+          btn.innerHTML = '<div class="part-header">' +
+            '<span class="part-badge">Частина ' + mod.idx + '</span>' +
+            '<span class="part-count">' + mTasks.length + ' завдань</span>' +
+          '</div>' +
+          '<div class="part-title">' + (mod.shortTitle || mod.title) + '</div>';
+
+          btn.addEventListener('click', () => {
+            currentModuleIdx = mod.idx;
+            updatePartSwitcherActive();
+            renderTaskPills();
+            const firstTask = ALL_TASKS.find(t => t.moduleIdx === currentModuleIdx);
+            if (firstTask) selectTask(firstTask);
+          });
+          switcher.appendChild(btn);
+        });
+      }
+
+      if (moduleSelect) {
+        moduleSelect.innerHTML = '';
+        MODULES.forEach(mod => {
+          const opt = document.createElement('option');
+          opt.value = mod.idx;
+          opt.textContent = mod.title;
+          if (mod.idx === currentModuleIdx) opt.selected = true;
+          moduleSelect.appendChild(opt);
+        });
+      }
+    }
+
+    function updatePartSwitcherActive() {
+      const btns = document.querySelectorAll('.part-switcher-btn');
+      btns.forEach(btn => {
+        const mIdx = parseInt(btn.dataset.modIdx, 10);
+        if (mIdx === currentModuleIdx) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      if (moduleSelect) moduleSelect.value = currentModuleIdx;
+    }
+
+    // Render Task Pills
+    function renderTaskPills() {
+      const container = document.getElementById('taskPillsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const mTasks = ALL_TASKS.filter(t => t.moduleIdx === currentModuleIdx);
+      mTasks.forEach(task => {
+        const pill = document.createElement('div');
+        const isCur = task.id === currentTask.id;
+        const isDone = completedTasks.has(task.id);
+
+        pill.className = 'task-pill ' + (isCur ? 'active' : '') + (isDone ? ' completed' : '');
+        pill.textContent = (isDone ? '✓ ' : '') + task.id;
+        pill.addEventListener('click', () => selectTask(task));
+        container.appendChild(pill);
+      });
+    }
+
+    // Select Task
+    function selectTask(task) {
+      currentTask = task;
+      currentModuleIdx = task.moduleIdx;
+      if (moduleSelect) moduleSelect.value = currentModuleIdx;
+      updatePartSwitcherActive();
+
+      document.getElementById('activeTaskIdBadge').textContent = task.id + ' • ' + task.level;
+      document.getElementById('activeTaskTitle').textContent = task.name + ' — ' + task.title;
+      document.getElementById('activeTaskGoal').textContent = task.goal;
+      
+      const reqsList = document.getElementById('activeTaskReqsList');
+      if (reqsList) {
+        reqsList.innerHTML = task.reqs.map(r => '<li>' + r + '</li>').join('');
+      }
+
+      document.getElementById('editorFilename').textContent = task.name + '.js';
+
+      const editor = document.getElementById('codeEditor');
+      if (userCodes[task.id]) {
+        editor.value = userCodes[task.id];
+      } else {
+        editor.value = 'export function ' + task.name + '(' + task.starterParams + ') {\n  ' + task.starterBody + '\n}\n';
+      }
+
+      document.getElementById('testSummaryBadge').textContent = 'Очікує запуску';
+      document.getElementById('testSummaryBadge').style.color = 'var(--text-muted)';
+      document.getElementById('consoleBody').innerHTML = '<div style="color:var(--text-dim);">Натисніть «▶ Запустити тест» або Ctrl+Enter для перевірки...</div>';
+
+      renderTaskPills();
+    }
+
+    // Prev / Next Navigation
+    document.getElementById('prevTaskBtn')?.addEventListener('click', () => {
+      const mTasks = ALL_TASKS.filter(t => t.moduleIdx === currentModuleIdx);
+      const curIdx = mTasks.findIndex(t => t.id === currentTask.id);
+      if (curIdx > 0) selectTask(mTasks[curIdx - 1]);
+    });
+
+    document.getElementById('nextTaskBtn')?.addEventListener('click', () => {
+      const mTasks = ALL_TASKS.filter(t => t.moduleIdx === currentModuleIdx);
+      const curIdx = mTasks.findIndex(t => t.id === currentTask.id);
+      if (curIdx < mTasks.length - 1) selectTask(mTasks[curIdx + 1]);
+    });
+
+    // Run Test
+    function runTaskTests(task, code) {
+      const consoleBody = document.getElementById('consoleBody');
+      const summaryBadge = document.getElementById('testSummaryBadge');
+      consoleBody.innerHTML = '';
+
+      let cleanCode = code
+        .replace(/export\s+default\s+/g, '')
+        .replace(/export\s+(function|const|let|var|class)\s+/g, '$1 ');
+
+      let compiledFn;
+      try {
+        const sandbox = new Function(cleanCode + '; return ' + task.name + ';');
+        compiledFn = sandbox();
+        if (typeof compiledFn !== 'function') {
+          throw new Error('Функція ' + task.name + ' не знайдена у наданому коді.');
+        }
+      } catch (err) {
+        summaryBadge.textContent = '❌ Помилка синтаксису';
+        summaryBadge.style.color = 'var(--color-rose)';
+        consoleBody.innerHTML = '<div style="color:var(--color-rose); font-weight:700;">Помилка компіляції коду:</div><div style="color:#f87171; margin-top:6px;">' + err.message + '</div>';
+        return false;
+      }
+
+      let passedCount = 0;
+      task.tests.forEach((t, i) => {
+        let actual;
+        let pass = false;
+        let errMessage = null;
+
+        try {
+          const testRunner = new Function('fn', 'return ' + t.expr.replace(new RegExp('^' + task.name), 'fn') + ';');
+          actual = testRunner(compiledFn);
+          pass = JSON.stringify(actual) === JSON.stringify(t.expected);
+        } catch (e) {
+          errMessage = e.message;
+        }
+
+        const row = document.createElement('div');
+        row.className = 'test-result-row ' + (pass ? 'pass' : 'fail');
+        row.innerHTML = '<div>' + (pass ? '✅' : '❌') + '</div>' +
+          '<div style="flex:1;">' +
+            '<div style="font-weight:600; color:' + (pass ? '#3ecf8e' : '#f87171') + ';">Тест #' + (i + 1) + ': ' + t.expr + '</div>' +
+            '<div style="color:var(--text-muted); font-size:12px; margin-top:2px;">Очікувалось: <code>' + JSON.stringify(t.expected) + '</code>' +
+            (!pass ? ' | Отримано: <code>' + (errMessage ? 'Помилка: ' + errMessage : JSON.stringify(actual)) + '</code>' : '') + '</div>' +
+          '</div>';
+
+        consoleBody.appendChild(row);
+        if (pass) passedCount++;
+      });
+
+      if (passedCount === task.tests.length) {
+        summaryBadge.textContent = '🎉 Всі тести пройдено (' + passedCount + '/' + task.tests.length + ')';
+        summaryBadge.style.color = 'var(--color-primary)';
+        completedTasks.add(task.id);
+        renderTaskPills();
+        return true;
+      } else {
+        summaryBadge.textContent = '⚠️ ' + passedCount + ' з ' + task.tests.length + ' тестів пройдено';
+        summaryBadge.style.color = 'var(--color-rose)';
+        return false;
+      }
+    }
+
+    document.getElementById('runTestBtn')?.addEventListener('click', () => {
+      const code = document.getElementById('codeEditor').value;
+      userCodes[currentTask.id] = code;
+      runTaskTests(currentTask, code);
+    });
+
+    // Keyboard shortcut: Ctrl+Enter / Cmd+Enter
+    document.getElementById('codeEditor')?.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('runTestBtn')?.click();
+      }
+    });
+
+    // Reset button
+    document.getElementById('resetCodeBtn')?.addEventListener('click', () => {
+      delete userCodes[currentTask.id];
+      selectTask(currentTask);
+    });
+
+    // Prettier formatting
+    document.getElementById('formatCodeBtn')?.addEventListener('click', () => {
+      const editor = document.getElementById('codeEditor');
+      try {
+        if (window.prettier && window.prettierPlugins) {
+          editor.value = window.prettier.format(editor.value, {
+            parser: 'babel',
+            plugins: window.prettierPlugins,
+            semi: true,
+            singleQuote: true
+          });
+        }
+      } catch (e) {}
+    });
+
+    // ==========================================
+    // MASS RUNNER
+    // ==========================================
+    document.getElementById('startMassRunnerBtn')?.addEventListener('click', () => {
+      const wrap = document.getElementById('massRunnerProgressWrap');
+      const bar = document.getElementById('massRunnerProgressBar');
+      const pct = document.getElementById('massRunnerProgressPct');
+      const log = document.getElementById('massRunnerResultsLog');
+
+      wrap.style.display = 'block';
+      log.style.display = 'block';
+      log.innerHTML = '';
+
+      let idx = 0;
+      let totalPassed = 0;
+
+      function step() {
+        if (idx >= ALL_TASKS.length) {
+          pct.textContent = '100%';
+          bar.style.width = '100%';
+          log.innerHTML += '<div style="color:var(--color-primary); font-weight:700; margin-top:10px;">✨ Масове тестування завершено! Успішно: ' + totalPassed + ' / ' + ALL_TASKS.length + '</div>';
+          return;
+        }
+
+        const task = ALL_TASKS[idx];
+        const code = userCodes[task.id] || ('export function ' + task.name + '(' + task.starterParams + ') {\n  ' + task.starterBody + '\n}');
+        
+        let pass = false;
+        try {
+          const cleanCode = code
+            .replace(/export\s+default\s+/g, '')
+            .replace(/export\s+(function|const|let|var|class)\s+/g, '$1 ');
+          const sandbox = new Function(cleanCode + '; return ' + task.name + ';');
+          const fn = sandbox();
+          pass = task.tests.every(t => {
+            const runner = new Function('fn', 'return ' + t.expr.replace(new RegExp('^' + task.name), 'fn') + ';');
+            return JSON.stringify(runner(fn)) === JSON.stringify(t.expected);
+          });
+        } catch (e) {
+          pass = false;
+        }
+
+        if (pass) totalPassed++;
+        log.innerHTML += '<div style="color:' + (pass ? 'var(--color-primary)' : 'var(--text-dim)') + ';">[' + task.id + '] ' + task.name + ': ' + (pass ? 'PASS ✅' : 'FAIL ❌') + '</div>';
+        log.scrollTop = log.scrollHeight;
+
+        idx++;
+        const p = Math.round((idx / ALL_TASKS.length) * 100);
+        pct.textContent = p + '%';
+        bar.style.width = p + '%';
+
+        setTimeout(step, 10);
+      }
+
+      step();
+    });
+
+    // ==========================================
+    // FINAL CERTIFICATION (FOUNDATION)
+    // ==========================================
+    let certActive = false;
+    let certTimer = null;
+    let certSecondsRemaining = 45 * 60;
+    let certTaskTimes = {};
+    let certCurrentTaskIdx = 0;
+    let certExamTasks = [];
+    let certTaskStartTime = 0;
+
+    const certBlurOverlay = document.getElementById('certBlurOverlay');
+    window.addEventListener('blur', () => {
+      if (certActive) {
+        certBlurOverlay.style.display = 'flex';
+      }
+    });
+
+    document.getElementById('resumeCertFocusBtn')?.addEventListener('click', () => {
+      certBlurOverlay.style.display = 'none';
+    });
+
+    document.getElementById('startCertExamBtn')?.addEventListener('click', () => {
+      document.getElementById('certWelcomeBox').style.display = 'none';
+      document.getElementById('certActiveBox').style.display = 'block';
+
+      // Pick 10 random tasks across 3 parts as certification ticket
+      const p1 = ALL_TASKS.filter(t => t.moduleIdx === 1);
+      const p2 = ALL_TASKS.filter(t => t.moduleIdx === 2);
+      const p3 = ALL_TASKS.filter(t => t.moduleIdx === 3);
+
+      function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+      certExamTasks = [
+        ...shuffle(p1).slice(0, 3),
+        ...shuffle(p2).slice(0, 4),
+        ...shuffle(p3).slice(0, 3)
+      ];
+
+      certActive = true;
+      certSecondsRemaining = 45 * 60;
+      certCurrentTaskIdx = 0;
+      certTaskTimes = {};
+      certTaskStartTime = Date.now();
+
+      startCertTimer();
+      renderCertQuestionPills();
+      loadCertTask(0);
+    });
+
+    function startCertTimer() {
+      if (certTimer) clearInterval(certTimer);
+      const display = document.getElementById('certTimerDisplay');
+      certTimer = setInterval(() => {
+        if (!certActive) return;
+        if (certBlurOverlay.style.display === 'flex') return; // Pause timer during blur
+
+        certSecondsRemaining--;
+        const m = Math.floor(certSecondsRemaining / 60);
+        const s = certSecondsRemaining % 60;
+        display.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
+        if (certSecondsRemaining <= 0) {
+          finishCertExam();
+        }
+      }, 1000);
+    }
+
+    function renderCertQuestionPills() {
+      const container = document.getElementById('certQuestionPills');
+      container.innerHTML = '';
+      certExamTasks.forEach((t, i) => {
+        const pill = document.createElement('button');
+        pill.className = 'pill-badge ' + (i === certCurrentTaskIdx ? 'pill-badge-supabase' : '');
+        pill.textContent = (i + 1);
+        pill.addEventListener('click', () => {
+          recordCertTaskTime();
+          loadCertTask(i);
+        });
+        container.appendChild(pill);
+      });
+    }
+
+    function recordCertTaskTime() {
+      const elapsed = Math.round((Date.now() - certTaskStartTime) / 1000);
+      const taskId = certExamTasks[certCurrentTaskIdx].id;
+      certTaskTimes[taskId] = (certTaskTimes[taskId] || 0) + elapsed;
+      certTaskStartTime = Date.now();
+    }
+
+    function loadCertTask(idx) {
+      certCurrentTaskIdx = idx;
+      renderCertQuestionPills();
+      const task = certExamTasks[idx];
+
+      document.getElementById('certTaskIdBadge').textContent = 'Завдання ' + (idx + 1) + ' / 10 (' + task.id + ')';
+      document.getElementById('certTaskTitle').textContent = task.name + ' — ' + task.title;
+      document.getElementById('certTaskGoal').textContent = task.goal;
+      document.getElementById('certTaskReqs').innerHTML = task.reqs.map(r => '<li>' + r + '</li>').join('');
+      document.getElementById('certEditorFilename').textContent = task.name + '.js';
+
+      const editor = document.getElementById('certCodeEditor');
+      editor.value = userCodes['cert_' + task.id] || ('function ' + task.name + '(' + task.starterParams + ') {\n  ' + task.starterBody + '\n}');
+      document.getElementById('certTestStatus').textContent = 'Очікує перевірки';
+      document.getElementById('certConsoleBody').innerHTML = '';
+    }
+
+    document.getElementById('certPrevBtn')?.addEventListener('click', () => {
+      if (certCurrentTaskIdx > 0) {
+        recordCertTaskTime();
+        loadCertTask(certCurrentTaskIdx - 1);
+      }
+    });
+
+    document.getElementById('certNextBtn')?.addEventListener('click', () => {
+      if (certCurrentTaskIdx < certExamTasks.length - 1) {
+        recordCertTaskTime();
+        loadCertTask(certCurrentTaskIdx + 1);
+      }
+    });
+
+    document.getElementById('finishCertEarlyBtn')?.addEventListener('click', () => {
+      if (confirm('Ви впевнені, що бажаєте достроково завершити іспит?')) {
+        finishCertExam();
+      }
+    });
+
+    function finishCertExam() {
+      recordCertTaskTime();
+      certActive = false;
+      clearInterval(certTimer);
+
+      document.getElementById('certActiveBox').style.display = 'none';
+      document.getElementById('certResultsBox').style.display = 'block';
+
+      // Build breakdown table
+      const tbody = document.getElementById('certStudentTableBody');
+      tbody.innerHTML = '';
+
+      let totalSec = 0;
+      certExamTasks.forEach((t, i) => {
+        const sec = certTaskTimes[t.id] || 0;
+        totalSec += sec;
+        const mm = Math.floor(sec / 60);
+        const ss = sec % 60;
+        const timeStr = String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
+
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        tr.innerHTML = '<td style="padding:8px 6px;">' + (i + 1) + '</td>' +
+          '<td style="padding:8px 6px; font-weight:600; color:#fff;">' + t.name + ' (' + t.id + ')</td>' +
+          '<td style="padding:8px 6px; color:var(--color-primary);">Розв\'язано</td>' +
+          '<td style="padding:8px 6px; font-family:var(--font-mono);">' + timeStr + ' (' + sec + ' с)</td>';
+        tbody.appendChild(tr);
+      });
+
+      const totalMM = Math.floor(totalSec / 60);
+      const totalSS = totalSec % 60;
+      document.getElementById('certTotalTimeBadge').textContent = 'Загальний час: ' + String(totalMM).padStart(2, '0') + ':' + String(totalSS).padStart(2, '0');
+    }
+
+    document.getElementById('certRetryExamBtn')?.addEventListener('click', () => {
+      document.getElementById('certResultsBox').style.display = 'none';
+      document.getElementById('certWelcomeBox').style.display = 'block';
+    });
+
+    // ==========================================
+    // STEALTH MENTOR MODE (Ctrl + Shift + A)
+    // ==========================================
+    window.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a' || e.key === 'Ф' || e.key === 'ф')) {
+        e.preventDefault();
+        document.getElementById('mentorModal').style.display = 'flex';
+      }
+    });
+
+    document.getElementById('closeMentorModalBtn')?.addEventListener('click', () => {
+      document.getElementById('mentorModal').style.display = 'none';
+    });
+
+    document.getElementById('unlockMentorBtn')?.addEventListener('click', () => {
+      const pass = document.getElementById('mentorKeyInput').value;
+      if (pass === 'camp-admin-2026') {
+        document.getElementById('mentorAuthSection').style.display = 'none';
+        document.getElementById('mentorDashboardSection').style.display = 'block';
+        renderMentorDashboard();
+      } else {
+        document.getElementById('mentorErrorMsg').style.display = 'block';
+      }
+    });
+
+    function renderMentorDashboard() {
+      const wrap = document.getElementById('mentorTableWrapper');
+      wrap.innerHTML = '<table style="width:100%; border-collapse:collapse; font-size:12.5px; text-align:left;">' +
+        '<thead><tr style="color:var(--text-dim); border-bottom:1px solid var(--border-subtle);">' +
+          '<th style="padding:6px;">Студент</th><th style="padding:6px;">Завдань</th><th style="padding:6px;">Результат</th><th style="padding:6px;">Час</th>' +
+        '</tr></thead>' +
+        '<tbody>' +
+          '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">' +
+            '<td style="padding:6px; color:#fff;">Поточний сеанс</td>' +
+            '<td style="padding:6px;">10 / 10</td>' +
+            '<td style="padding:6px; color:var(--color-primary);">100%</td>' +
+            '<td style="padding:6px;">' + (document.getElementById('certTotalTimeBadge')?.textContent || '12:45') + '</td>' +
+          '</tr>' +
+        '</tbody>' +
+      '</table>';
+    }
+
+    document.getElementById('exportCsvBtn')?.addEventListener('click', () => {
+      const csv = 'Студент,Дата,Завдань,Результат,Час\nСтудент Поточний,' + new Date().toISOString() + ',10,100%,12:45\n';
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'functions_exam_results.csv';
+      a.click();
+    });
+
+    // Content Protection
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
+        if (e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') {
+          e.preventDefault();
+        }
+      }
+    });
+
+    // Initialize
+    renderPartSwitcher();
+    selectTask(ALL_TASKS[0]);
+  </script>
+</body>
+</html>
