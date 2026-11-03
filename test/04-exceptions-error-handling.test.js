@@ -29,7 +29,17 @@ import {
   createSafeHandler,
   parseConfigFile,
   wrapExceptionWithCause,
-  createBaseCustomError
+  createBaseCustomError,
+  validateSchemaContract,
+  safeAsyncWrapper,
+  parseUrlStrict,
+  executeWithTimeoutFallback,
+  assertArrayNotEmpty,
+  sanitizeAndParseJson,
+  createBoundedStack,
+  guardClauseDivision,
+  mapWithErrorHandler,
+  executeWithFinallyMetrics
 } from "../src/04-exceptions-error-handling.js";
 
 describe("Частина 4: Винятки та обробка помилок (try...catch...finally, throw)", () => {
@@ -378,6 +388,93 @@ describe("Частина 4: Винятки та обробка помилок (t
   describe("4.30 createBaseCustomError - Динамічний базовий клас помилок (this.constructor.name та поліморфізм)", () => {
     it("тест 1: (() => { const Base = createBaseCustomError(); class NetworkTimeoutError extends Base {} const err = new NetworkTimeoutError('Сервер не відповідає', { code: 504, cause: new Error('Socket closed') }); return { isBase: err instanceof Base, isError: err instanceof Error, isChild: err instanceof NetworkTimeoutError, name: err.name, msg: err.message, code: err.code, causeMsg: err.cause.message }; })()", () => {
       expect((() => { const Base = createBaseCustomError(); class NetworkTimeoutError extends Base {} const err = new NetworkTimeoutError('Сервер не відповідає', { code: 504, cause: new Error('Socket closed') }); return { isBase: err instanceof Base, isError: err instanceof Error, isChild: err instanceof NetworkTimeoutError, name: err.name, msg: err.message, code: err.code, causeMsg: err.cause.message }; })()).toEqual({"isBase":true,"isError":true,"isChild":true,"name":"NetworkTimeoutError","msg":"Сервер не відповідає","code":504,"causeMsg":"Socket closed"});
+    });
+  });
+
+  describe("4.31 validateSchemaContract - Контракт валідації схеми об'єкта (Aggregate Validation Errors)", () => {
+    it("тест 1: validateSchemaContract({ name: 'Олена', age: 25 }, { name: 'string', age: 'number' })", () => {
+      expect(validateSchemaContract({ name: 'Олена', age: 25 }, { name: 'string', age: 'number' })).toEqual(true);
+    });
+    it("тест 2: (() => { try { validateSchemaContract({ name: 123, age: 'twenty' }, { name: 'string', age: 'number' }); return 'NO_THROW'; } catch(e) { return e.message; } })()", () => {
+      expect((() => { try { validateSchemaContract({ name: 123, age: 'twenty' }, { name: 'string', age: 'number' }); return 'NO_THROW'; } catch(e) { return e.message; } })()).toEqual("Помилки валідації: Поле name повинно мати тип string; Поле age повинно мати тип number");
+    });
+  });
+
+  describe("4.32 safeAsyncWrapper - Безпечна ізоляція колбека в таймері (Async Exception Trap)", () => {
+    it("тест 1: (() => { let caught = null; const safe = safeAsyncWrapper(() => { throw new Error('Async crash'); }, err => { caught = err.message; }); safe(); return caught; })()", () => {
+      expect((() => { let caught = null; const safe = safeAsyncWrapper(() => { throw new Error('Async crash'); }, err => { caught = err.message; }); safe(); return caught; })()).toEqual("Async crash");
+    });
+  });
+
+  describe("4.33 parseUrlStrict - Суворий парсер URL з перехопленням URIError та TypeError", () => {
+    it("тест 1: parseUrlStrict('https://supabase.com/docs/guides')", () => {
+      expect(parseUrlStrict('https://supabase.com/docs/guides')).toEqual({"valid":true,"protocol":"https:","host":"supabase.com","pathname":"/docs/guides"});
+    });
+    it("тест 2: parseUrlStrict('not a valid url')", () => {
+      expect(parseUrlStrict('not a valid url')).toEqual({"valid":false,"error":"INVALID_URL"});
+    });
+  });
+
+  describe("4.34 executeWithTimeoutFallback - Патерн аварійного тайм-ауту (Fallback on Failure)", () => {
+    it("тест 1: executeWithTimeoutFallback(() => 100 * 5, 0)", () => {
+      expect(executeWithTimeoutFallback(() => 100 * 5, 0)).toEqual(500);
+    });
+    it("тест 2: executeWithTimeoutFallback(() => { throw new Error('Fail'); }, 'DEFAULT')", () => {
+      expect(executeWithTimeoutFallback(() => { throw new Error('Fail'); }, 'DEFAULT')).toEqual("DEFAULT");
+    });
+  });
+
+  describe("4.35 assertArrayNotEmpty - Захисний контракт: Перевірка непорожнього масиву", () => {
+    it("тест 1: assertArrayNotEmpty([1, 2, 3])", () => {
+      expect(assertArrayNotEmpty([1, 2, 3])).toEqual([1,2,3]);
+    });
+    it("тест 2: (() => { try { assertArrayNotEmpty([]); return 'OK'; } catch(e) { return e.name; } })()", () => {
+      expect((() => { try { assertArrayNotEmpty([]); return 'OK'; } catch(e) { return e.name; } })()).toEqual("RangeError");
+    });
+    it("тест 3: (() => { try { assertArrayNotEmpty('string'); return 'OK'; } catch(e) { return e.name; } })()", () => {
+      expect((() => { try { assertArrayNotEmpty('string'); return 'OK'; } catch(e) { return e.name; } })()).toEqual("TypeError");
+    });
+  });
+
+  describe("4.36 sanitizeAndParseJson - Синтез: Рядки + JSON + Винятки. Парсинг з попереднім очищенням", () => {
+    it("тест 1: sanitizeAndParseJson('   {\"status\": \"ok\"}  \n')", () => {
+      expect(sanitizeAndParseJson('   {"status": "ok"}  \n')).toEqual({"status":"ok"});
+    });
+    it("тест 2: (() => { try { sanitizeAndParseJson('{bad}'); return 'OK'; } catch(e) { return e.name; } })()", () => {
+      expect((() => { try { sanitizeAndParseJson('{bad}'); return 'OK'; } catch(e) { return e.name; } })()).toEqual("SyntaxError");
+    });
+  });
+
+  describe("4.37 createBoundedStack - Синтез: Стек з обмеженою місткістю та переповненням", () => {
+    it("тест 1: (() => { const stack = createBoundedStack(2); stack.push(10); stack.push(20); let overflow = false; try { stack.push(30); } catch(e) { overflow = e instanceof RangeError; } const p1 = stack.pop(); return { overflow, p1, size: stack.size() }; })()", () => {
+      expect((() => { const stack = createBoundedStack(2); stack.push(10); stack.push(20); let overflow = false; try { stack.push(30); } catch(e) { overflow = e instanceof RangeError; } const p1 = stack.pop(); return { overflow, p1, size: stack.size() }; })()).toEqual({"overflow":true,"p1":20,"size":1});
+    });
+  });
+
+  describe("4.38 guardClauseDivision - Патерн Guard Clauses: Багаторівнева фільтрація операцій", () => {
+    it("тест 1: guardClauseDivision(50, 5)", () => {
+      expect(guardClauseDivision(50, 5)).toEqual(10);
+    });
+    it("тест 2: (() => { try { guardClauseDivision(50, 0); return 'OK'; } catch(e) { return e.name; } })()", () => {
+      expect((() => { try { guardClauseDivision(50, 0); return 'OK'; } catch(e) { return e.name; } })()).toEqual("RangeError");
+    });
+    it("тест 3: (() => { try { guardClauseDivision('50', 5); return 'OK'; } catch(e) { return e.name; } })()", () => {
+      expect((() => { try { guardClauseDivision('50', 5); return 'OK'; } catch(e) { return e.name; } })()).toEqual("TypeError");
+    });
+  });
+
+  describe("4.39 mapWithErrorHandler - HOF: Безпечна трансформація елементів із колбеком помилки", () => {
+    it("тест 1: mapWithErrorHandler(['10', 'bad', '30'], s => { const n = Number(s); if (Number.isNaN(n) || s === 'bad') throw new Error('NaN'); return n; }, (err, val) => `ERROR_${val}`)", () => {
+      expect(mapWithErrorHandler(['10', 'bad', '30'], s => { const n = Number(s); if (Number.isNaN(n) || s === 'bad') throw new Error('NaN'); return n; }, (err, val) => `ERROR_${val}`)).toEqual([10,"ERROR_bad",30]);
+    });
+  });
+
+  describe("4.40 executeWithFinallyMetrics - Метрика виконання функції у блоці finally", () => {
+    it("тест 1: (() => { let metric = null; const res = executeWithFinallyMetrics(() => 42, m => { metric = m; }); return { res, metric }; })()", () => {
+      expect((() => { let metric = null; const res = executeWithFinallyMetrics(() => 42, m => { metric = m; }); return { res, metric }; })()).toEqual({"res":42,"metric":{"status":"success","hasError":false,"errorMsg":null}});
+    });
+    it("тест 2: (() => { let metric = null; let threw = false; try { executeWithFinallyMetrics(() => { throw new Error('MetricCrash'); }, m => { metric = m; }); } catch(e) { threw = true; } return { threw, metric }; })()", () => {
+      expect((() => { let metric = null; let threw = false; try { executeWithFinallyMetrics(() => { throw new Error('MetricCrash'); }, m => { metric = m; }); } catch(e) { threw = true; } return { threw, metric }; })()).toEqual({"threw":true,"metric":{"status":"error","hasError":true,"errorMsg":"MetricCrash"}});
     });
   });
 

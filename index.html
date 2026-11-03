@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JS Functions Mastery Workout | Модуль 7: Функції в JavaScript (Supabase Edition)</title>
-  <meta name="description" content="Інтерактивний воркаут по роботі з функціями в JavaScript: синтаксис, області видимості, замикання, цикли, масиви, HOF та бойові патерни в естетиці Supabase.">
+  <meta name="description" content="Інтерактивний воркаут по роботі з функціями, винятками та DOM-компонентами в JavaScript: 202 завдання, синтаксис, області видимості, замикання, цикли, масиви, HOF та бойові патерни в естетиці Supabase.">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +21,7 @@
   <script src="https://unpkg.com/prettier@3.2.5/plugins/babel.js"></script>
   <script src="https://unpkg.com/prettier@3.2.5/plugins/estree.js"></script>
 
-  <!-- Supabase JS Client for realtime presence -->
+  <!-- Supabase JS Client for realtime presence & broadcast -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -139,6 +139,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .pill-badge {
@@ -151,12 +152,55 @@
       gap: 6px;
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
+      color: var(--text-main);
     }
 
     .pill-badge-supabase {
       border-color: rgba(62, 207, 142, 0.4);
       color: var(--color-primary);
       background: var(--color-primary-dim);
+    }
+
+    /* Student Profile Pill in Header */
+    .student-profile-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+      padding: 4px 14px 4px 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-main);
+      font-size: 12.5px;
+    }
+
+    .student-profile-pill:hover {
+      border-color: var(--color-primary);
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 12px rgba(62, 207, 142, 0.2);
+    }
+
+    .student-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3ecf8e, #10b981);
+      color: #000;
+      font-weight: 800;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .student-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     /* Tabs Bar */
@@ -253,28 +297,24 @@
       cursor: pointer;
       transition: all 0.15s ease;
       color: var(--text-main);
-      font-family: inherit;
-      width: 100%;
-      box-sizing: border-box;
     }
 
     .part-switcher-btn:hover {
       background: var(--bg-card-hover);
       border-color: rgba(255, 255, 255, 0.15);
-      transform: translateY(-1px);
     }
 
     .part-switcher-btn.active {
-      background: rgba(62, 207, 142, 0.08);
+      background: #242424;
       border-color: var(--color-primary);
-      box-shadow: 0 0 15px rgba(62, 207, 142, 0.15);
+      box-shadow: 0 0 0 1px var(--color-primary);
     }
 
     .part-header {
-      width: 100%;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      width: 100%;
     }
 
     .part-badge {
@@ -287,58 +327,53 @@
 
     .part-count {
       font-size: 11px;
-      font-weight: 600;
       color: var(--text-muted);
-      background: rgba(255, 255, 255, 0.04);
-      padding: 2px 8px;
-      border-radius: 9999px;
-      border: 1px solid var(--border-subtle);
-    }
-
-    .part-switcher-btn.active .part-count {
-      background: var(--color-primary-dim);
-      color: #fff;
-      border-color: rgba(62, 207, 142, 0.3);
+      font-family: var(--font-mono);
     }
 
     .part-title {
       font-size: 13px;
       font-weight: 600;
-      color: #e4e4e7;
+      color: #fff;
       line-height: 1.35;
     }
 
+    /* Task Pills */
     .task-pills-wrap {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+      gap: 6px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 4px;
       margin-bottom: 20px;
     }
 
     .task-pill {
-      padding: 8px 10px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-mono);
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      font-family: var(--font-mono);
-      font-size: 12.5px;
-      font-weight: 600;
       color: var(--text-muted);
-      text-align: center;
       cursor: pointer;
       transition: all 0.15s ease;
     }
 
     .task-pill:hover {
       color: #fff;
-      background: var(--bg-card-hover);
       border-color: rgba(255, 255, 255, 0.2);
     }
 
     .task-pill.active {
-      color: #121212;
-      background: var(--color-primary);
+      background: var(--color-primary-dim);
       border-color: var(--color-primary);
+      color: var(--color-primary);
       font-weight: 700;
     }
 
@@ -347,59 +382,53 @@
       color: var(--color-primary);
     }
 
-    .task-pill.active.completed {
-      color: #121212;
-      background: var(--color-primary);
-    }
-
     /* Task Details Card */
     .task-details-box {
-      border-top: 1px solid var(--border-subtle);
-      padding-top: 20px;
-      margin-top: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 16px;
     }
 
     .task-id-badge {
-      display: inline-block;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
       color: var(--color-primary);
-      background: var(--color-primary-dim);
-      padding: 3px 10px;
-      border-radius: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
+      display: inline-block;
     }
 
     .task-title {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
-      margin: 0 0 10px 0;
       color: #fff;
+      margin: 0 0 10px 0;
+      line-height: 1.35;
     }
 
     .task-goal {
       font-size: 13.5px;
       color: var(--text-muted);
-      line-height: 1.6;
-      margin-bottom: 14px;
+      line-height: 1.55;
+      margin: 0 0 14px 0;
     }
 
     .task-reqs-title {
       font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.04em;
       color: var(--text-dim);
       margin-bottom: 8px;
     }
 
     .task-reqs-list {
       margin: 0;
-      padding-left: 20px;
+      padding-left: 18px;
       font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.6;
+      line-height: 1.5;
     }
 
     .task-reqs-list li {
@@ -421,57 +450,41 @@
     }
 
     .editor-header {
-      padding: 12px 18px;
-      background: #191919;
+      background: #141414;
       border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
       flex-wrap: wrap;
+      gap: 12px;
     }
 
     .editor-title-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       font-family: var(--font-mono);
       font-size: 13px;
-      color: #e4e4e7;
-    }
-
-    .code-textarea {
-      width: 100%;
-      height: 380px;
-      background: #141414;
-      color: #f4f4f5;
-      font-family: var(--font-mono);
-      font-size: 14px;
-      line-height: 1.6;
-      padding: 18px;
-      border: none;
-      outline: none;
-      resize: vertical;
-      box-sizing: border-box;
-      tab-size: 2;
+      color: #fff;
     }
 
     .editor-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .btn-pill {
-      padding: 9px 18px;
+      padding: 8px 18px;
       border-radius: 8px;
-      font-family: inherit;
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       transition: all 0.15s ease;
       border: 1px solid transparent;
     }
@@ -479,18 +492,18 @@
     .btn-pill-primary {
       background: var(--color-primary);
       color: #121212;
-      font-weight: 700;
+      border-color: var(--color-primary);
     }
 
     .btn-pill-primary:hover {
       background: #4ade80;
-      transform: translateY(-1px);
+      box-shadow: 0 0 16px rgba(62, 207, 142, 0.4);
     }
 
     .btn-pill-outline {
       background: var(--bg-card);
-      color: var(--text-main);
       border-color: var(--border-subtle);
+      color: var(--text-main);
     }
 
     .btn-pill-outline:hover {
@@ -498,56 +511,101 @@
       border-color: rgba(255, 255, 255, 0.2);
     }
 
-    /* Console & Test Results */
+    .code-textarea {
+      width: 100%;
+      height: 340px;
+      background: #121212;
+      color: #f4f4f5;
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      line-height: 1.6;
+      padding: 18px;
+      border: none;
+      resize: vertical;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    /* Live Preview for Part 5 (DOM Mini-Projects) */
+    .live-preview-card {
+      background: var(--bg-surface);
+      border: 1px solid rgba(62, 207, 142, 0.35);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .live-preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    .live-preview-container {
+      background: #111;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 20px;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+    }
+
+    /* Console Card */
     .console-card {
-      background: #141414;
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 12px;
       overflow: hidden;
     }
 
     .console-header {
-      padding: 10px 18px;
-      background: #18181b;
+      background: #141414;
       border-bottom: 1px solid var(--border-subtle);
+      padding: 10px 18px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-dim);
     }
 
     .console-body {
-      padding: 18px;
-      max-height: 260px;
-      overflow-y: auto;
+      padding: 16px 18px;
+      background: #121212;
       font-family: var(--font-mono);
       font-size: 13px;
+      min-height: 100px;
+      max-height: 240px;
+      overflow-y: auto;
     }
 
     .test-result-row {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin-bottom: 6px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     .test-result-row.pass {
-      border-left: 3px solid var(--color-primary);
+      color: var(--color-primary);
     }
 
     .test-result-row.fail {
-      border-left: 3px solid var(--color-rose);
+      color: var(--color-rose);
     }
 
-    /* Theory Book Styles */
+    /* Theory Styling */
     .theory-section {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
@@ -559,17 +617,19 @@
     .theory-section h2 {
       font-size: 22px;
       font-weight: 800;
-      margin: 0 0 14px 0;
+      margin-top: 0;
+      margin-bottom: 16px;
       color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
     }
 
     .theory-section h3 {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 700;
-      margin: 20px 0 8px 0;
+      margin-top: 24px;
+      margin-bottom: 10px;
       color: var(--color-primary);
     }
 
@@ -580,20 +640,81 @@
     }
 
     .theory-callout {
-      background: rgba(62, 207, 142, 0.06);
+      background: rgba(62, 207, 142, 0.08);
       border-left: 4px solid var(--color-primary);
       padding: 14px 18px;
-      border-radius: 6px;
+      border-radius: 0 8px 8px 0;
       margin: 16px 0;
-      font-size: 14px;
+      font-size: 13.5px;
+      color: #e4e4e7;
     }
 
-    /* Mentor Stealth Modal */
+    /* Student Profile Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .profile-modal-card {
+      background: #171717;
+      border: 1px solid var(--border-active);
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-label .required {
+      color: var(--color-rose);
+      font-weight: 700;
+    }
+
+    .form-input {
+      width: 100%;
+      box-sizing: border-box;
+      background: #111;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--color-primary);
+    }
+
+    /* Stealth Mentor Modal (Ctrl+Shift+A) */
     #mentorModal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(8px);
       z-index: 99999;
       align-items: center;
       justify-content: center;
@@ -603,14 +724,14 @@
     .mentor-content {
       background: #18181b;
       border: 1px solid var(--color-primary);
-      border-radius: 14px;
-      max-width: 900px;
+      border-radius: 16px;
+      max-width: 1080px;
       width: 100%;
-      max-height: 85vh;
+      max-height: 88vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
     }
 
     .mentor-header {
@@ -626,6 +747,85 @@
       padding: 24px;
       overflow-y: auto;
     }
+
+    .mentor-tabs-nav {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+
+    .mentor-tab-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      background: #222;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .mentor-tab-btn:hover {
+      color: #fff;
+    }
+
+    .mentor-tab-btn.active {
+      background: var(--color-primary-dim);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .mentor-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .mentor-stat-card {
+      background: #111;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 16px;
+    }
+
+    .mentor-stat-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      font-family: var(--font-mono);
+    }
+
+    .mentor-stat-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .mentor-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      text-align: left;
+    }
+
+    .mentor-table th {
+      padding: 10px 8px;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border-subtle);
+      font-weight: 600;
+    }
+
+    .mentor-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--text-main);
+    }
   </style>
 </head>
 <body>
@@ -637,10 +837,20 @@
         <div class="logo-badge">⚡</div>
         <div class="header-titles">
           <h1>JS Functions Mastery Workout</h1>
-          <p>Модуль 7: Синтаксис, параметри, замикання, цикли, масиви та функції вищого порядку</p>
+          <p>Модуль 7: Синтаксис, замикання, цикли, масиви, HOF, винятки та DOM Міні-проекти</p>
         </div>
       </div>
       <div class="header-status-group">
+        <!-- Student Profile Pill Widget -->
+        <div class="student-profile-pill" id="headerProfileWidget" title="Натисніть для редагування даних студента">
+          <div class="student-avatar" id="headerStudentAvatar">👤</div>
+          <div style="display:flex; flex-direction:column; line-height:1.2;">
+            <span id="headerStudentName" style="font-weight:700; color:#fff;">Вказати студента (Прізвище, Ім'я)</span>
+            <span id="headerStudentGithub" style="font-size:11px; color:var(--text-muted);">@github</span>
+          </div>
+          <span style="font-size:12px; opacity:0.6; margin-left:4px;">✏️</span>
+        </div>
+
         <span class="pill-badge pill-badge-supabase">⚡ Supabase Edition</span>
         <span class="pill-badge" id="onlineCountText">🟢 1 онлайн</span>
       </div>
@@ -648,9 +858,9 @@
 
     <!-- Navigation Tabs -->
     <nav class="tabs-nav">
-      <button class="tab-btn active" data-tab="trainer">⚡ Тренажер (122 завдання)</button>
+      <button class="tab-btn active" data-tab="trainer">⚡ Тренажер (202 завдання)</button>
       <button class="tab-btn" data-tab="theory">📖 Повна теорія (12 розділів)</button>
-      <button class="tab-btn" data-tab="mass-runner">🧪 Масовий запуск (122 тести)</button>
+      <button class="tab-btn" data-tab="mass-runner">🧪 Масовий запуск (202 тести)</button>
       <button class="tab-btn" data-tab="final-cert">🚀 Підсумковий тест (Сертифікація)</button>
     </nav>
 
@@ -697,6 +907,17 @@
             </div>
 
             <textarea id="codeEditor" class="code-textarea" spellcheck="false"></textarea>
+          </div>
+
+          <!-- Part 5 Live DOM Component Preview Sandbox -->
+          <div class="live-preview-card" id="livePreviewCard" style="display:none;">
+            <div class="live-preview-header">
+              <span>🎨 Живе прев'ю DOM-компонента (Частина 5)</span>
+              <span style="font-size:11px; padding:3px 8px; border-radius:9999px; background:rgba(62,207,142,0.15); border:1px solid rgba(62,207,142,0.3); color:var(--color-primary);">Інтерактивна пісочниця</span>
+            </div>
+            <div class="live-preview-container" id="livePreviewMount">
+              <div style="color:var(--text-dim); font-size:12.5px;">Запустіть тест, щоб переглянути створений DOM-компонент наживо...</div>
+            </div>
           </div>
 
           <!-- Console & Output -->
@@ -1036,11 +1257,11 @@ window.addEventListener('unhandledrejection', event => {
         <span style="font-size:36px; display:inline-block; margin-bottom:12px;">🧪</span>
         <h2 style="font-size:24px; font-weight:800; margin:0 0 10px 0; color:#fff;">Масовий запуск тестів (Mass Suite Runner)</h2>
         <p style="font-size:14px; color:var(--text-muted); max-width:600px; margin:0 auto 24px auto;">
-          Запустіть одночасну валідацію всіх 122 завдань курсу на реальних тестах у захищеній пісочниці для перевірки готовності.
+          Запустіть одночасну валідацію всіх 202 завдань курсу (Частини 1–5) на реальних тестах у захищеній пісочниці для повної перевірки готовності.
         </p>
 
         <button class="btn-pill btn-pill-primary" id="startMassRunnerBtn" style="padding:12px 28px; font-size:15px;">
-          🚀 Запустити всі 122 тести
+          🚀 Запустити всі 202 тести
         </button>
 
         <div id="massRunnerProgressWrap" style="display:none; margin-top:24px; text-align:left;">
@@ -1057,14 +1278,17 @@ window.addEventListener('unhandledrejection', event => {
       </div>
     </div>
 
-    <!-- TAB 4: FINAL CERTIFICATION (FOUNDATION) -->
+    <!-- TAB 4: FINAL CERTIFICATION -->
     <div id="tab-final-cert" class="tab-content" style="display:none;">
       <!-- Exam Focus Blur Overlay -->
       <div id="certBlurOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); backdrop-filter:blur(15px); z-index:999999; flex-direction:column; align-items:center; justify-content:center; color:#fff; text-align:center; padding:24px;">
         <div style="font-size:48px; margin-bottom:16px;">⏸️</div>
-        <h2 style="font-size:24px; font-weight:800; margin-bottom:12px;">Тест призупинено</h2>
-        <p style="font-size:15px; color:#a1a1aa; max-width:540px; line-height:1.6; margin-bottom:24px;">
+        <h2 style="font-size:24px; font-weight:800; margin-bottom:12px;">Тест призупинено (Втрата фокусу)</h2>
+        <p style="font-size:15px; color:#a1a1aa; max-width:540px; line-height:1.6; margin-bottom:14px;">
           Вікно тестування втратило фокус. Щоб продовжити роботу над завданнями, поверніться до цієї вкладки.
+        </p>
+        <p id="certInfractionNotice" style="font-size:13.5px; color:var(--color-amber); margin-bottom:24px; font-weight:600;">
+          Увага: спроба перемикання вікна зафіксована античитом.
         </p>
         <button class="btn-pill btn-pill-primary" id="resumeCertFocusBtn" style="padding:12px 28px; font-size:15px;">
           Продовжити тестування
@@ -1074,13 +1298,18 @@ window.addEventListener('unhandledrejection', event => {
       <!-- Welcome Box -->
       <div id="certWelcomeBox" class="supabase-card" style="text-align:center; max-width:800px; margin:0 auto;">
         <span style="font-size:40px; display:inline-block; margin-bottom:12px;">🎓</span>
-        <h2 style="font-size:26px; font-weight:800; margin-bottom:10px; color:#fff;">Фінальний сертифікаційний тест (Фундамент)</h2>
-        <p style="font-size:14.5px; color:var(--text-muted); line-height:1.6; max-width:620px; margin:0 auto 24px auto;">
-          Модуль сертифікації закладено як основу для майбутнього комплексного іспиту. Включає таймер, генератор квитків, захист фокусу вікна та аналітику часу.
+        <h2 style="font-size:26px; font-weight:800; margin-bottom:10px; color:#fff;">Фінальний сертифікаційний іспит (Фундамент)</h2>
+        <p style="font-size:14.5px; color:var(--text-muted); line-height:1.6; max-width:620px; margin:0 auto 20px auto;">
+          Комплексний квиток із 10 рандомізованих завдань, що пропорційно охоплюють усі 5 частин модуля (Синтаксис, Замикання, HOF, Винятки та DOM). Включає 45-хвилинний таймер, захист від списування та детальну аналітику часу.
         </p>
-        <button class="btn-pill btn-pill-primary" id="startCertExamBtn" style="padding:14px 32px; font-size:16px;">
-          ⚡ Розпочати тренувальний іспит (45 хв)
-        </button>
+        <div id="certStudentGreet" style="display:inline-block; background:rgba(62,207,142,0.1); border:1px solid rgba(62,207,142,0.3); border-radius:8px; padding:8px 16px; margin-bottom:20px; font-size:13.5px; color:var(--color-primary); font-weight:600;">
+          👤 Студент: <span id="certStudentGreetName">Не вказано</span>
+        </div>
+        <div>
+          <button class="btn-pill btn-pill-primary" id="startCertExamBtn" style="padding:14px 32px; font-size:16px;">
+            ⚡ Розпочати іспит (45 хв)
+          </button>
+        </div>
       </div>
 
       <!-- Active Exam Box -->
@@ -1140,15 +1369,20 @@ window.addEventListener('unhandledrejection', event => {
           <div id="certStatusIcon" style="font-size:48px; margin-bottom:8px;">🎉</div>
           <h2 id="certResultHeadline" style="font-size:26px; font-weight:800; margin-bottom:8px; color:#fff;">Тест завершено!</h2>
           <p id="certResultSubtext" style="font-size:15px; color:var(--text-muted); margin-bottom:20px;">
-            Ви успішно пройшли всі тренувальні завдання сертифікації.
+            Ваш результат успішно зафіксовано у журналі викладача.
           </p>
 
           <!-- Student Timing Breakdown Table -->
           <div id="certStudentTableContainer" style="margin-top:24px; text-align:left; background:#141414; border:1px solid var(--border-subtle); border-radius:10px; padding:18px; overflow-x:auto;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
               <h4 style="margin:0; font-size:15px; font-weight:700; color:#fff;">⏱️ Деталізація часу по завданнях:</h4>
-              <div id="certTotalTimeBadge" style="font-size:13px; font-weight:700; color:var(--color-primary); background:var(--color-primary-dim); padding:4px 12px; border-radius:9999px;">
-                Загальний час: 00:00
+              <div style="display:flex; gap:8px;">
+                <div id="certTotalScoreBadge" style="font-size:13px; font-weight:700; color:var(--color-primary); background:var(--color-primary-dim); padding:4px 12px; border-radius:9999px;">
+                  Бал: 0 / 10
+                </div>
+                <div id="certTotalTimeBadge" style="font-size:13px; font-weight:700; color:#fff; background:#242424; padding:4px 12px; border-radius:9999px;">
+                  Час: 00:00
+                </div>
               </div>
             </div>
 
@@ -1174,29 +1408,165 @@ window.addEventListener('unhandledrejection', event => {
 
   </div>
 
+  <!-- Student Profile Identification Modal -->
+  <div id="studentProfileModal" class="modal-backdrop">
+    <div class="profile-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:24px;">👤</span>
+          <h3 style="margin:0; font-size:18px; font-weight:800; color:#fff;">Ідентифікація студента</h3>
+        </div>
+        <button id="closeProfileModalBtn" style="background:none; border:none; color:var(--text-muted); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <p style="font-size:13.5px; color:var(--text-muted); margin:0 0 20px 0; line-height:1.5;">
+        Будь ласка, вкажіть ваше <strong style="color:#fff;">Прізвище та Ім'я</strong>. Вони обов'язкові для викладача, щоб ваш прогрес регулярної практики та результати іспиту фіксувалися безпомилково.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Прізвище <span class="required">* (Обов'язкове поле)</span></label>
+        <input type="text" id="inputSurname" class="form-input" placeholder="наприклад: Шевченко" autocomplete="family-name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ім'я <span class="required">* (Обов'язкове поле)</span></label>
+        <input type="text" id="inputName" class="form-input" placeholder="наприклад: Тарас" autocomplete="given-name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">GitHub Логін / Нікнейм (рекомендовано)</label>
+        <input type="text" id="inputGithub" class="form-input" placeholder="наприклад: octocat" autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Група / Потік</label>
+        <input type="text" id="inputGroup" class="form-input" placeholder="наприклад: FS-2026" />
+      </div>
+      <div id="profileValidationMsg" style="color:var(--color-rose); font-size:12.5px; margin-bottom:14px; display:none; font-weight:600;"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn-pill btn-pill-outline" id="cancelProfileBtn">Скасувати</button>
+        <button class="btn-pill btn-pill-primary" id="saveProfileBtn" style="padding:10px 24px; font-size:14px;">💾 Зберегти профіль</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Hidden Stealth Mentor Modal (Ctrl + Shift + A) -->
   <div id="mentorModal">
     <div class="mentor-content">
       <div class="mentor-header">
-        <div style="font-size:16px; font-weight:700; color:var(--color-primary);">🛠️ Панель Ментора (Stealth Mode)</div>
-        <button id="closeMentorModalBtn" style="background:none; border:none; color:#a1a1aa; font-size:20px; cursor:pointer;">&times;</button>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:20px;">🛠️</span>
+          <div style="font-size:16px; font-weight:700; color:var(--color-primary);">Панель Викладача (Stealth Mentor Mode)</div>
+        </div>
+        <button id="closeMentorModalBtn" style="background:none; border:none; color:#a1a1aa; font-size:22px; cursor:pointer;">&times;</button>
       </div>
       <div class="mentor-body">
+        <!-- Auth Section -->
         <div id="mentorAuthSection">
-          <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:12px;">Введіть менторський ключ доступу для дешифрування аналітики та відповідей:</p>
+          <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:14px;">Введіть менторський ключ доступу для дешифрування аналітики та відповідей:</p>
           <div style="display:flex; gap:8px;">
-            <input type="password" id="mentorKeyInput" placeholder="camp-admin-2026" style="flex:1; padding:8px 12px; border-radius:6px; border:1px solid var(--border-subtle); background:#141414; color:#fff;" />
+            <input type="password" id="mentorKeyInput" placeholder="camp-admin-2026" style="flex:1; padding:10px 14px; border-radius:8px; border:1px solid var(--border-subtle); background:#141414; color:#fff; font-family:inherit;" />
             <button class="btn-pill btn-pill-primary" id="unlockMentorBtn">Розблокувати</button>
           </div>
-          <div id="mentorErrorMsg" style="color:var(--color-rose); font-size:12px; margin-top:6px; display:none;">Невірний пароль!</div>
+          <div id="mentorErrorMsg" style="color:var(--color-rose); font-size:12.5px; margin-top:8px; display:none;">Невірний пароль викладача!</div>
         </div>
 
+        <!-- Dashboard Section (Two Distinct Tabs) -->
         <div id="mentorDashboardSection" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <h4 style="margin:0; font-size:15px; color:#fff;">Журнал спроб сертифікації студентів</h4>
-            <button class="btn-pill btn-pill-outline" id="exportCsvBtn" style="padding:6px 14px; font-size:12px;">📥 Експорт CSV для журналу</button>
+          
+          <!-- Mentor Navigation Tabs -->
+          <div class="mentor-tabs-nav">
+            <button class="mentor-tab-btn active" id="mentorTabBtnPractice">📚 Регулярна практика на уроці</button>
+            <button class="mentor-tab-btn" id="mentorTabBtnCert">🎓 Результати сертифікації</button>
           </div>
-          <div id="mentorTableWrapper" style="overflow-x:auto;"></div>
+
+          <!-- TAB A: REGULAR PRACTICE -->
+          <div id="mentorPracticeView">
+            <div class="mentor-stats-grid">
+              <div class="mentor-stat-card">
+                <div class="mentor-stat-val" id="statPracticeTotalStudents">0</div>
+                <div class="mentor-stat-label">Всього студентів на практиці</div>
+              </div>
+              <div class="mentor-stat-card">
+                <div class="mentor-stat-val" id="statPracticeTotalSolved">0</div>
+                <div class="mentor-stat-label">Вирішено завдань (загалом)</div>
+              </div>
+              <div class="mentor-stat-card">
+                <div class="mentor-stat-val" id="statPracticeAvgPct">0%</div>
+                <div class="mentor-stat-label">Середній прогрес (з 202)</div>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+              <div style="font-size:13.5px; color:var(--text-muted);">
+                Журнал вирішення 202 регулярних завдань під час аудиторних занять:
+              </div>
+              <button class="btn-pill btn-pill-outline" id="exportPracticeCsvBtn" style="padding:6px 16px; font-size:12.5px;">
+                📥 Експорт практики в CSV
+              </button>
+            </div>
+
+            <div style="overflow-x:auto; background:#121212; border:1px solid var(--border-subtle); border-radius:10px; padding:12px;">
+              <table class="mentor-table">
+                <thead>
+                  <tr>
+                    <th>Прізвище та Ім'я</th>
+                    <th>GitHub акаунт</th>
+                    <th>Група</th>
+                    <th>Вирішено (з 202)</th>
+                    <th>Прогрес по частинах (Ч1 - Ч5)</th>
+                    <th>Остання активність</th>
+                  </tr>
+                </thead>
+                <tbody id="mentorPracticeTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB B: CERTIFICATION EXAMS -->
+          <div id="mentorCertView" style="display:none;">
+            <div class="mentor-stats-grid">
+              <div class="mentor-stat-card">
+                <div class="mentor-stat-val" id="statCertAttempts">0</div>
+                <div class="mentor-stat-label">Складено іспитів</div>
+              </div>
+              <div class="mentor-stat-card">
+                <div class="mentor-stat-val" id="statCertAvgScore">0%</div>
+                <div class="mentor-stat-label">Середній бал</div>
+              </div>
+              <div class="mentor-stat-card">
+                <div class="mentor-stat-val" id="statCertAvgTime">00:00</div>
+                <div class="mentor-stat-label">Середній час іспиту</div>
+              </div>
+              <div class="mentor-stat-card">
+                <div class="mentor-stat-val" id="statCertInfractions">0</div>
+                <div class="mentor-stat-label">Зафіксовано втрат фокусу</div>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+              <div style="font-size:13.5px; color:var(--text-muted);">
+                Офіційний протокол підсумкових сертифікаційних тестувань:
+              </div>
+              <button class="btn-pill btn-pill-outline" id="exportCertCsvBtn" style="padding:6px 16px; font-size:12.5px;">
+                📥 Експорт сертифікації в CSV
+              </button>
+            </div>
+
+            <div style="overflow-x:auto; background:#121212; border:1px solid var(--border-subtle); border-radius:10px; padding:12px;">
+              <table class="mentor-table">
+                <thead>
+                  <tr>
+                    <th>Студент</th>
+                    <th>GitHub</th>
+                    <th>Група</th>
+                    <th>Дата іспиту</th>
+                    <th>Результат</th>
+                    <th>Статус</th>
+                    <th>Час</th>
+                    <th>Античит (Фокус)</th>
+                  </tr>
+                </thead>
+                <tbody id="mentorCertTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -1210,7 +1580,109 @@ window.addEventListener('unhandledrejection', event => {
     const userCodes = {};
     const completedTasks = new Set();
 
-    // Setup Navigation Tabs
+    // ==========================================
+    // STUDENT PROFILE SYSTEM
+    // ==========================================
+    let studentProfile = null;
+
+    function initStudentProfile() {
+      try {
+        const raw = localStorage.getItem('camp_student_profile');
+        if (raw) studentProfile = JSON.parse(raw);
+      } catch (e) {}
+
+      updateProfileUI();
+
+      // If no student profile filled yet, show modal after brief delay
+      if (!studentProfile || !studentProfile.surname || !studentProfile.name) {
+        setTimeout(() => openProfileModal(false), 600);
+      }
+    }
+
+    function updateProfileUI() {
+      const nameEl = document.getElementById('headerStudentName');
+      const githubEl = document.getElementById('headerStudentGithub');
+      const avatarEl = document.getElementById('headerStudentAvatar');
+      const greetEl = document.getElementById('certStudentGreetName');
+
+      if (studentProfile && studentProfile.surname && studentProfile.name) {
+        const fullName = `${studentProfile.surname} ${studentProfile.name}`;
+        nameEl.textContent = fullName;
+        greetEl.textContent = fullName + (studentProfile.group ? ` (${studentProfile.group})` : '');
+        
+        if (studentProfile.github && studentProfile.github.trim()) {
+          const gh = studentProfile.github.trim().replace(/^@/, '');
+          githubEl.textContent = '@' + gh;
+          avatarEl.innerHTML = `<img src="https://github.com/${gh}.png" alt="avatar" onerror="this.parentElement.textContent='${studentProfile.surname[0]}${studentProfile.name[0]}'" />`;
+        } else {
+          githubEl.textContent = studentProfile.group || 'Студент';
+          avatarEl.textContent = (studentProfile.surname[0] || 'С') + (studentProfile.name[0] || 'Т');
+        }
+      } else {
+        nameEl.textContent = "Вказати студента (Прізвище, Ім'я)";
+        githubEl.textContent = '@github';
+        avatarEl.textContent = '👤';
+        greetEl.textContent = 'Не вказано (потрібна ідентифікація)';
+      }
+    }
+
+    function openProfileModal(canCancel = true) {
+      const modal = document.getElementById('studentProfileModal');
+      const cancelBtn = document.getElementById('cancelProfileBtn');
+      const closeBtn = document.getElementById('closeProfileModalBtn');
+      
+      if (!canCancel) {
+        cancelBtn.style.display = 'none';
+        closeBtn.style.display = 'none';
+      } else {
+        cancelBtn.style.display = 'inline-block';
+        closeBtn.style.display = 'inline-block';
+      }
+
+      if (studentProfile) {
+        document.getElementById('inputSurname').value = studentProfile.surname || '';
+        document.getElementById('inputName').value = studentProfile.name || '';
+        document.getElementById('inputGithub').value = studentProfile.github || '';
+        document.getElementById('inputGroup').value = studentProfile.group || '';
+      }
+      modal.style.display = 'flex';
+      document.getElementById('inputSurname').focus();
+    }
+
+    function closeProfileModal() {
+      document.getElementById('studentProfileModal').style.display = 'none';
+    }
+
+    document.getElementById('headerProfileWidget')?.addEventListener('click', () => openProfileModal(true));
+    document.getElementById('closeProfileModalBtn')?.addEventListener('click', closeProfileModal);
+    document.getElementById('cancelProfileBtn')?.addEventListener('click', closeProfileModal);
+
+    document.getElementById('saveProfileBtn')?.addEventListener('click', () => {
+      const surname = document.getElementById('inputSurname').value.trim();
+      const name = document.getElementById('inputName').value.trim();
+      const github = document.getElementById('inputGithub').value.trim().replace(/^@/, '');
+      const group = document.getElementById('inputGroup').value.trim();
+      const msg = document.getElementById('profileValidationMsg');
+
+      if (!surname || !name) {
+        msg.textContent = "⚠️ Поля «Прізвище» та «Ім'я» є обов'язковими для викладача!";
+        msg.style.display = 'block';
+        return;
+      }
+
+      msg.style.display = 'none';
+      studentProfile = { surname, name, github, group, updatedAt: new Date().toISOString() };
+      localStorage.setItem('camp_student_profile', JSON.stringify(studentProfile));
+      updateProfileUI();
+      closeProfileModal();
+
+      // Sync active student presence
+      broadcastPracticeUpdate();
+    });
+
+    // ==========================================
+    // NAVIGATION TABS
+    // ==========================================
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = {
       'trainer': document.getElementById('tab-trainer'),
@@ -1233,7 +1705,9 @@ window.addEventListener('unhandledrejection', event => {
       });
     });
 
-    // Populate Part Switcher
+    // ==========================================
+    // PART SWITCHER & TASK LIST
+    // ==========================================
     const moduleSelect = document.getElementById('moduleSelect');
     function renderPartSwitcher() {
       const switcher = document.getElementById('partSwitcherGroup');
@@ -1287,7 +1761,6 @@ window.addEventListener('unhandledrejection', event => {
       if (moduleSelect) moduleSelect.value = currentModuleIdx;
     }
 
-    // Render Task Pills
     function renderTaskPills() {
       const container = document.getElementById('taskPillsContainer');
       if (!container) return;
@@ -1306,7 +1779,6 @@ window.addEventListener('unhandledrejection', event => {
       });
     }
 
-    // Select Task
     function selectTask(task) {
       currentTask = task;
       currentModuleIdx = task.moduleIdx;
@@ -1335,6 +1807,16 @@ window.addEventListener('unhandledrejection', event => {
       document.getElementById('testSummaryBadge').style.color = 'var(--text-muted)';
       document.getElementById('consoleBody').innerHTML = '<div style="color:var(--text-dim);">Натисніть «▶ Запустити тест» або Ctrl+Enter для перевірки...</div>';
 
+      // Toggle live DOM preview for Part 5
+      const previewCard = document.getElementById('livePreviewCard');
+      const previewMount = document.getElementById('livePreviewMount');
+      if (task.moduleIdx === 5) {
+        previewCard.style.display = 'block';
+        previewMount.innerHTML = '<div style="color:var(--text-dim); font-size:12.5px;">Запустіть тест, щоб переглянути створений DOM-компонент наживо...</div>';
+      } else {
+        previewCard.style.display = 'none';
+      }
+
       renderTaskPills();
     }
 
@@ -1351,7 +1833,9 @@ window.addEventListener('unhandledrejection', event => {
       if (curIdx < mTasks.length - 1) selectTask(mTasks[curIdx + 1]);
     });
 
-    // Run Test
+    // ==========================================
+    // RUN TASK TESTS & LIVE DOM PREVIEW
+    // ==========================================
     function runTaskTests(task, code) {
       const consoleBody = document.getElementById('consoleBody');
       const summaryBadge = document.getElementById('testSummaryBadge');
@@ -1375,6 +1859,9 @@ window.addEventListener('unhandledrejection', event => {
         return false;
       }
 
+      // Expose to window so any nested invocation inside tests finds it
+      window[task.name] = compiledFn;
+
       let passedCount = 0;
       task.tests.forEach((t, i) => {
         let actual;
@@ -1382,7 +1869,7 @@ window.addEventListener('unhandledrejection', event => {
         let errMessage = null;
 
         try {
-          const testRunner = new Function('fn', 'return ' + t.expr.replace(new RegExp('^' + task.name), 'fn') + ';');
+          const testRunner = new Function(task.name, 'return ' + t.expr + ';');
           actual = testRunner(compiledFn);
           pass = JSON.stringify(actual) === JSON.stringify(t.expected);
         } catch (e) {
@@ -1393,26 +1880,75 @@ window.addEventListener('unhandledrejection', event => {
         row.className = 'test-result-row ' + (pass ? 'pass' : 'fail');
         row.innerHTML = '<div>' + (pass ? '✅' : '❌') + '</div>' +
           '<div style="flex:1;">' +
-            '<div style="font-weight:600; color:' + (pass ? '#3ecf8e' : '#f87171') + ';">Тест #' + (i + 1) + ': ' + t.expr + '</div>' +
-            '<div style="color:var(--text-muted); font-size:12px; margin-top:2px;">Очікувалось: <code>' + JSON.stringify(t.expected) + '</code>' +
-            (!pass ? ' | Отримано: <code>' + (errMessage ? 'Помилка: ' + errMessage : JSON.stringify(actual)) + '</code>' : '') + '</div>' +
+            '<div style="font-weight:600; color:' + (pass ? 'var(--color-primary)' : 'var(--color-rose)') + ';">' +
+              'Тест ' + (i + 1) + ': ' + escapeHtml(t.expr) +
+            '</div>' +
+            (pass 
+              ? '<div style="color:var(--text-muted); font-size:12px; margin-top:2px;">Очікувалось: ' + escapeHtml(JSON.stringify(t.expected)) + ' | Отримано: ' + escapeHtml(JSON.stringify(actual)) + '</div>'
+              : '<div style="color:#f87171; font-size:12px; margin-top:2px;">' + (errMessage ? 'Помилка виконання: ' + escapeHtml(errMessage) : 'Очікувалось: ' + escapeHtml(JSON.stringify(t.expected)) + ' | Отримано: ' + escapeHtml(JSON.stringify(actual))) + '</div>'
+            ) +
           '</div>';
 
         consoleBody.appendChild(row);
         if (pass) passedCount++;
       });
 
-      if (passedCount === task.tests.length) {
-        summaryBadge.textContent = '🎉 Всі тести пройдено (' + passedCount + '/' + task.tests.length + ')';
+      const allPassed = passedCount === task.tests.length;
+      if (allPassed) {
+        summaryBadge.textContent = '✅ Усі тести пройдено (' + passedCount + '/' + task.tests.length + ')';
         summaryBadge.style.color = 'var(--color-primary)';
         completedTasks.add(task.id);
         renderTaskPills();
-        return true;
+        recordPracticeTaskSolved(task.id);
       } else {
-        summaryBadge.textContent = '⚠️ ' + passedCount + ' з ' + task.tests.length + ' тестів пройдено';
+        summaryBadge.textContent = '❌ Не всі тести пройдено (' + passedCount + '/' + task.tests.length + ')';
         summaryBadge.style.color = 'var(--color-rose)';
-        return false;
       }
+
+      // Live DOM Preview for Part 5
+      if (task.moduleIdx === 5) {
+        const previewMount = document.getElementById('livePreviewMount');
+        previewMount.innerHTML = '';
+        try {
+          let demoNode = null;
+          if (task.name === 'createCounterButton') {
+            demoNode = compiledFn(0);
+          } else if (task.name === 'createThemeToggle') {
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'padding:14px; border:1px dashed #555; border-radius:8px; display:flex; align-items:center; gap:12px;';
+            wrap.innerHTML = '<span style="color:#aaa; font-size:13px;">Тестовий контейнер теми:</span>';
+            const btn = compiledFn(wrap);
+            wrap.appendChild(btn);
+            demoNode = wrap;
+          } else if (task.name === 'createStatusBadge') {
+            demoNode = compiledFn('success', 'Активний студент');
+          } else if (task.name === 'createModalDialog') {
+            const wrap = document.createElement('div');
+            const modalObj = compiledFn('Успіх!', 'Ваш DOM-компонент чудово працює.');
+            wrap.appendChild(modalObj.openBtn);
+            wrap.appendChild(modalObj.modal);
+            demoNode = wrap;
+          } else {
+            // General invocation test
+            const sample = compiledFn();
+            if (sample instanceof HTMLElement) demoNode = sample;
+          }
+
+          if (demoNode instanceof HTMLElement) {
+            previewMount.appendChild(demoNode);
+          } else {
+            previewMount.innerHTML = '<div style="color:var(--color-primary); font-size:13px;">✅ Компонент ' + task.name + ' успішно згенеровано в памʼяті DOM!</div>';
+          }
+        } catch (e) {
+          previewMount.innerHTML = '<div style="color:var(--text-dim); font-size:12px;">Попередній перегляд: функція очікує специфічні параметри виклику.</div>';
+        }
+      }
+
+      return allPassed;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     document.getElementById('runTestBtn')?.addEventListener('click', () => {
@@ -1421,26 +1957,27 @@ window.addEventListener('unhandledrejection', event => {
       runTaskTests(currentTask, code);
     });
 
-    // Keyboard shortcut: Ctrl+Enter / Cmd+Enter
-    document.getElementById('codeEditor')?.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('runTestBtn')?.click();
+        const code = document.getElementById('codeEditor').value;
+        userCodes[currentTask.id] = code;
+        runTaskTests(currentTask, code);
       }
     });
 
-    // Reset button
     document.getElementById('resetCodeBtn')?.addEventListener('click', () => {
-      delete userCodes[currentTask.id];
-      selectTask(currentTask);
+      if (confirm('Скинути код завдання до початкового шаблону?')) {
+        delete userCodes[currentTask.id];
+        selectTask(currentTask);
+      }
     });
 
-    // Prettier formatting
-    document.getElementById('formatCodeBtn')?.addEventListener('click', () => {
+    document.getElementById('formatCodeBtn')?.addEventListener('click', async () => {
       const editor = document.getElementById('codeEditor');
       try {
         if (window.prettier && window.prettierPlugins) {
-          editor.value = window.prettier.format(editor.value, {
+          editor.value = await window.prettier.format(editor.value, {
             parser: 'babel',
             plugins: window.prettierPlugins,
             semi: true,
@@ -1451,7 +1988,7 @@ window.addEventListener('unhandledrejection', event => {
     });
 
     // ==========================================
-    // MASS RUNNER
+    // MASS RUNNER (202 TASKS)
     // ==========================================
     document.getElementById('startMassRunnerBtn')?.addEventListener('click', () => {
       const wrap = document.getElementById('massRunnerProgressWrap');
@@ -1484,8 +2021,9 @@ window.addEventListener('unhandledrejection', event => {
             .replace(/export\s+(function|const|let|var|class)\s+/g, '$1 ');
           const sandbox = new Function(cleanCode + '; return ' + task.name + ';');
           const fn = sandbox();
+          window[task.name] = fn;
           pass = task.tests.every(t => {
-            const runner = new Function('fn', 'return ' + t.expr.replace(new RegExp('^' + task.name), 'fn') + ';');
+            const runner = new Function(task.name, 'return ' + t.expr + ';');
             return JSON.stringify(runner(fn)) === JSON.stringify(t.expected);
           });
         } catch (e) {
@@ -1501,14 +2039,14 @@ window.addEventListener('unhandledrejection', event => {
         pct.textContent = p + '%';
         bar.style.width = p + '%';
 
-        setTimeout(step, 10);
+        setTimeout(step, 8);
       }
 
       step();
     });
 
     // ==========================================
-    // FINAL CERTIFICATION (FOUNDATION)
+    // FINAL CERTIFICATION EXAM
     // ==========================================
     let certActive = false;
     let certTimer = null;
@@ -1517,11 +2055,15 @@ window.addEventListener('unhandledrejection', event => {
     let certCurrentTaskIdx = 0;
     let certExamTasks = [];
     let certTaskStartTime = 0;
+    let certInfractionsCount = 0;
 
     const certBlurOverlay = document.getElementById('certBlurOverlay');
     window.addEventListener('blur', () => {
       if (certActive) {
+        certInfractionsCount++;
         certBlurOverlay.style.display = 'flex';
+        document.getElementById('certInfractionNotice').textContent =
+          `Увага: втрату фокусу вікна зафіксовано античитом (${certInfractionsCount} разів). Усі перемикання записуються у звіт викладача.`;
       }
     });
 
@@ -1530,21 +2072,29 @@ window.addEventListener('unhandledrejection', event => {
     });
 
     document.getElementById('startCertExamBtn')?.addEventListener('click', () => {
+      if (!studentProfile || !studentProfile.surname || !studentProfile.name) {
+        alert("Будь ласка, вкажіть ваше Прізвище та Ім'я перед початком іспиту!");
+        openProfileModal(false);
+        return;
+      }
+
       document.getElementById('certWelcomeBox').style.display = 'none';
       document.getElementById('certActiveBox').style.display = 'block';
 
-      // Pick 10 random tasks across 4 parts as certification ticket
+      // Pick 10 random tasks across ALL 5 parts (2 from each part)
       const p1 = ALL_TASKS.filter(t => t.moduleIdx === 1);
       const p2 = ALL_TASKS.filter(t => t.moduleIdx === 2);
       const p3 = ALL_TASKS.filter(t => t.moduleIdx === 3);
       const p4 = ALL_TASKS.filter(t => t.moduleIdx === 4);
+      const p5 = ALL_TASKS.filter(t => t.moduleIdx === 5);
 
       function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
       certExamTasks = [
         ...shuffle(p1).slice(0, 2),
-        ...shuffle(p2).slice(0, 3),
-        ...shuffle(p3).slice(0, 3),
-        ...shuffle(p4).slice(0, 2)
+        ...shuffle(p2).slice(0, 2),
+        ...shuffle(p3).slice(0, 2),
+        ...shuffle(p4).slice(0, 2),
+        ...shuffle(p5).slice(0, 2)
       ];
 
       certActive = true;
@@ -1552,6 +2102,7 @@ window.addEventListener('unhandledrejection', event => {
       certCurrentTaskIdx = 0;
       certTaskTimes = {};
       certTaskStartTime = Date.now();
+      certInfractionsCount = 0;
 
       startCertTimer();
       renderCertQuestionPills();
@@ -1563,7 +2114,7 @@ window.addEventListener('unhandledrejection', event => {
       const display = document.getElementById('certTimerDisplay');
       certTimer = setInterval(() => {
         if (!certActive) return;
-        if (certBlurOverlay.style.display === 'flex') return; // Pause timer during blur
+        if (certBlurOverlay.style.display === 'flex') return;
 
         certSecondsRemaining--;
         const m = Math.floor(certSecondsRemaining / 60);
@@ -1630,8 +2181,46 @@ window.addEventListener('unhandledrejection', event => {
     });
 
     document.getElementById('finishCertEarlyBtn')?.addEventListener('click', () => {
-      if (confirm('Ви впевнені, що бажаєте достроково завершити іспит?')) {
+      if (confirm('Ви впевнені, що бажаєте завершити сертифікаційний іспит достроково?')) {
         finishCertExam();
+      }
+    });
+
+    document.getElementById('certRunTestBtn')?.addEventListener('click', () => {
+      const task = certExamTasks[certCurrentTaskIdx];
+      const code = document.getElementById('certCodeEditor').value;
+      userCodes['cert_' + task.id] = code;
+
+      const consoleBody = document.getElementById('certConsoleBody');
+      const statusBadge = document.getElementById('certTestStatus');
+      consoleBody.innerHTML = '';
+
+      let cleanCode = code
+        .replace(/export\s+default\s+/g, '')
+        .replace(/export\s+(function|const|let|var|class)\s+/g, '$1 ');
+
+      try {
+        const sandbox = new Function(cleanCode + '; return ' + task.name + ';');
+        const fn = sandbox();
+        window[task.name] = fn;
+        const pass = task.tests.every(t => {
+          const runner = new Function(task.name, 'return ' + t.expr + ';');
+          return JSON.stringify(runner(fn)) === JSON.stringify(t.expected);
+        });
+
+        if (pass) {
+          statusBadge.textContent = '✅ Завдання зараховано!';
+          statusBadge.style.color = 'var(--color-primary)';
+          consoleBody.innerHTML = '<div style="color:var(--color-primary); font-weight:600;">Усі тести завдання успішно пройдено!</div>';
+        } else {
+          statusBadge.textContent = '❌ Не всі тести пройдено';
+          statusBadge.style.color = 'var(--color-rose)';
+          consoleBody.innerHTML = '<div style="color:var(--color-rose);">Деякі перевірки не збігаються з еталоном.</div>';
+        }
+      } catch (err) {
+        statusBadge.textContent = '❌ Помилка синтаксису';
+        statusBadge.style.color = 'var(--color-rose)';
+        consoleBody.innerHTML = '<div style="color:var(--color-rose);">' + err.message + '</div>';
       }
     });
 
@@ -1643,7 +2232,8 @@ window.addEventListener('unhandledrejection', event => {
       document.getElementById('certActiveBox').style.display = 'none';
       document.getElementById('certResultsBox').style.display = 'block';
 
-      // Build breakdown table
+      // Check results for each task
+      let solvedCount = 0;
       const tbody = document.getElementById('certStudentTableBody');
       tbody.innerHTML = '';
 
@@ -1655,18 +2245,48 @@ window.addEventListener('unhandledrejection', event => {
         const ss = sec % 60;
         const timeStr = String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
 
+        let isPassed = false;
+        try {
+          const code = userCodes['cert_' + t.id] || '';
+          const cleanCode = code.replace(/export\s+default\s+/g, '').replace(/export\s+(function|const|let|var|class)\s+/g, '$1 ');
+          const fn = new Function(cleanCode + '; return ' + t.name + ';')();
+          window[t.name] = fn;
+          isPassed = t.tests.every(test => {
+            const runner = new Function(t.name, 'return ' + test.expr + ';');
+            return JSON.stringify(runner(fn)) === JSON.stringify(test.expected);
+          });
+        } catch (e) {
+          isPassed = false;
+        }
+
+        if (isPassed) solvedCount++;
+
         const tr = document.createElement('tr');
         tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
         tr.innerHTML = '<td style="padding:8px 6px;">' + (i + 1) + '</td>' +
           '<td style="padding:8px 6px; font-weight:600; color:#fff;">' + t.name + ' (' + t.id + ')</td>' +
-          '<td style="padding:8px 6px; color:var(--color-primary);">Розв\'язано</td>' +
+          '<td style="padding:8px 6px; color:' + (isPassed ? 'var(--color-primary)' : 'var(--color-rose)') + ';">' + (isPassed ? '✅ Складено' : '❌ Не складено') + '</td>' +
           '<td style="padding:8px 6px; font-family:var(--font-mono);">' + timeStr + ' (' + sec + ' с)</td>';
         tbody.appendChild(tr);
       });
 
       const totalMM = Math.floor(totalSec / 60);
       const totalSS = totalSec % 60;
-      document.getElementById('certTotalTimeBadge').textContent = 'Загальний час: ' + String(totalMM).padStart(2, '0') + ':' + String(totalSS).padStart(2, '0');
+      document.getElementById('certTotalScoreBadge').textContent = 'Бал: ' + solvedCount + ' / 10 (' + (solvedCount * 10) + '%)';
+      document.getElementById('certTotalTimeBadge').textContent = 'Час: ' + String(totalMM).padStart(2, '0') + ':' + String(totalSS).padStart(2, '0');
+
+      // Save cert log
+      saveCertificationRecord({
+        student: studentProfile,
+        score: solvedCount,
+        total: 10,
+        pct: solvedCount * 10,
+        durationSec: totalSec,
+        durationFormatted: String(totalMM).padStart(2, '0') + ':' + String(totalSS).padStart(2, '0'),
+        infractions: certInfractionsCount,
+        taskTimes: certTaskTimes,
+        date: new Date().toISOString()
+      });
     }
 
     document.getElementById('certRetryExamBtn')?.addEventListener('click', () => {
@@ -1675,7 +2295,134 @@ window.addEventListener('unhandledrejection', event => {
     });
 
     // ==========================================
-    // STEALTH MENTOR MODE (Ctrl + Shift + A)
+    // DATA PERSISTENCE & REALTIME SYNC
+    // ==========================================
+    function recordPracticeTaskSolved(taskId) {
+      if (!studentProfile) return;
+
+      const key = 'camp_practice_stats_local';
+      let stats = {};
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) stats = JSON.parse(raw);
+      } catch (e) {}
+
+      const studentKey = (studentProfile.surname + '_' + studentProfile.name).toLowerCase();
+      if (!stats[studentKey]) {
+        stats[studentKey] = {
+          student: studentProfile,
+          solvedTaskIds: [],
+          lastActive: new Date().toISOString()
+        };
+      }
+
+      if (!stats[studentKey].solvedTaskIds.includes(taskId)) {
+        stats[studentKey].solvedTaskIds.push(taskId);
+      }
+      stats[studentKey].student = studentProfile;
+      stats[studentKey].lastActive = new Date().toISOString();
+
+      localStorage.setItem(key, JSON.stringify(stats));
+      broadcastPracticeUpdate();
+    }
+
+    function saveCertificationRecord(record) {
+      const key = 'camp_cert_stats_local';
+      let list = [];
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) list = JSON.parse(raw);
+      } catch (e) {}
+
+      list.unshift(record);
+      localStorage.setItem(key, JSON.stringify(list));
+
+      if (window.campRealtimePresence) {
+        try {
+          window.campRealtimePresence.send({
+            type: 'broadcast',
+            event: 'cert_submitted',
+            payload: record
+          });
+        } catch (e) {}
+      }
+    }
+
+    function broadcastPracticeUpdate() {
+      if (window.campRealtimePresence && studentProfile) {
+        try {
+          window.campRealtimePresence.send({
+            type: 'broadcast',
+            event: 'practice_progress',
+            payload: {
+              student: studentProfile,
+              solvedCount: completedTasks.size,
+              solvedTaskIds: Array.from(completedTasks),
+              timestamp: new Date().toISOString()
+            }
+          });
+        } catch (e) {}
+      }
+    }
+
+    // Supabase Realtime Setup
+    try {
+      const SUPABASE_URL = 'https://djjvceuzbvhfvfdcptwb.supabase.co';
+      const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqanZjZXV6YnZoZnZmZGNwdHdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1Mzg1OTgsImV4cCI6MjA1NDExNDU5OH0.7YtGzJ66bZlIUXf2n3L1uW7Hk5k5u5U8X7';
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+      const room = supabase.channel('functions_workout_presence', {
+        config: { presence: { key: 'user_' + Math.random().toString(36).substring(7) } }
+      });
+      window.campRealtimePresence = room;
+
+      room.on('presence', { event: 'sync' }, () => {
+        const state = room.presenceState();
+        const count = Math.max(1, Object.keys(state).length);
+        document.getElementById('onlineCountText').textContent = '🟢 ' + count + ' онлайн';
+      });
+
+      room.on('broadcast', { event: 'practice_progress' }, ({ payload }) => {
+        if (!payload || !payload.student) return;
+        saveRemotePracticeUpdate(payload);
+      });
+
+      room.on('broadcast', { event: 'cert_submitted' }, ({ payload }) => {
+        if (!payload || !payload.student) return;
+        saveRemoteCertUpdate(payload);
+      });
+
+      room.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await room.track({ online_at: new Date().toISOString() });
+        }
+      });
+    } catch (e) {
+      document.getElementById('onlineCountText').textContent = '🟢 1 онлайн';
+    }
+
+    function saveRemotePracticeUpdate(data) {
+      const key = 'camp_practice_stats_local';
+      let stats = {};
+      try { stats = JSON.parse(localStorage.getItem(key)) || {}; } catch (e) {}
+      const sKey = (data.student.surname + '_' + data.student.name).toLowerCase();
+      stats[sKey] = {
+        student: data.student,
+        solvedTaskIds: data.solvedTaskIds || [],
+        lastActive: data.timestamp || new Date().toISOString()
+      };
+      localStorage.setItem(key, JSON.stringify(stats));
+    }
+
+    function saveRemoteCertUpdate(record) {
+      const key = 'camp_cert_stats_local';
+      let list = [];
+      try { list = JSON.parse(localStorage.getItem(key)) || []; } catch (e) {}
+      list.unshift(record);
+      localStorage.setItem(key, JSON.stringify(list));
+    }
+
+    // ==========================================
+    // STEALTH MENTOR DASHBOARD (Ctrl + Shift + A)
     // ==========================================
     window.addEventListener('keydown', (e) => {
       if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a' || e.key === 'Ф' || e.key === 'ф')) {
@@ -1693,40 +2440,249 @@ window.addEventListener('unhandledrejection', event => {
       if (pass === 'camp-admin-2026') {
         document.getElementById('mentorAuthSection').style.display = 'none';
         document.getElementById('mentorDashboardSection').style.display = 'block';
-        renderMentorDashboard();
+        renderMentorPracticeDashboard();
+        renderMentorCertDashboard();
       } else {
         document.getElementById('mentorErrorMsg').style.display = 'block';
       }
     });
 
-    function renderMentorDashboard() {
-      const wrap = document.getElementById('mentorTableWrapper');
-      wrap.innerHTML = '<table style="width:100%; border-collapse:collapse; font-size:12.5px; text-align:left;">' +
-        '<thead><tr style="color:var(--text-dim); border-bottom:1px solid var(--border-subtle);">' +
-          '<th style="padding:6px;">Студент</th><th style="padding:6px;">Завдань</th><th style="padding:6px;">Результат</th><th style="padding:6px;">Час</th>' +
-        '</tr></thead>' +
-        '<tbody>' +
-          '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">' +
-            '<td style="padding:6px; color:#fff;">Поточний сеанс</td>' +
-            '<td style="padding:6px;">10 / 10</td>' +
-            '<td style="padding:6px; color:var(--color-primary);">100%</td>' +
-            '<td style="padding:6px;">' + (document.getElementById('certTotalTimeBadge')?.textContent || '12:45') + '</td>' +
-          '</tr>' +
-        '</tbody>' +
-      '</table>';
+    // Toggle Mentor Tabs
+    document.getElementById('mentorTabBtnPractice')?.addEventListener('click', () => {
+      document.getElementById('mentorTabBtnPractice').classList.add('active');
+      document.getElementById('mentorTabBtnCert').classList.remove('active');
+      document.getElementById('mentorPracticeView').style.display = 'block';
+      document.getElementById('mentorCertView').style.display = 'none';
+      renderMentorPracticeDashboard();
+    });
+
+    document.getElementById('mentorTabBtnCert')?.addEventListener('click', () => {
+      document.getElementById('mentorTabBtnCert').classList.add('active');
+      document.getElementById('mentorTabBtnPractice').classList.remove('active');
+      document.getElementById('mentorCertView').style.display = 'block';
+      document.getElementById('mentorPracticeView').style.display = 'none';
+      renderMentorCertDashboard();
+    });
+
+    // Render TAB 1: Practice Dashboard
+    function renderMentorPracticeDashboard() {
+      let stats = {};
+      try {
+        const raw = localStorage.getItem('camp_practice_stats_local');
+        if (raw) stats = JSON.parse(raw);
+      } catch (e) {}
+
+      // Ensure active student is included
+      if (studentProfile && studentProfile.surname && studentProfile.name) {
+        const sKey = (studentProfile.surname + '_' + studentProfile.name).toLowerCase();
+        if (!stats[sKey]) {
+          stats[sKey] = {
+            student: studentProfile,
+            solvedTaskIds: Array.from(completedTasks),
+            lastActive: new Date().toISOString()
+          };
+        }
+      }
+
+      const students = Object.values(stats);
+      document.getElementById('statPracticeTotalStudents').textContent = students.length;
+      
+      let totalSolvedAll = 0;
+      students.forEach(s => totalSolvedAll += (s.solvedTaskIds || []).length);
+      document.getElementById('statPracticeTotalSolved').textContent = totalSolvedAll;
+
+      const avgPct = students.length ? Math.round((totalSolvedAll / (students.length * ALL_TASKS.length)) * 100) : 0;
+      document.getElementById('statPracticeAvgPct').textContent = avgPct + '%';
+
+      const tbody = document.getElementById('mentorPracticeTableBody');
+      tbody.innerHTML = '';
+
+      if (students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center; color:var(--text-dim);">Поки що немає даних про вирішення практичних завдань на уроці.</td></tr>';
+        return;
+      }
+
+      students.forEach(s => {
+        const solved = s.solvedTaskIds || [];
+        const count = solved.length;
+        const pct = Math.round((count / ALL_TASKS.length) * 100);
+
+        // Calculate breakdown by part
+        const p1 = solved.filter(id => id.startsWith('1.')).length;
+        const p2 = solved.filter(id => id.startsWith('2.')).length;
+        const p3 = solved.filter(id => id.startsWith('3.')).length;
+        const p4 = solved.filter(id => id.startsWith('4.')).length;
+        const p5 = solved.filter(id => id.startsWith('5.')).length;
+
+        const ghLink = s.student.github 
+          ? `<a href="https://github.com/${s.student.github}" target="_blank" style="color:var(--color-primary); text-decoration:none;">@${s.student.github}</a>`
+          : '<span style="color:var(--text-dim);">-</span>';
+
+        const lastTime = s.lastActive ? new Date(s.lastActive).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : '-';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight:700; color:#fff;">${escapeHtml(s.student.surname)} ${escapeHtml(s.student.name)}</td>
+          <td>${ghLink}</td>
+          <td><span class="pill-badge" style="padding:2px 8px; font-size:11px;">${escapeHtml(s.student.group || 'Загальна')}</span></td>
+          <td>
+            <div style="font-weight:700; color:var(--color-primary);">${count} / ${ALL_TASKS.length} (${pct}%)</div>
+            <div style="height:4px; width:100px; background:rgba(255,255,255,0.08); border-radius:9999px; overflow:hidden; margin-top:4px;">
+              <div style="height:100%; width:${pct}%; background:var(--color-primary);"></div>
+            </div>
+          </td>
+          <td style="font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted);">
+            Ч1: ${p1}/40 | Ч2: ${p2}/40 | Ч3: ${p3}/42 | Ч4: ${p4}/40 | Ч5: ${p5}/40
+          </td>
+          <td style="color:var(--text-dim); font-size:12px;">${lastTime}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
-    document.getElementById('exportCsvBtn')?.addEventListener('click', () => {
-      const csv = 'Студент,Дата,Завдань,Результат,Час\nСтудент Поточний,' + new Date().toISOString() + ',10,100%,12:45\n';
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    // Render TAB 2: Certification Dashboard
+    function renderMentorCertDashboard() {
+      let list = [];
+      try {
+        const raw = localStorage.getItem('camp_cert_stats_local');
+        if (raw) list = JSON.parse(raw);
+      } catch (e) {}
+
+      document.getElementById('statCertAttempts').textContent = list.length;
+
+      let totalScore = 0;
+      let totalSec = 0;
+      let totalInf = 0;
+
+      list.forEach(item => {
+        totalScore += (item.score || 0);
+        totalSec += (item.durationSec || 0);
+        totalInf += (item.infractions || 0);
+      });
+
+      const avgScore = list.length ? Math.round((totalScore / (list.length * 10)) * 100) : 0;
+      document.getElementById('statCertAvgScore').textContent = avgScore + '%';
+
+      const avgSec = list.length ? Math.round(totalSec / list.length) : 0;
+      const mm = Math.floor(avgSec / 60);
+      const ss = avgSec % 60;
+      document.getElementById('statCertAvgTime').textContent = String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
+
+      document.getElementById('statCertInfractions').textContent = totalInf;
+
+      const tbody = document.getElementById('mentorCertTableBody');
+      tbody.innerHTML = '';
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="padding:20px; text-align:center; color:var(--text-dim);">Ще не складено жодного сертифікаційного іспиту.</td></tr>';
+        return;
+      }
+
+      list.forEach(item => {
+        const passed = item.score >= 8;
+        const dateStr = item.date ? new Date(item.date).toLocaleDateString([], { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : '-';
+        const gh = item.student?.github ? `<a href="https://github.com/${item.student.github}" target="_blank" style="color:var(--color-primary); text-decoration:none;">@${item.student.github}</a>` : '-';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight:700; color:#fff;">${escapeHtml(item.student?.surname || 'Невідомий')} ${escapeHtml(item.student?.name || 'Студент')}</td>
+          <td>${gh}</td>
+          <td><span class="pill-badge" style="padding:2px 8px; font-size:11px;">${escapeHtml(item.student?.group || 'Загальна')}</span></td>
+          <td style="color:var(--text-dim); font-size:12px;">${dateStr}</td>
+          <td style="font-weight:700; color:${passed ? 'var(--color-primary)' : 'var(--color-rose)'};">${item.score} / 10 (${item.pct}%)</td>
+          <td>
+            <span class="pill-badge" style="${passed ? 'background:rgba(62,207,142,0.15); color:var(--color-primary); border-color:rgba(62,207,142,0.3);' : 'background:rgba(248,113,113,0.15); color:var(--color-rose); border-color:rgba(248,113,113,0.3);'}">
+              ${passed ? '🟢 Складено' : '🔴 Не складено'}
+            </span>
+          </td>
+          <td style="font-family:var(--font-mono);">${item.durationFormatted || '00:00'}</td>
+          <td style="color:${item.infractions > 0 ? 'var(--color-amber)' : 'var(--text-dim)'}; font-weight:${item.infractions > 0 ? '700' : 'normal'};">
+            ${item.infractions > 0 ? '⚠️ ' + item.infractions : '0'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // CSV EXPORTS
+    document.getElementById('exportPracticeCsvBtn')?.addEventListener('click', () => {
+      let stats = {};
+      try { stats = JSON.parse(localStorage.getItem('camp_practice_stats_local')) || {}; } catch (e) {}
+      
+      const rows = [
+        ['Прізвище', "Ім'я", 'GitHub', 'Група', 'Вирішено_всього', 'Відсоток', 'Частина_1', 'Частина_2', 'Частина_3', 'Частина_4', 'Частина_5', 'Остання_активність']
+      ];
+
+      Object.values(stats).forEach(s => {
+        const solved = s.solvedTaskIds || [];
+        const count = solved.length;
+        const pct = Math.round((count / ALL_TASKS.length) * 100);
+        const p1 = solved.filter(id => id.startsWith('1.')).length;
+        const p2 = solved.filter(id => id.startsWith('2.')).length;
+        const p3 = solved.filter(id => id.startsWith('3.')).length;
+        const p4 = solved.filter(id => id.startsWith('4.')).length;
+        const p5 = solved.filter(id => id.startsWith('5.')).length;
+
+        rows.push([
+          s.student?.surname || '',
+          s.student?.name || '',
+          s.student?.github || '',
+          s.student?.group || '',
+          count,
+          pct + '%',
+          p1 + '/40',
+          p2 + '/40',
+          p3 + '/42',
+          p4 + '/40',
+          p5 + '/40',
+          s.lastActive || ''
+        ]);
+      });
+
+      const csvContent = '\uFEFF' + rows.map(r => r.map(f => '"' + String(f).replace(/"/g, '""') + '"').join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'functions_exam_results.csv';
+      a.download = 'regular_lesson_practice_stats.csv';
       a.click();
     });
 
-    // Content Protection
+    document.getElementById('exportCertCsvBtn')?.addEventListener('click', () => {
+      let list = [];
+      try { list = JSON.parse(localStorage.getItem('camp_cert_stats_local')) || []; } catch (e) {}
+
+      const rows = [
+        ['Прізвище', "Ім'я", 'GitHub', 'Група', 'Дата_іспиту', 'Бал', 'Відсоток', 'Статус', 'Час_виконання', 'Інфракції_фокусу']
+      ];
+
+      list.forEach(item => {
+        rows.push([
+          item.student?.surname || '',
+          item.student?.name || '',
+          item.student?.github || '',
+          item.student?.group || '',
+          item.date || '',
+          item.score + '/10',
+          item.pct + '%',
+          item.score >= 8 ? 'Складено' : 'Не складено',
+          item.durationFormatted || '',
+          item.infractions || 0
+        ]);
+      });
+
+      const csvContent = '\uFEFF' + rows.map(r => r.map(f => '"' + String(f).replace(/"/g, '""') + '"').join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'certification_exam_results.csv';
+      a.click();
+    });
+
+    // ==========================================
+    // CONTENT PROTECTION
+    // ==========================================
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
@@ -1736,7 +2692,10 @@ window.addEventListener('unhandledrejection', event => {
       }
     });
 
-    // Initialize
+    // ==========================================
+    // INITIALIZATION
+    // ==========================================
+    initStudentProfile();
     renderPartSwitcher();
     selectTask(ALL_TASKS[0]);
   </script>

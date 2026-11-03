@@ -1,0 +1,57 @@
+name: Student Homework Evaluation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  evaluate:
+    name: Auto-test JS Functions & DOM Workout
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout student code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Run Vitest Suite
+        id: vitest
+        run: |
+          npx vitest run --reporter=verbose --reporter=json --outputFile=test-results.json || true
+
+      - name: Generate Evaluation Summary
+        run: |
+          node -e "
+            const fs = require('fs');
+            if (fs.existsSync('test-results.json')) {
+              const res = JSON.parse(fs.readFileSync('test-results.json', 'utf8'));
+              const total = res.numTotalTests || 0;
+              const passed = res.numPassedTests || 0;
+              const failed = res.numFailedTests || 0;
+              const pct = total ? Math.round((passed / total) * 100) : 0;
+              
+              let md = '## 📊 Результати автоперевірки завдань\n\n';
+              md += '| Показник | Значення |\n|---|---|\n';
+              md += '| 🎯 Всього перевірок | **' + total + '** |\n';
+              md += '| ✅ Успішно пройдено | **' + passed + '** |\n';
+              md += '| ❌ Помилок | **' + failed + '** |\n';
+              md += '| 🏆 Загальний бал | **' + pct + '%** |\n\n';
+              
+              if (pct === 100) {
+                md += '🎉 **Вітаємо! Всі завдання вирішено ідеально!** 🚀\n';
+              } else {
+                md += '💡 **Порада:** Перегляньте непройдені тести вище, щоб знайти невідповідності у вимогах.\n';
+              }
+              fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+            }
+          "

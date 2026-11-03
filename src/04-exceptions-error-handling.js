@@ -402,3 +402,132 @@ export function createBaseCustomError() {
   return undefined;
 }
 
+/**
+ * Завдання 4.31: Контракт валідації схеми об'єкта (Aggregate Validation Errors) (Просунутий рівень)
+ * Напишіть функцію validateSchemaContract(data, schema), де schema описує обов'язкові типи: { name: 'string', age: 'number' }. Якщо якісь поля відсутні або мають неправильний тип — збирає ВСІ помилки в масив і кидає Error('Помилки валідації: ' + errors.join('; ')). Якщо все валідно — повертає true.
+ * Вимоги:
+ * - Перевірте кожне поле схеми.
+ * - Накопичуйте всі знайдені помилки в масив errors.
+ * - Якщо масив errors не порожній — throw new Error(...).
+ * - Інакше return true.
+ */
+export function validateSchemaContract(data, schema) {
+  // Валідуйте об'єкт за схемою
+  return undefined;
+}
+
+/**
+ * Завдання 4.32: Безпечна ізоляція колбека в таймері (Async Exception Trap) (Середній рівень)
+ * Напишіть функцію safeAsyncWrapper(asyncFn, onError), яка повертає нову функцію (...args). Коли ця нова функція викликається, вона виконує asyncFn у try...catch і у разі помилки викликає onError(err), не даючи впасти глобальному середовищу.
+ * Вимоги:
+ * - Поверніть функцію (...args).
+ * - У try викличте asyncFn(...args).
+ * - У catch передайте помилку в onError(err).
+ */
+export function safeAsyncWrapper(asyncFn, onError) {
+  // Ізолюйте помилку всередині асинхронної обгортки
+  return undefined;
+}
+
+/**
+ * Завдання 4.33: Суворий парсер URL з перехопленням URIError та TypeError (Середній рівень)
+ * Напишіть функцію parseUrlStrict(urlString), яка намагається створити new URL(urlString). Якщо рядок некоректний — перехоплює TypeError і повертає { valid: false, error: 'INVALID_URL' }. У разі успіху повертає { valid: true, protocol: u.protocol, host: u.host, pathname: u.pathname }.
+ * Вимоги:
+ * - Використайте try...catch навколо new URL(urlString).
+ * - Поверніть розпарсені властивості або статус помилки.
+ */
+export function parseUrlStrict(urlString) {
+  // Розпарсіть URL або перехопіть TypeError
+  return undefined;
+}
+
+/**
+ * Завдання 4.34: Патерн аварійного тайм-ауту (Fallback on Failure) (Середній рівень)
+ * Напишіть функцію executeWithTimeoutFallback(operationFn, fallbackValue), яка запускає operationFn(). Якщо операція викидає будь-яку помилку — негайно повертає fallbackValue.
+ * Вимоги:
+ * - Огорніть виклик у try...catch.
+ * - Поверніть результат або fallbackValue.
+ */
+export function executeWithTimeoutFallback(operationFn, fallbackValue) {
+  // Виконайте операцію з безпечним fallback
+  return undefined;
+}
+
+/**
+ * Завдання 4.35: Захисний контракт: Перевірка непорожнього масиву (Базовий рівень)
+ * Напишіть функцію assertArrayNotEmpty(arr, paramName = 'list'), яка перевіряє, що arr є масивом і має length > 0. Якщо не масив — кидає TypeError(`Параметр ${paramName} повинен бути масивом`). Якщо порожній — кидає RangeError(`Масив ${paramName} не може бути порожнім`). Інакше повертає arr.
+ * Вимоги:
+ * - Перевірте Array.isArray(arr).
+ * - Перевірте arr.length > 0.
+ * - Поверніть arr.
+ */
+export function assertArrayNotEmpty(arr, paramName = 'list') {
+  // Перевірте чи масив непорожній
+  return undefined;
+}
+
+/**
+ * Завдання 4.36: Синтез: Рядки + JSON + Винятки. Парсинг з попереднім очищенням (Середній рівень)
+ * Напишіть функцію sanitizeAndParseJson(rawString), яка обрізає пробіли, видаляє символи переносу рядка на початку й у кінці, і намагається виконати JSON.parse. Якщо синтаксис порушено — викидає SyntaxError('Невалідний JSON формат'). Повертає об'єкт.
+ * Вимоги:
+ * - Очистіть rawString.trim().
+ * - У try викличте JSON.parse.
+ * - У catch викиньте зрозумілий SyntaxError.
+ */
+export function sanitizeAndParseJson(rawString) {
+  // Очистіть та розпарсіть JSON рядок
+  return undefined;
+}
+
+/**
+ * Завдання 4.37: Синтез: Стек з обмеженою місткістю та переповненням (Середній рівень)
+ * Напишіть функцію createBoundedStack(maxSize = 3), яка створює стек: push(val), pop(), size(). Якщо при push кількість перевищує maxSize — кидає RangeError('Stack overflow: стек переповнено'). Якщо при pop стек порожній — кидає RangeError('Stack underflow: стек порожній').
+ * Вимоги:
+ * - Збережіть масив items у замиканні.
+ * - Перевіряйте межі при push та pop і генеруйте RangeError.
+ * - Повертайте видалений елемент при pop.
+ */
+export function createBoundedStack(maxSize = 3) {
+  // Реалізуйте обмежений стек з перевірками
+  return undefined;
+}
+
+/**
+ * Завдання 4.38: Патерн Guard Clauses: Багаторівнева фільтрація операцій (Базовий рівень)
+ * Напишіть функцію guardClauseDivision(numerator, denominator), яка перевіряє обидва числа. Якщо будь-яке не є скінченним числом (Number.isFinite) — кидає TypeError('Обидва аргументи повинні бути скінченними числами'). Якщо denominator === 0 — кидає RangeError('Неможливо ділити на 0'). Повертає результат.
+ * Вимоги:
+ * - Використайте Guard Clauses на початку.
+ * - Поверніть numerator / denominator.
+ */
+export function guardClauseDivision(numerator, denominator) {
+  // Перевірте параметри за допомогою Guard Clauses
+  return undefined;
+}
+
+/**
+ * Завдання 4.39: HOF: Безпечна трансформація елементів із колбеком помилки (Середній рівень)
+ * Напишіть функцію mapWithErrorHandler(arr, transformFn, onError), яка проходить по масиву. Якщо transformFn(item) кидає помилку — викликається onError(err, item, index) і його результат підставляється на поточне місце.
+ * Вимоги:
+ * - Пройдіть по arr циклом.
+ * - Огорніть transformFn у try...catch.
+ * - При збої поверніть onError(err, item, i).
+ */
+export function mapWithErrorHandler(arr, transformFn, onError) {
+  // Трансформуйте елементи із заміною збійних через onError
+  return undefined;
+}
+
+/**
+ * Завдання 4.40: Метрика виконання функції у блоці finally (Середній рівень)
+ * Напишіть функцію executeWithFinallyMetrics(fn, metricsCollector), яка виконує fn(), фіксує статус ('success' або 'error') та час початку, і обов'язково у блоці finally викликає metricsCollector({ status, hasError, errorMsg }).
+ * Вимоги:
+ * - Встановіть status = 'success'.
+ * - У try викличте fn().
+ * - У catch запишіть статус 'error' та прокиньте помилку далі.
+ * - У finally викличте metricsCollector.
+ */
+export function executeWithFinallyMetrics(fn, metricsCollector) {
+  // Зафіксуйте метрики виконання у блоці finally
+  return undefined;
+}
+

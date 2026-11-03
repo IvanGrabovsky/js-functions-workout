@@ -29,7 +29,17 @@ import {
   sortWordsByLengthFunction,
   calculateCartTotalFunction,
   findIndexOfElementFunction,
-  cleanAndJoinWordsFunction
+  cleanAndJoinWordsFunction,
+  createIdGenerator,
+  createRunningAverage,
+  transposeMatrix,
+  sanitizeObjectKeys,
+  createHistoryManager,
+  flattenMatrixBySpiral,
+  createEventListenerHub,
+  countOccurrencesInMatrix,
+  createVotingSystem,
+  createBatchAggregator
 } from "../src/02-scope-hoisting-closures.js";
 
 describe("Частина 2: Області видимості, Hoisting та Замикання (з циклами й масивами)", () => {
@@ -291,6 +301,84 @@ describe("Частина 2: Області видимості, Hoisting та З�
     });
     it("тест 2: cleanAndJoinWordsFunction(['One', 'Two'], '/')", () => {
       expect(cleanAndJoinWordsFunction(['One', 'Two'], '/')).toEqual("One/Two");
+    });
+  });
+
+  describe("2.31 createIdGenerator - Замикання: Генератор унікальних ID з префіксом", () => {
+    it("тест 1: (() => { const gen = createIdGenerator('user'); return [gen(), gen(), gen()]; })()", () => {
+      expect((() => { const gen = createIdGenerator('user'); return [gen(), gen(), gen()]; })()).toEqual(["user_1","user_2","user_3"]);
+    });
+    it("тест 2: (() => { const gen = createIdGenerator('btn'); return [gen(), gen()]; })()", () => {
+      expect((() => { const gen = createIdGenerator('btn'); return [gen(), gen()]; })()).toEqual(["btn_1","btn_2"]);
+    });
+  });
+
+  describe("2.32 createRunningAverage - Замикання: Обчислення середнього арифметичного на льоту (Moving Average)", () => {
+    it("тест 1: (() => { const avg = createRunningAverage(); return [avg(10), avg(20), avg(30)]; })()", () => {
+      expect((() => { const avg = createRunningAverage(); return [avg(10), avg(20), avg(30)]; })()).toEqual([10,15,20]);
+    });
+    it("тест 2: (() => { const avg = createRunningAverage(); return [avg(4), avg(8)]; })()", () => {
+      expect((() => { const avg = createRunningAverage(); return [avg(4), avg(8)]; })()).toEqual([4,6]);
+    });
+  });
+
+  describe("2.33 transposeMatrix - Синтез: 2D Матриці та цикли. Транспонування матриці (рядки у стовпці)", () => {
+    it("тест 1: transposeMatrix([[1, 2, 3], [4, 5, 6]])", () => {
+      expect(transposeMatrix([[1, 2, 3], [4, 5, 6]])).toEqual([[1,4],[2,5],[3,6]]);
+    });
+    it("тест 2: transposeMatrix([[1, 2], [3, 4]])", () => {
+      expect(transposeMatrix([[1, 2], [3, 4]])).toEqual([[1,3],[2,4]]);
+    });
+  });
+
+  describe("2.34 sanitizeObjectKeys - Очищення чутливих ключів в об'єкті (Sanitize Keys)", () => {
+    it("тест 1: sanitizeObjectKeys({ id: 1, name: 'Іван', password: '123', token: 'xyz' })", () => {
+      expect(sanitizeObjectKeys({ id: 1, name: 'Іван', password: '123', token: 'xyz' })).toEqual({"id":1,"name":"Іван"});
+    });
+    it("тест 2: sanitizeObjectKeys({ apiKey: 'key', SECRET: 'shh' })", () => {
+      expect(sanitizeObjectKeys({ apiKey: 'key', SECRET: 'shh' })).toEqual({"apiKey":"key"});
+    });
+  });
+
+  describe("2.35 createHistoryManager - Замикання: Менеджер історії дій (Undo / Redo)", () => {
+    it("тест 1: (() => { const hm = createHistoryManager('step1'); hm.set('step2'); hm.set('step3'); const u1 = hm.undo(); const u2 = hm.undo(); const r1 = hm.redo(); return [u1, u2, r1, hm.getState()]; })()", () => {
+      expect((() => { const hm = createHistoryManager('step1'); hm.set('step2'); hm.set('step3'); const u1 = hm.undo(); const u2 = hm.undo(); const r1 = hm.redo(); return [u1, u2, r1, hm.getState()]; })()).toEqual(["step2","step1","step2","step2"]);
+    });
+  });
+
+  describe("2.36 flattenMatrixBySpiral - Синтез: 2D Матриці та цикли. Спіральний обхід матриці", () => {
+    it("тест 1: flattenMatrixBySpiral([[1, 2, 3], [4, 5, 6], [7, 8, 9]])", () => {
+      expect(flattenMatrixBySpiral([[1, 2, 3], [4, 5, 6], [7, 8, 9]])).toEqual([1,2,3,6,9,8,7,4,5]);
+    });
+    it("тест 2: flattenMatrixBySpiral([[1, 2], [3, 4]])", () => {
+      expect(flattenMatrixBySpiral([[1, 2], [3, 4]])).toEqual([1,2,4,3]);
+    });
+  });
+
+  describe("2.37 createEventListenerHub - Замикання: Власний Event Emitter (Підписник та сповіщення)", () => {
+    it("тест 1: (() => { const hub = createEventListenerHub(); const msgs = []; const handler = d => msgs.push(d); hub.on('msg', handler); hub.emit('msg', 'hello'); hub.off('msg', handler); hub.emit('msg', 'ignored'); return msgs; })()", () => {
+      expect((() => { const hub = createEventListenerHub(); const msgs = []; const handler = d => msgs.push(d); hub.on('msg', handler); hub.emit('msg', 'hello'); hub.off('msg', handler); hub.emit('msg', 'ignored'); return msgs; })()).toEqual(["hello"]);
+    });
+  });
+
+  describe("2.38 countOccurrencesInMatrix - Синтез: 2D Матриці та цикли. Частотний аналіз матриці", () => {
+    it("тест 1: countOccurrencesInMatrix([[1, 2, 1], [3, 1, 4]], 1)", () => {
+      expect(countOccurrencesInMatrix([[1, 2, 1], [3, 1, 4]], 1)).toEqual(3);
+    });
+    it("тест 2: countOccurrencesInMatrix([['a', 'b'], ['c', 'd']], 'z')", () => {
+      expect(countOccurrencesInMatrix([['a', 'b'], ['c', 'd']], 'z')).toEqual(0);
+    });
+  });
+
+  describe("2.39 createVotingSystem - Замикання: Система голосування з фіксацією результатів", () => {
+    it("тест 1: (() => { const vs = createVotingSystem(); vs.vote('Олена'); vs.vote('Тарас'); vs.vote('Олена'); return { res: vs.getResults(), winner: vs.getWinner() }; })()", () => {
+      expect((() => { const vs = createVotingSystem(); vs.vote('Олена'); vs.vote('Тарас'); vs.vote('Олена'); return { res: vs.getResults(), winner: vs.getWinner() }; })()).toEqual({"res":{"Олена":2,"Тарас":1},"winner":"Олена"});
+    });
+  });
+
+  describe("2.40 createBatchAggregator - Замикання: Пакетний накопичувач елементів (Batch Flusher)", () => {
+    it("тест 1: (() => { const batches = []; const agg = createBatchAggregator(2, b => batches.push(b)); agg.add('a'); agg.add('b'); agg.add('c'); agg.flush(); return batches; })()", () => {
+      expect((() => { const batches = []; const agg = createBatchAggregator(2, b => batches.push(b)); agg.add('a'); agg.add('b'); agg.add('c'); agg.flush(); return batches; })()).toEqual([["a","b"],["c"]]);
     });
   });
 

@@ -29,7 +29,17 @@ import {
   findMaxInArray,
   filterEvenNumbers,
   formatListString,
-  capitalizeWordsInSentence
+  capitalizeWordsInSentence,
+  formatCurrencyUAH,
+  pluralizeUk,
+  maskCreditCard,
+  generateSlug,
+  secondsToHms,
+  calculateTaxDiscount,
+  clampNumber,
+  isPalindromeText,
+  truncateWords,
+  parseQueryString
 } from "../src/01-syntax-params-return.js";
 
 describe("Частина 1: Синтаксис функцій, параметри та повернення значень", () => {
@@ -402,6 +412,132 @@ describe("Частина 1: Синтаксис функцій, параметр�
     });
     it("тест 2: capitalizeWordsInSentence('SUPABASE DATABASE')", () => {
       expect(capitalizeWordsInSentence('SUPABASE DATABASE')).toEqual("Supabase Database");
+    });
+  });
+
+  describe("1.31 formatCurrencyUAH - Форматування грошової суми у гривнях (UAH)", () => {
+    it("тест 1: formatCurrencyUAH(1250)", () => {
+      expect(formatCurrencyUAH(1250)).toEqual("1 250.00 ₴");
+    });
+    it("тест 2: formatCurrencyUAH(99.5)", () => {
+      expect(formatCurrencyUAH(99.5)).toEqual("99.50 ₴");
+    });
+    it("тест 3: formatCurrencyUAH(1000000)", () => {
+      expect(formatCurrencyUAH(1000000)).toEqual("1 000 000.00 ₴");
+    });
+    it("тест 4: formatCurrencyUAH(null)", () => {
+      expect(formatCurrencyUAH(null)).toEqual("0.00 ₴");
+    });
+  });
+
+  describe("1.32 pluralizeUk - Відмінювання слів за числівниками (1 яблуко, 2 яблука, 5 яблук)", () => {
+    it("тест 1: pluralizeUk(1, 'студент', 'студенти', 'студентів')", () => {
+      expect(pluralizeUk(1, 'студент', 'студенти', 'студентів')).toEqual("студент");
+    });
+    it("тест 2: pluralizeUk(3, 'студент', 'студенти', 'студентів')", () => {
+      expect(pluralizeUk(3, 'студент', 'студенти', 'студентів')).toEqual("студенти");
+    });
+    it("тест 3: pluralizeUk(5, 'студент', 'студенти', 'студентів')", () => {
+      expect(pluralizeUk(5, 'студент', 'студенти', 'студентів')).toEqual("студентів");
+    });
+    it("тест 4: pluralizeUk(21, 'бал', 'бали', 'балів')", () => {
+      expect(pluralizeUk(21, 'бал', 'бали', 'балів')).toEqual("бал");
+    });
+    it("тест 5: pluralizeUk(12, 'бал', 'бали', 'балів')", () => {
+      expect(pluralizeUk(12, 'бал', 'бали', 'балів')).toEqual("балів");
+    });
+  });
+
+  describe("1.33 maskCreditCard - Маскування номера банківської картки", () => {
+    it("тест 1: maskCreditCard('4111-2222-3333-4444')", () => {
+      expect(maskCreditCard('4111-2222-3333-4444')).toEqual("4111********4444");
+    });
+    it("тест 2: maskCreditCard('123456789012', '#')", () => {
+      expect(maskCreditCard('123456789012', '#')).toEqual("1234####9012");
+    });
+    it("тест 3: maskCreditCard('12345')", () => {
+      expect(maskCreditCard('12345')).toEqual("INVALID_CARD");
+    });
+  });
+
+  describe("1.34 generateSlug - Генератор URL-slug із рядка заголовка", () => {
+    it("тест 1: generateSlug('JavaScript & React Fundamentals 2026!')", () => {
+      expect(generateSlug('JavaScript & React Fundamentals 2026!')).toEqual("javascript-react-fundamentals-2026");
+    });
+    it("тест 2: generateSlug('  Модуль 7: Функції в JS   ')", () => {
+      expect(generateSlug('  Модуль 7: Функції в JS   ')).toEqual("модуль-7-функції-в-js");
+    });
+  });
+
+  describe("1.35 secondsToHms - Конвертація секунд у читабельний час (HH:MM:SS)", () => {
+    it("тест 1: secondsToHms(3665)", () => {
+      expect(secondsToHms(3665)).toEqual("01:01:05");
+    });
+    it("тест 2: secondsToHms(45)", () => {
+      expect(secondsToHms(45)).toEqual("00:00:45");
+    });
+    it("тест 3: secondsToHms(0)", () => {
+      expect(secondsToHms(0)).toEqual("00:00:00");
+    });
+    it("тест 4: secondsToHms(7200)", () => {
+      expect(secondsToHms(7200)).toEqual("02:00:00");
+    });
+  });
+
+  describe("1.36 calculateTaxDiscount - Калькулятор знижки з урахуванням ПДВ", () => {
+    it("тест 1: calculateTaxDiscount(100, 10, 20)", () => {
+      expect(calculateTaxDiscount(100, 10, 20)).toEqual(108);
+    });
+    it("тест 2: calculateTaxDiscount(200, 0, 20)", () => {
+      expect(calculateTaxDiscount(200, 0, 20)).toEqual(240);
+    });
+    it("тест 3: calculateTaxDiscount(50, 50, 0)", () => {
+      expect(calculateTaxDiscount(50, 50, 0)).toEqual(25);
+    });
+  });
+
+  describe("1.37 clampNumber - Обмеження числа в діапазоні (Clamp Helper)", () => {
+    it("тест 1: clampNumber(15, 0, 10)", () => {
+      expect(clampNumber(15, 0, 10)).toEqual(10);
+    });
+    it("тест 2: clampNumber(-5, 0, 10)", () => {
+      expect(clampNumber(-5, 0, 10)).toEqual(0);
+    });
+    it("тест 3: clampNumber(7, 0, 10)", () => {
+      expect(clampNumber(7, 0, 10)).toEqual(7);
+    });
+  });
+
+  describe("1.38 isPalindromeText - Перевірка тексту на паліндром без урахування регістру й розділових знаків", () => {
+    it("тест 1: isPalindromeText('А роза упала на лапу Азора')", () => {
+      expect(isPalindromeText('А роза упала на лапу Азора')).toEqual(true);
+    });
+    it("тест 2: isPalindromeText('racecar')", () => {
+      expect(isPalindromeText('racecar')).toEqual(true);
+    });
+    it("тест 3: isPalindromeText('hello world')", () => {
+      expect(isPalindromeText('hello world')).toEqual(false);
+    });
+  });
+
+  describe("1.39 truncateWords - Обрізання тексту за кількістю слів з трикрапкою", () => {
+    it("тест 1: truncateWords('Один два три чотири пʼять шість сім', 4)", () => {
+      expect(truncateWords('Один два три чотири пʼять шість сім', 4)).toEqual("Один два три чотири...");
+    });
+    it("тест 2: truncateWords('Короткий текст', 5)", () => {
+      expect(truncateWords('Короткий текст', 5)).toEqual("Короткий текст");
+    });
+  });
+
+  describe("1.40 parseQueryString - Парсинг URL Query String в об'єкт параметрів", () => {
+    it("тест 1: parseQueryString('?page=2&sort=asc&tab=profile')", () => {
+      expect(parseQueryString('?page=2&sort=asc&tab=profile')).toEqual({"page":"2","sort":"asc","tab":"profile"});
+    });
+    it("тест 2: parseQueryString('name=%D0%86%D0%B2%D0%B0%D0%BD&role=admin')", () => {
+      expect(parseQueryString('name=%D0%86%D0%B2%D0%B0%D0%BD&role=admin')).toEqual({"name":"Іван","role":"admin"});
+    });
+    it("тест 3: parseQueryString('')", () => {
+      expect(parseQueryString('')).toEqual({});
     });
   });
 

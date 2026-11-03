@@ -31,7 +31,17 @@ import {
   createLazyEvaluator,
   trampoline,
   createCircuitBreaker,
-  createPluginManager
+  createPluginManager,
+  createDebounce,
+  createThrottle,
+  deepCloneObject,
+  findFileInTree,
+  zipArraysWith,
+  createPriorityQueue,
+  createEventBus,
+  flattenDeepArray,
+  asyncTaskWaterfall,
+  createLazyRange
 } from "../src/03-hof-pipelines-patterns.js";
 
 describe("Частина 3: Функції вищого порядку, пайплайни та бойові алгоритми", () => {
@@ -320,6 +330,75 @@ describe("Частина 3: Функції вищого порядку, пайп
   describe("3.32 createPluginManager - Модульна система плагінів (Micro-kernel architecture)", () => {
     it("тест 1: (() => { const pm = createPluginManager(); pm.registerPlugin({ name: 'uppercase', install: m => m.addHook('format', s => s.toUpperCase()) }); pm.registerPlugin({ name: 'tag', install: m => m.addHook('format', s => `<tag>${s}</tag>`) }); return pm.triggerHook('format', 'supabase'); })()", () => {
       expect((() => { const pm = createPluginManager(); pm.registerPlugin({ name: 'uppercase', install: m => m.addHook('format', s => s.toUpperCase()) }); pm.registerPlugin({ name: 'tag', install: m => m.addHook('format', s => `<tag>${s}</tag>`) }); return pm.triggerHook('format', 'supabase'); })()).toEqual("<tag>SUPABASE</tag>");
+    });
+  });
+
+  describe("3.33 createDebounce - HOF: Декоратор Debounce (Відкладення виконання)", () => {
+    it("тест 1: (() => { let called = 0; const debounced = createDebounce(() => { called++; }, 50); debounced(); debounced(); return typeof debounced === 'function'; })()", () => {
+      expect((() => { let called = 0; const debounced = createDebounce(() => { called++; }, 50); debounced(); debounced(); return typeof debounced === 'function'; })()).toEqual(true);
+    });
+  });
+
+  describe("3.34 createThrottle - HOF: Декоратор Throttle (Обмеження частоти викликів)", () => {
+    it("тест 1: (() => { let count = 0; const throttled = createThrottle(() => ++count, 100); const r1 = throttled(); const r2 = throttled(); return [r1, r2, count]; })()", () => {
+      expect((() => { let count = 0; const throttled = createThrottle(() => ++count, 100); const r1 = throttled(); const r2 = throttled(); return [r1, r2, count]; })()).toEqual([1,null,1]);
+    });
+  });
+
+  describe("3.35 deepCloneObject - Рекурсія: Глибоке клонування об'єкта (Deep Clone)", () => {
+    it("тест 1: (() => { const original = { a: 1, b: { c: [2, 3] } }; const copy = deepCloneObject(original); copy.b.c.push(4); return { origLen: original.b.c.length, copyLen: copy.b.c.length }; })()", () => {
+      expect((() => { const original = { a: 1, b: { c: [2, 3] } }; const copy = deepCloneObject(original); copy.b.c.push(4); return { origLen: original.b.c.length, copyLen: copy.b.c.length }; })()).toEqual({"origLen":2,"copyLen":3});
+    });
+  });
+
+  describe("3.36 findFileInTree - Рекурсія: Пошук файлу у файловій системі (Tree Search)", () => {
+    it("тест 1: findFileInTree({ name: 'root', type: 'dir', children: [{ name: 'app.js', type: 'file' }, { name: 'src', type: 'dir', children: [{ name: 'index.html', type: 'file' }] }] }, 'index.html')", () => {
+      expect(findFileInTree({ name: 'root', type: 'dir', children: [{ name: 'app.js', type: 'file' }, { name: 'src', type: 'dir', children: [{ name: 'index.html', type: 'file' }] }] }, 'index.html')).toEqual("root/src/index.html");
+    });
+    it("тест 2: findFileInTree({ name: 'root', type: 'dir', children: [] }, 'missing.txt')", () => {
+      expect(findFileInTree({ name: 'root', type: 'dir', children: [] }, 'missing.txt')).toEqual(null);
+    });
+  });
+
+  describe("3.37 zipArraysWith - HOF: Попарне об'єднання масивів за функцією (zipWith)", () => {
+    it("тест 1: zipArraysWith([1, 2, 3], [10, 20, 30], (a, b) => a + b)", () => {
+      expect(zipArraysWith([1, 2, 3], [10, 20, 30], (a, b) => a + b)).toEqual([11,22,33]);
+    });
+    it("тест 2: zipArraysWith(['Олена', 'Тарас'], [95, 88], (n, s) => `${n}: ${s}`)", () => {
+      expect(zipArraysWith(['Олена', 'Тарас'], [95, 88], (n, s) => `${n}: ${s}`)).toEqual(["Олена: 95","Тарас: 88"]);
+    });
+  });
+
+  describe("3.38 createPriorityQueue - Патерни: Черга з пріоритетами (Priority Queue)", () => {
+    it("тест 1: (() => { const pq = createPriorityQueue(); pq.enqueue('task_low', 10); pq.enqueue('task_urgent', 1); pq.enqueue('task_med', 5); return [pq.dequeue(), pq.dequeue(), pq.dequeue()]; })()", () => {
+      expect((() => { const pq = createPriorityQueue(); pq.enqueue('task_low', 10); pq.enqueue('task_urgent', 1); pq.enqueue('task_med', 5); return [pq.dequeue(), pq.dequeue(), pq.dequeue()]; })()).toEqual(["task_urgent","task_med","task_low"]);
+    });
+  });
+
+  describe("3.39 createEventBus - Патерни: Шина подій з підтримкою once (одноразові підписки)", () => {
+    it("тест 1: (() => { const bus = createEventBus(); let count = 0; bus.once('greet', () => { count++; }); bus.emit('greet'); bus.emit('greet'); return count; })()", () => {
+      expect((() => { const bus = createEventBus(); let count = 0; bus.once('greet', () => { count++; }); bus.emit('greet'); bus.emit('greet'); return count; })()).toEqual(1);
+    });
+  });
+
+  describe("3.40 flattenDeepArray - Рекурсія: Глибоке розгортання вкладених масивів (Flat Polyfill)", () => {
+    it("тест 1: flattenDeepArray([1, [2, [3, [4, 5]]]])", () => {
+      expect(flattenDeepArray([1, [2, [3, [4, 5]]]])).toEqual([1,2,3,4,5]);
+    });
+    it("тест 2: flattenDeepArray([[1], [[2]], [[[3]]]])", () => {
+      expect(flattenDeepArray([[1], [[2]], [[[3]]]])).toEqual([1,2,3]);
+    });
+  });
+
+  describe("3.41 asyncTaskWaterfall - Патерни: Послідовне виконання синхронних задач (Waterfall Runner)", () => {
+    it("тест 1: asyncTaskWaterfall(5, [x => x * 2, x => x + 10, x => `${x} грн`])", () => {
+      expect(asyncTaskWaterfall(5, [x => x * 2, x => x + 10, x => `${x} грн`])).toEqual("20 грн");
+    });
+  });
+
+  describe("3.42 createLazyRange - Генераторні функції / Ітератори: Лінивий генератор діапазону (Lazy Range)", () => {
+    it("тест 1: (() => { const range = createLazyRange(1, 5, 2); return [range.next(), range.next(), range.next(), range.next()]; })()", () => {
+      expect((() => { const range = createLazyRange(1, 5, 2); return [range.next(), range.next(), range.next(), range.next()]; })()).toEqual([{"value":1,"done":false},{"value":3,"done":false},{"value":5,"done":false},{"done":true}]);
     });
   });
 
