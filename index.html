@@ -648,9 +648,9 @@
 
     <!-- Navigation Tabs -->
     <nav class="tabs-nav">
-      <button class="tab-btn active" data-tab="trainer">⚡ Тренажер (92 завдання)</button>
-      <button class="tab-btn" data-tab="theory">📖 Повна теорія (6 розділів)</button>
-      <button class="tab-btn" data-tab="mass-runner">🧪 Масовий запуск (92 тести)</button>
+      <button class="tab-btn active" data-tab="trainer">⚡ Тренажер (120 завдань)</button>
+      <button class="tab-btn" data-tab="theory">📖 Повна теорія (11 розділів)</button>
+      <button class="tab-btn" data-tab="mass-runner">🧪 Масовий запуск (120 тестів)</button>
       <button class="tab-btn" data-tab="final-cert">🚀 Підсумковий тест (Сертифікація)</button>
     </nav>
 
@@ -817,6 +817,144 @@ console.log(counter()); // 2</code></pre>
 }</code></pre>
       </div>
 
+      <!-- Section 7 -->
+      <div class="theory-section">
+        <h2>7. Що таке виняток (Exception) у JavaScript?</h2>
+        <p>
+          <strong>Виняток (Exception)</strong> — це нештатна або помилкова ситуація, що виникає під час виконання програми (<em>Runtime</em>) і перериває нормальний потік інструкцій.
+        </p>
+        <p>
+          Якщо виняток не перехопити, він «спливає» вгору по стеку викликів (<em>Call Stack</em>) аж до глобального оточення, що призводить до <strong>аварійної зупинки скрипта (Crash)</strong>.
+        </p>
+        <div class="theory-callout">
+          ⚠️ <strong>Помилки компіляції (Parsing) vs Помилки виконання (Runtime):</strong><br>
+          Помилки синтаксису (наприклад, незакрита фігурна дужка <code>{</code>) виявляються рушієм JS ще до старту програми — код навіть не почне виконуватися.<br>
+          Винятки (наприклад, <code>user.profile.name</code> коли <code>user</code> є <code>null</code>) виникають безпосередньо під час виконання певної операції.
+        </div>
+      </div>
+
+      <!-- Section 8 -->
+      <div class="theory-section">
+        <h2>8. Стандартні типи вбудованих помилок (Standard Error Types)</h2>
+        <p>
+          У JavaScript усі вбудовані помилки успадковують властивості від базового класу <code>Error</code>. Головні типи:
+        </p>
+        <ul>
+          <li><strong><code>TypeError</code> (Помилка типу):</strong> виникає при спробі виконати операцію над несумісним типом (наприклад, викликати не-функцію <code>foo()</code> або прочитати властивість <code>null.name</code>).</li>
+          <li><strong><code>RangeError</code> (Помилка діапазону):</strong> виникає, коли числове значення виходить за допустимі межі (наприклад, <code>new Array(-5)</code> або переповнення стеку рекурсії).</li>
+          <li><strong><code>ReferenceError</code> (Помилка посилання):</strong> звернення до неіснуючої або ще не ініціалізованої змінної (зокрема у «мертвій зоні» TDZ для <code>let</code>/<code>const</code>).</li>
+          <li><strong><code>SyntaxError</code> (Помилка синтаксису):</strong> виникає при спробі інтерпретувати некоректний код, найчастіше під час виконання <code>JSON.parse('{bad json}')</code> або <code>eval()</code>.</li>
+          <li><strong><code>URIError</code> (Помилка URI):</strong> некоректне використання функцій кодування/декодування адрес: <code>decodeURIComponent('%')</code>.</li>
+        </ul>
+      </div>
+
+      <!-- Section 9 -->
+      <div class="theory-section">
+        <h2>9. Конструкція try...catch...finally</h2>
+        <p>
+          Конструкція <code>try...catch...finally</code> дозволяє безпечно «огорнути» небезпечний блок коду та забезпечити стійкість додатку (<em>Graceful Degradation</em>).
+        </p>
+
+        <h3>1. Блок <code>try</code></h3>
+        <p>Містить інструкції, які можуть призвести до помилки. Якщо сталася помилка — виконання блоку <code>try</code> негайно припиняється, і керування передається у блок <code>catch</code>.</p>
+
+        <h3>2. Блок <code>catch (error)</code></h3>
+        <p>Отримує об'єкт винятку. Основні властивості об'єкта помилки:</p>
+        <ul>
+          <li><code>error.name</code> — назва типу помилки (наприклад, <code>"TypeError"</code>, <code>"RangeError"</code>).</li>
+          <li><code>error.message</code> — текстовий опис проблеми, переданий у конструктор.</li>
+          <li><code>error.stack</code> — повний стек викликів функцій із номерами рядків (для дебагу).</li>
+        </ul>
+        <div class="theory-callout">
+          💡 <strong>Optional Catch Binding (ES2019):</strong> Якщо об'єкт помилки не потрібен, круглі дужки можна опустити: <code>try { ... } catch { return fallback; }</code>.
+        </div>
+
+        <h3>3. Блок <code>finally</code></h3>
+        <p>
+          Виконується <strong>завжди</strong>: як при успішному завершенні блоку <code>try</code>, так і після обробки помилки в <code>catch</code>. Навіть якщо всередині <code>try</code> був викликаний <code>return</code>!
+        </p>
+        <pre><code class="language-javascript">function loadData(url) {
+  let isLoading = true; // встановлюємо індикатор
+  try {
+    const data = fetchDataSync(url);
+    return data;
+  } catch (err) {
+    console.error('Збій запиту:', err.message);
+    return null;
+  } finally {
+    isLoading = false; // ГАРАНТОВАНО вимикаємо індикатор!
+  }
+}</code></pre>
+        <div class="theory-callout" style="border-left-color:var(--color-amber);">
+          ⚠️ <strong>Підводний камінь:</strong> Ніколи не пишіть оператори <code>return</code> або <code>throw</code> всередині блоку <code>finally</code>. Вони «перетирають» будь-які значення та скасовують винятки з блоків <code>try</code> та <code>catch</code>!
+        </div>
+      </div>
+
+      <!-- Section 10 -->
+      <div class="theory-section">
+        <h2>10. Генерація винятків: Ключове слово throw та кастомні класи</h2>
+        <p>
+          Оператор <code>throw</code> дозволяє генерувати власні винятки у коді (<em>Defensive Programming</em>).
+        </p>
+        <pre><code class="language-javascript">function calculateDiscount(price, percent) {
+  if (typeof price !== 'number' || price &lt; 0) {
+    throw new TypeError('Ціна має бути невідʼємним числом');
+  }
+  if (percent &lt; 0 || percent &gt; 100) {
+    throw new RangeError('Знижка повинна бути в діапазоні від 0 до 100%');
+  }
+  return price * (1 - percent / 100);
+}</code></pre>
+
+        <h3>Власні класи помилок (Custom Error Classes)</h3>
+        <p>
+          Для зручної ідентифікації бізнес-помилок створюють власні класи, успадковані від <code>Error</code>:
+        </p>
+        <pre><code class="language-javascript">class ValidationError extends Error {
+  constructor(message, field) {
+    super(message);
+    this.name = 'ValidationError';
+    this.field = field;
+  }
+}
+
+// Використання:
+throw new ValidationError('Email вже зайнятий', 'email');</code></pre>
+
+        <h3>Патерн повторного викидання (Re-throwing)</h3>
+        <p>
+          Якщо блок <code>catch</code> отримує помилку, яку він не вміє обробляти — він зобов'язаний прокинути її далі:
+        </p>
+        <pre><code class="language-javascript">try {
+  processOrder();
+} catch (err) {
+  if (err instanceof ValidationError) {
+    showUserAlert(err.message); // знайома бізнес-помилка
+  } else {
+    throw err; // невідома критична помилка — прокидаємо нагору!
+  }
+}</code></pre>
+      </div>
+
+      <!-- Section 11 -->
+      <div class="theory-section">
+        <h2>11. Золоті поради для студентів: Best Practices & Pitfalls</h2>
+        <ul>
+          <li><strong>❌ Антипатерн «Мовчазний catch» (Swallowing Errors):</strong><br>
+            Ніколи не пишіть <code>catch (err) {}</code> з порожнім тілом. Це маскує критичні баги, робить відстеження помилок неможливим і ламає поведінку всієї системи. Завжди логуйте, повертайте зрозумілий fallback або сповіщайте користувача.
+          </li>
+          <li><strong>🛡️ Принцип Fail-Fast:</strong><br>
+            Валідуйте аргументи на самому початку функції (Guard Clauses). Краще одразу викинути точний <code>TypeError</code> або <code>RangeError</code>, ніж отримати дивний математичний <code>NaN</code> чи зламаний масив десь у глибині 10-го виклику.
+          </li>
+          <li><strong>🎯 Не використовуйте винятки для звичайного розгалуження коду:</strong><br>
+            Створення об'єкта <code>Error</code> і розмотування стеку викликів — ресурсомістка операція. Для штатної перевірки умов використовуйте звичайні <code>if/else</code>.
+          </li>
+          <li><strong>⚡ Безпечний кортежний патерн [data, error]:</strong><br>
+            Замість десятків вкладених блоків <code>try/catch</code> використовуйте функції-обгортки, що повертають кортеж <code>[result, null]</code> або <code>[null, error]</code>. Це робить код чистим, лінійним і передбачуваним.
+          </li>
+        </ul>
+      </div>
+
     </div>
 
     <!-- TAB 3: MASS RUNNER -->
@@ -825,11 +963,11 @@ console.log(counter()); // 2</code></pre>
         <span style="font-size:36px; display:inline-block; margin-bottom:12px;">🧪</span>
         <h2 style="font-size:24px; font-weight:800; margin:0 0 10px 0; color:#fff;">Масовий запуск тестів (Mass Suite Runner)</h2>
         <p style="font-size:14px; color:var(--text-muted); max-width:600px; margin:0 auto 24px auto;">
-          Запустіть одночасну валідацію всіх 92 завдань курсу на реальних тестах у захищеній пісочниці для перевірки готовності.
+          Запустіть одночасну валідацію всіх 120 завдань курсу на реальних тестах у захищеній пісочниці для перевірки готовності.
         </p>
 
         <button class="btn-pill btn-pill-primary" id="startMassRunnerBtn" style="padding:12px 28px; font-size:15px;">
-          🚀 Запустити всі 92 тести
+          🚀 Запустити всі 120 тестів
         </button>
 
         <div id="massRunnerProgressWrap" style="display:none; margin-top:24px; text-align:left;">
@@ -1322,16 +1460,18 @@ console.log(counter()); // 2</code></pre>
       document.getElementById('certWelcomeBox').style.display = 'none';
       document.getElementById('certActiveBox').style.display = 'block';
 
-      // Pick 10 random tasks across 3 parts as certification ticket
+      // Pick 10 random tasks across 4 parts as certification ticket
       const p1 = ALL_TASKS.filter(t => t.moduleIdx === 1);
       const p2 = ALL_TASKS.filter(t => t.moduleIdx === 2);
       const p3 = ALL_TASKS.filter(t => t.moduleIdx === 3);
+      const p4 = ALL_TASKS.filter(t => t.moduleIdx === 4);
 
       function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
       certExamTasks = [
-        ...shuffle(p1).slice(0, 3),
-        ...shuffle(p2).slice(0, 4),
-        ...shuffle(p3).slice(0, 3)
+        ...shuffle(p1).slice(0, 2),
+        ...shuffle(p2).slice(0, 3),
+        ...shuffle(p3).slice(0, 3),
+        ...shuffle(p4).slice(0, 2)
       ];
 
       certActive = true;

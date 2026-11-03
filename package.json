@@ -1,7 +1,7 @@
 {
   "name": "js-functions-workout",
   "version": "1.0.0",
-  "description": "Практичний воркаут: Функції в JavaScript (Модуль 7) — синтаксис, області видимості, замикання, цикли, масиви та функції вищого порядку у стилі Supabase",
+  "description": "Практичний воркаут: Функції та Винятки в JavaScript (Модулі 7 і 8) — синтаксис, замикання, цикли, масиви, HOF, try...catch...finally та throw у стилі Supabase",
   "type": "module",
   "scripts": {
     "start": "vite --open",

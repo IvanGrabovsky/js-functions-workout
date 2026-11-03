@@ -21,6 +21,13 @@ export const MODULES = [
     "title": "Частина 3: Функції вищого порядку, пайплайни та бойові алгоритми",
     "shortTitle": "3. HOF, пайплайни та алгоритми",
     "desc": "First-Class Citizens, поліфіли map/filter/reduce, конвеєри pipe/compose, каррінг, мемоізація, рекурсія, ASCII-таблиці, бінарний пошук та Circuit Breaker."
+  },
+  {
+    "idx": 4,
+    "id": "04-exceptions-error-handling",
+    "title": "Частина 4: Винятки та обробка помилок (try...catch...finally, throw)",
+    "shortTitle": "4. Винятки та try...catch...finally",
+    "desc": "Що таке виняток, типи стандартних помилок (TypeError, RangeError тощо), try catch finally, оператор throw, кастомні класи помилок, defensive programming."
   }
 ];
 
@@ -2770,100 +2777,1059 @@ export const ALL_TASKS = [
         "expected": "<tag>SUPABASE</tag>"
       }
     ]
+  },
+  {
+    "id": "4.1",
+    "moduleIdx": 4,
+    "name": "safeJsonParse",
+    "title": "Безпечний парсинг JSON (try...catch): fallback значення",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію safeJsonParse(jsonString, fallback = null), яка намагається розпарсити рядок через JSON.parse(). Якщо виникає помилка синтаксису (SyntaxError) або будь-яка інша — повертає fallback значення замість аварійної зупинки програми.",
+    "reqs": [
+      "Огорніть JSON.parse(jsonString) у блок try.",
+      "У блоці catch поверніть значення fallback.",
+      "Якщо парсинг успішний — поверніть отриманий результат."
+    ],
+    "starterParams": "jsonString, fallback = null",
+    "starterBody": "// Реалізуйте безпечний парсинг JSON",
+    "tests": [
+      {
+        "expr": "safeJsonParse('{\"name\":\"Анна\",\"age\":22}')",
+        "expected": {
+          "name": "Анна",
+          "age": 22
+        }
+      },
+      {
+        "expr": "safeJsonParse('[1, 2, 3]')",
+        "expected": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "expr": "safeJsonParse('{invalid_json}', {})",
+        "expected": {}
+      },
+      {
+        "expr": "safeJsonParse('undefined', 'DEFAULT')",
+        "expected": "DEFAULT"
+      },
+      {
+        "expr": "safeJsonParse('true')",
+        "expected": true
+      }
+    ]
+  },
+  {
+    "id": "4.2",
+    "moduleIdx": 4,
+    "name": "validatePositiveNumber",
+    "title": "Генерація винятку: оператор throw та TypeError",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію validatePositiveNumber(val), яка перевіряє, чи є val числом і чи є воно строго більше за 0. Якщо ні — функція повинна викинути помилку: throw new TypeError('Значення має бути додатним числом'). Якщо валідація пройдена — повертає val.",
+    "reqs": [
+      "Перевірте: typeof val === 'number' && !Number.isNaN(val) && val > 0.",
+      "Якщо умова не виконується — викиньте TypeError з вказаним повідомленням.",
+      "Поверніть val у разі успіху."
+    ],
+    "starterParams": "val",
+    "starterBody": "// Перевірте число та згенеруйте TypeError у разі помилки",
+    "tests": [
+      {
+        "expr": "validatePositiveNumber(42)",
+        "expected": 42
+      },
+      {
+        "expr": "validatePositiveNumber(3.14)",
+        "expected": 3.14
+      },
+      {
+        "expr": "(() => { try { validatePositiveNumber(-5); return 'NO_THROW'; } catch(e) { return e instanceof TypeError ? e.message : 'WRONG_TYPE'; } })()",
+        "expected": "Значення має бути додатним числом"
+      },
+      {
+        "expr": "(() => { try { validatePositiveNumber('10'); return 'NO_THROW'; } catch(e) { return e instanceof TypeError ? e.message : 'WRONG_TYPE'; } })()",
+        "expected": "Значення має бути додатним числом"
+      },
+      {
+        "expr": "(() => { try { validatePositiveNumber(0); return 'NO_THROW'; } catch(e) { return e instanceof TypeError ? e.message : 'WRONG_TYPE'; } })()",
+        "expected": "Значення має бути додатним числом"
+      }
+    ]
+  },
+  {
+    "id": "4.3",
+    "moduleIdx": 4,
+    "name": "safeDivision",
+    "title": "Ділення з генерацією RangeError при діленні на нуль",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію safeDivision(a, b), яка повертає результат a / b. Якщо b === 0 або b === -0, функція викидає RangeError('Ділення на нуль неможливе'). Якщо a або b не є числами — викидає TypeError('Обидва аргументи мають бути числами').",
+    "reqs": [
+      "Перевірте типи аргументів (typeof number).",
+      "Перевірте ділення на нуль через b === 0.",
+      "Поверніть частку a / b."
+    ],
+    "starterParams": "a, b",
+    "starterBody": "// Перевірте вхідні дані та поверніть частку або згенеруйте помилку",
+    "tests": [
+      {
+        "expr": "safeDivision(10, 2)",
+        "expected": 5
+      },
+      {
+        "expr": "safeDivision(9, 3)",
+        "expected": 3
+      },
+      {
+        "expr": "(() => { try { safeDivision(10, 0); return 'NO_ERROR'; } catch(e) { return { name: e.name, msg: e.message }; } })()",
+        "expected": {
+          "name": "RangeError",
+          "msg": "Ділення на нуль неможливе"
+        }
+      },
+      {
+        "expr": "(() => { try { safeDivision('10', 2); return 'NO_ERROR'; } catch(e) { return { name: e.name, msg: e.message }; } })()",
+        "expected": {
+          "name": "TypeError",
+          "msg": "Обидва аргументи мають бути числами"
+        }
+      }
+    ]
+  },
+  {
+    "id": "4.4",
+    "moduleIdx": 4,
+    "name": "extractErrorInfo",
+    "title": "Анатомія об'єкта помилки (Error Object: name, message, stack)",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію extractErrorInfo(fn), яка виконує передану функцію fn(). Якщо вона виконується без помилок — повертає { success: true, result: <результат> }. Якщо виникає виняток — перехоплює його і повертає { success: false, name: err.name, message: err.message, hasStack: Boolean(err.stack) }.",
+    "reqs": [
+      "Використайте try...catch для перехоплення помилки.",
+      "Витягніть властивості name та message перехопленого об'єкта.",
+      "Перевірте наявність stack через Boolean(err && err.stack)."
+    ],
+    "starterParams": "fn",
+    "starterBody": "// Перехопіть помилку або поверніть результат виклику",
+    "tests": [
+      {
+        "expr": "extractErrorInfo(() => 100 * 2)",
+        "expected": {
+          "success": true,
+          "result": 200
+        }
+      },
+      {
+        "expr": "extractErrorInfo(() => { throw new TypeError('Невірний тип!'); })",
+        "expected": {
+          "success": false,
+          "name": "TypeError",
+          "message": "Невірний тип!",
+          "hasStack": true
+        }
+      },
+      {
+        "expr": "extractErrorInfo(() => { throw new RangeError('Поза межами!'); })",
+        "expected": {
+          "success": false,
+          "name": "RangeError",
+          "message": "Поза межами!",
+          "hasStack": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "4.5",
+    "moduleIdx": 4,
+    "name": "validateUserAge",
+    "title": "Комплексна валідація віку: диференціація TypeError та RangeError",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію validateUserAge(age), яка перевіряє вік користувача. Якщо age не є цілим числом — кидає TypeError('Вік повинен бути цілим числом'). Якщо age < 0 або age > 130 — кидає RangeError('Вік повинен бути в діапазоні від 0 до 130'). Якщо все вірно — повертає age.",
+    "reqs": [
+      "Перевірка на ціле число: Number.isInteger(age).",
+      "Перевірка діапазону: age >= 0 && age <= 130.",
+      "Викидання відповідних типів помилок."
+    ],
+    "starterParams": "age",
+    "starterBody": "// Валідуйте вік користувача з диференціацією помилок",
+    "tests": [
+      {
+        "expr": "validateUserAge(25)",
+        "expected": 25
+      },
+      {
+        "expr": "validateUserAge(0)",
+        "expected": 0
+      },
+      {
+        "expr": "validateUserAge(130)",
+        "expected": 130
+      },
+      {
+        "expr": "(() => { try { validateUserAge(25.5); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "TypeError"
+      },
+      {
+        "expr": "(() => { try { validateUserAge(-1); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "RangeError"
+      },
+      {
+        "expr": "(() => { try { validateUserAge(131); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "RangeError"
+      },
+      {
+        "expr": "(() => { try { validateUserAge('20'); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "TypeError"
+      }
+    ]
+  },
+  {
+    "id": "4.6",
+    "moduleIdx": 4,
+    "name": "safeUriDecode",
+    "title": "Обробка вбудованої помилки URIError",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію safeUriDecode(encodedStr), яка викликає decodeURIComponent(encodedStr). Якщо рядок містить некоректну послідовність байтів (що викликає URIError) — функція перехоплює помилку і повертає рядок 'INVALID_URI'.",
+    "reqs": [
+      "Використайте try...catch навколо decodeURIComponent.",
+      "Якщо сталася помилка — поверніть 'INVALID_URI'.",
+      "Якщо все гаразд — поверніть декодований рядок."
+    ],
+    "starterParams": "encodedStr",
+    "starterBody": "// Декодуйте URI або поверніть 'INVALID_URI'",
+    "tests": [
+      {
+        "expr": "safeUriDecode('Hello%20World%21')",
+        "expected": "Hello World!"
+      },
+      {
+        "expr": "safeUriDecode('%D0%9A%D0%B8%D1%97%D0%B2')",
+        "expected": "Київ"
+      },
+      {
+        "expr": "safeUriDecode('%E0%A4%A')",
+        "expected": "INVALID_URI"
+      },
+      {
+        "expr": "safeUriDecode('%')",
+        "expected": "INVALID_URI"
+      }
+    ]
+  },
+  {
+    "id": "4.7",
+    "moduleIdx": 4,
+    "name": "executeWithCleanup",
+    "title": "Блок finally: Гарантоване виконання очищення ресурсів",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію executeWithCleanup(actionFn, cleanupFn), яка виконує actionFn() у блоці try, і ГАРАНТОВАНО викликає cleanupFn() у блоці finally, незалежно від того, успішно завершилася actionFn чи викинула помилку. Якщо actionFn викинула помилку — вона має бути прокинута далі після cleanup.",
+    "reqs": [
+      "Організуйте блок try...finally (без придушення помилки в catch).",
+      "Зафіксуйте повернення результату з try.",
+      "Переконайтеся, що cleanupFn() виконується завжди."
+    ],
+    "starterParams": "actionFn, cleanupFn",
+    "starterBody": "// Забезпечте гарантоване очищення ресурсів",
+    "tests": [
+      {
+        "expr": "(() => { let cleaned = false; const res = executeWithCleanup(() => 42, () => { cleaned = true; }); return { res, cleaned }; })()",
+        "expected": {
+          "res": 42,
+          "cleaned": true
+        }
+      },
+      {
+        "expr": "(() => { let cleaned = false; let errorCaught = false; try { executeWithCleanup(() => { throw new Error('fail'); }, () => { cleaned = true; }); } catch(e) { errorCaught = true; } return { cleaned, errorCaught }; })()",
+        "expected": {
+          "cleaned": true,
+          "errorCaught": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "4.8",
+    "moduleIdx": 4,
+    "name": "validateStringLength",
+    "title": "Контракт функції: Захисне програмування рядків (Defensive Programming)",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію validateStringLength(str, min, max), яка перевіряє довжину рядка після trim(). Якщо str не є рядком — кидає TypeError('Параметр повинен бути рядком'). Якщо min > max — кидає RangeError('min не може бути більшим за max'). Якщо довжина < min або > max — кидає RangeError('Довжина поза дозволеним діапазоном'). Повертає очищений рядок.",
+    "reqs": [
+      "Перевірте typeof str === 'string'.",
+      "Очистіть через str.trim().",
+      "Перевірте коректність меж min та max."
+    ],
+    "starterParams": "str, min = 1, max = 100",
+    "starterBody": "// Перевірте довжину рядка згідно контракту",
+    "tests": [
+      {
+        "expr": "validateStringLength('   admin   ', 3, 10)",
+        "expected": "admin"
+      },
+      {
+        "expr": "(() => { try { validateStringLength(12345, 1, 10); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "TypeError"
+      },
+      {
+        "expr": "(() => { try { validateStringLength('ab', 5, 10); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "RangeError"
+      },
+      {
+        "expr": "(() => { try { validateStringLength('hello', 10, 5); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "RangeError"
+      }
+    ]
+  },
+  {
+    "id": "4.9",
+    "moduleIdx": 4,
+    "name": "createCustomError",
+    "title": "Створення спеціалізованого об'єкта помилки з метаданими",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію createCustomError(name, message, code = 500), яка створює новий об'єкт помилки new Error(message), змінює його властивість name на передане значення, додає властивість code і повертає цей об'єкт помилки (не викидаючи його через throw).",
+    "reqs": [
+      "Створіть const err = new Error(message).",
+      "Встановіть err.name = name.",
+      "Встановіть err.code = code і поверніть err."
+    ],
+    "starterParams": "name, message, code = 500",
+    "starterBody": "// Створіть та поверніть налаштований об'єкт Error",
+    "tests": [
+      {
+        "expr": "(() => { const e = createCustomError('DatabaseError', 'Connection timeout', 504); return { isError: e instanceof Error, name: e.name, msg: e.message, code: e.code }; })()",
+        "expected": {
+          "isError": true,
+          "name": "DatabaseError",
+          "msg": "Connection timeout",
+          "code": 504
+        }
+      }
+    ]
+  },
+  {
+    "id": "4.10",
+    "moduleIdx": 4,
+    "name": "createValidationErrorClass",
+    "title": "Кастомний клас помилки: Наслідування від Error (class ValidationError)",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію createValidationErrorClass(), яка оголошує і повертає клас ValidationError, успадкований від Error. Конструктор класу приймає message та field, викликає super(message), встановлює this.name = 'ValidationError' та this.field = field.",
+    "reqs": [
+      "Оголосіть class ValidationError extends Error { ... }.",
+      "У конструкторі викличте super(message).",
+      "Встановіть this.name = 'ValidationError' та this.field = field.",
+      "Поверніть сам клас."
+    ],
+    "starterParams": "",
+    "starterBody": "// Оголосіть та поверніть клас ValidationError",
+    "tests": [
+      {
+        "expr": "(() => { const Cls = createValidationErrorClass(); const err = new Cls('Імʼя занадто коротке', 'username'); return { isErr: err instanceof Error, isCustom: err instanceof Cls, name: err.name, msg: err.message, field: err.field }; })()",
+        "expected": {
+          "isErr": true,
+          "isCustom": true,
+          "name": "ValidationError",
+          "msg": "Імʼя занадто коротке",
+          "field": "username"
+        }
+      }
+    ]
+  },
+  {
+    "id": "4.11",
+    "moduleIdx": 4,
+    "name": "parseUserRecord",
+    "title": "Синтез: Рядки + Винятки. Парсинг рядка користувача з валідацією",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію parseUserRecord(csvLine), яка парсить рядок формату 'id,name,role'. Якщо csvLine не є рядком або після розбивки через кому не містить рівно 3 непорожні частини — функція кидає Error('Невірний формат запису: очікується id,name,role'). Повертає об'єкт { id: Number(id), name, role }.",
+    "reqs": [
+      "Перевірте typeof csvLine === 'string'.",
+      "Розбийте рядок на частини за комою та очистіть кожну частину через trim().",
+      "Якщо кількість частин !== 3 або будь-яка з них порожня — викиньте Error.",
+      "Поверніть об'єкт { id, name, role }."
+    ],
+    "starterParams": "csvLine",
+    "starterBody": "// Розпарсіть рядок з перевіркою та генерацією помилки",
+    "tests": [
+      {
+        "expr": "parseUserRecord('101,Олена,admin')",
+        "expected": {
+          "id": 101,
+          "name": "Олена",
+          "role": "admin"
+        }
+      },
+      {
+        "expr": "parseUserRecord(' 202 ,  Максим  , user ')",
+        "expected": {
+          "id": 202,
+          "name": "Максим",
+          "role": "user"
+        }
+      },
+      {
+        "expr": "(() => { try { parseUserRecord('bad,record'); return 'OK'; } catch(e) { return e.message; } })()",
+        "expected": "Невірний формат запису: очікується id,name,role"
+      },
+      {
+        "expr": "(() => { try { parseUserRecord('abc,Олег,moderator'); return 'OK'; } catch(e) { return e.message; } })()",
+        "expected": "Невірний id: очікується число"
+      }
+    ]
+  },
+  {
+    "id": "4.12",
+    "moduleIdx": 4,
+    "name": "safeArrayAccess",
+    "title": "Синтез: Масиви + RangeError. Безпечний доступ за індексом",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію safeArrayAccess(arr, index), яка перевіряє переданий масив та індекс. Якщо arr не є масивом — кидає TypeError('Очікується масив'). Якщо index не є цілим числом або виходить за межі [0, arr.length - 1] — кидає RangeError(`Індекс ${index} поза межами масиву`). Повертає arr[index].",
+    "reqs": [
+      "Перевірте Array.isArray(arr).",
+      "Перевірте ціле число та діапазон 0 <= index < arr.length.",
+      "Поверніть елемент."
+    ],
+    "starterParams": "arr, index",
+    "starterBody": "// Перевірте межі індексу та поверніть елемент або згенеруйте RangeError",
+    "tests": [
+      {
+        "expr": "safeArrayAccess(['яблуко', 'банан', 'груша'], 1)",
+        "expected": "банан"
+      },
+      {
+        "expr": "safeArrayAccess([10, 20, 30], 0)",
+        "expected": 10
+      },
+      {
+        "expr": "(() => { try { safeArrayAccess([1, 2], 5); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "RangeError"
+      },
+      {
+        "expr": "(() => { try { safeArrayAccess('not-array', 0); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "TypeError"
+      }
+    ]
+  },
+  {
+    "id": "4.13",
+    "moduleIdx": 4,
+    "name": "rethrowSpecific",
+    "title": "Патерн Re-throwing: Вибіркове перехоплення та прокидання винятків",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію rethrowSpecific(fn), яка викликає fn() у try...catch. Якщо помилка є екземпляром TypeError — функція обробляє її та повертає рядок 'HANDLED_TYPE_ERROR: ' + err.message. Якщо помилка іншого типу (наприклад, RangeError чи SyntaxError) — вона повторно викидається далі через throw err.",
+    "reqs": [
+      "Перевірте: err instanceof TypeError.",
+      "Якщо так — поверніть статус 'HANDLED_TYPE_ERROR: ...'.",
+      "Якщо ні — здійсніть повторне викидання: throw err."
+    ],
+    "starterParams": "fn",
+    "starterBody": "// Обробіть лише TypeError, а інші типи викиньте далі",
+    "tests": [
+      {
+        "expr": "rethrowSpecific(() => 'all good')",
+        "expected": "all good"
+      },
+      {
+        "expr": "rethrowSpecific(() => { throw new TypeError('Wrong argument'); })",
+        "expected": "HANDLED_TYPE_ERROR: Wrong argument"
+      },
+      {
+        "expr": "(() => { try { rethrowSpecific(() => { throw new RangeError('Out of bounds'); }); return 'FAIL'; } catch(e) { return e.name; } })()",
+        "expected": "RangeError"
+      }
+    ]
+  },
+  {
+    "id": "4.14",
+    "moduleIdx": 4,
+    "name": "batchProcessWithErrors",
+    "title": "Синтез: Цикли + Масиви + Винятки. Пакетна обробка без зупинки",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію batchProcessWithErrors(items, processor), яка в циклі проходить по масиву items і викликає processor(item) для кожного елемента. Якщо виникає помилка — вона фіксується, але цикл не зупиняється. Поверніть { successes: [...], errors: [{ item, error }] }.",
+    "reqs": [
+      "Ініціалізуйте масиви successes та errors.",
+      "Для кожного елемента використайте try...catch навколо processor(item).",
+      "У разі успіху додайте результат у successes, у разі збою — запис у errors."
+    ],
+    "starterParams": "items, processor",
+    "starterBody": "// Обробіть елементи масиву із накопиченням результатів і помилок",
+    "tests": [
+      {
+        "expr": "batchProcessWithErrors([2, -4, 6, 0, -8], n => { if (n < 0) throw new Error('Відʼємне число!'); return n * 10; })",
+        "expected": {
+          "successes": [
+            20,
+            60,
+            0
+          ],
+          "errors": [
+            {
+              "item": -4,
+              "error": "Відʼємне число!"
+            },
+            {
+              "item": -8,
+              "error": "Відʼємне число!"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "4.15",
+    "moduleIdx": 4,
+    "name": "safeMathEvaluate",
+    "title": "Безпечний мікро-калькулятор рядкових виразів",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію safeMathEvaluate(exprStr), яка обчислює простий вираз формату 'A + B', 'A - B', 'A * B', 'A / B'. Якщо рядок некоректний — кидає SyntaxError('Невірний вираз'). При діленні на 0 — кидає RangeError('Ділення на нуль'). Повертає числове значення результату.",
+    "reqs": [
+      "Розбийте рядок на 3 частини через пробіл або регулярний вираз.",
+      "Перевірте, чи операнди є валідними числами.",
+      "Обробіть операції +, -, *, / та перевірте ділення на 0."
+    ],
+    "starterParams": "exprStr",
+    "starterBody": "// Обчисліть вираз з перевіркою синтаксису та ділення на нуль",
+    "tests": [
+      {
+        "expr": "safeMathEvaluate('12 + 8')",
+        "expected": 20
+      },
+      {
+        "expr": "safeMathEvaluate('50 - 15')",
+        "expected": 35
+      },
+      {
+        "expr": "safeMathEvaluate('6 * 7')",
+        "expected": 42
+      },
+      {
+        "expr": "safeMathEvaluate('100 / 4')",
+        "expected": 25
+      },
+      {
+        "expr": "(() => { try { safeMathEvaluate('10 / 0'); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "RangeError"
+      },
+      {
+        "expr": "(() => { try { safeMathEvaluate('invalid string'); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "SyntaxError"
+      }
+    ]
+  },
+  {
+    "id": "4.16",
+    "moduleIdx": 4,
+    "name": "runWithLoadingState",
+    "title": "Патерн керування станом (Loading Flag) з блоком finally",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію runWithLoadingState(stateObj, taskFn), яка встановлює stateObj.isLoading = true, виконує taskFn(), і обов'язково у блоці finally скидає stateObj.isLoading = false. Повертає результат taskFn() або прокидає помилку далі.",
+    "reqs": [
+      "Встановіть stateObj.isLoading = true.",
+      "У блоці try викличте taskFn().",
+      "У блоці finally встановіть stateObj.isLoading = false."
+    ],
+    "starterParams": "stateObj, taskFn",
+    "starterBody": "// Забезпечте скидання прапорця isLoading у finally",
+    "tests": [
+      {
+        "expr": "(() => { const state = { isLoading: false }; const val = runWithLoadingState(state, () => { if (!state.isLoading) throw new Error('Not loading!'); return 777; }); return { val, finalLoading: state.isLoading }; })()",
+        "expected": {
+          "val": 777,
+          "finalLoading": false
+        }
+      },
+      {
+        "expr": "(() => { const state = { isLoading: false }; let errCaught = false; try { runWithLoadingState(state, () => { throw new Error('fail'); }); } catch(e) { errCaught = true; } return { errCaught, finalLoading: state.isLoading }; })()",
+        "expected": {
+          "errCaught": true,
+          "finalLoading": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "4.17",
+    "moduleIdx": 4,
+    "name": "retryOperation",
+    "title": "Патерн повторних спроб (Retry Pattern з лічильником)",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію retryOperation(fn, maxRetries = 3), яка намагається виконати fn(). Якщо виникає помилка, функція повторює виклик у циклі до maxRetries разів. Якщо всі спроби вичерпано — викидає останню отриману помилку. Повертає результат при першому успіху.",
+    "reqs": [
+      "Організуйте цикл for або while до maxRetries.",
+      "Огорніть виклик fn() у try...catch.",
+      "Збережіть останню помилку lastError і викиньте її, якщо спроби вичерпано."
+    ],
+    "starterParams": "fn, maxRetries = 3",
+    "starterBody": "// Повторюйте спроби виконання fn() до maxRetries разів",
+    "tests": [
+      {
+        "expr": "(() => { let attempts = 0; const res = retryOperation(() => { attempts++; if (attempts < 3) throw new Error('Temporary failure'); return 'Success on attempt ' + attempts; }, 5); return { res, attempts }; })()",
+        "expected": {
+          "res": "Success on attempt 3",
+          "attempts": 3
+        }
+      },
+      {
+        "expr": "(() => { try { retryOperation(() => { throw new Error('Permanent crash'); }, 3); return 'NO_THROW'; } catch(e) { return e.message; } })()",
+        "expected": "Permanent crash"
+      }
+    ]
+  },
+  {
+    "id": "4.18",
+    "moduleIdx": 4,
+    "name": "validateEmail",
+    "title": "Синтез: Рядки + Валідація email з генерацією винятків",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію validateEmail(email), яка перевіряє адресу ел. пошти. Якщо email не рядок — кидає TypeError('Email має бути рядком'). Якщо після trim() не містить символ '@' або крапку після '@' — кидає Error('Некоректний формат email'). Повертає очищений рядок у нижньому регістрі.",
+    "reqs": [
+      "Перевірте typeof email === 'string'.",
+      "Очистіть через trim().toLowerCase().",
+      "Перевірте наявність '@' та '.' після '@'.",
+      "Поверніть валідний email."
+    ],
+    "starterParams": "email",
+    "starterBody": "// Перевірте коректність email і поверніть його або згенеруйте помилку",
+    "tests": [
+      {
+        "expr": "validateEmail('  STUDENT@Camp.edu.ua  ')",
+        "expected": "student@camp.edu.ua"
+      },
+      {
+        "expr": "validateEmail('test.dev@company.com')",
+        "expected": "test.dev@company.com"
+      },
+      {
+        "expr": "(() => { try { validateEmail('plainaddress'); return 'OK'; } catch(e) { return e.message; } })()",
+        "expected": "Некоректний формат email"
+      },
+      {
+        "expr": "(() => { try { validateEmail(12345); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "TypeError"
+      }
+    ]
+  },
+  {
+    "id": "4.19",
+    "moduleIdx": 4,
+    "name": "assertCondition",
+    "title": "Універсальна функція перевірки тверджень (Assert Helper)",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію assertCondition(condition, message = 'Assertion failed', ErrorConstructor = Error), яка перевіряє умову condition. Якщо умова хибна (falsy) — генерує виняток new ErrorConstructor(message). Якщо істинна — повертає true.",
+    "reqs": [
+      "Перевірте !condition.",
+      "Якщо хибна — throw new ErrorConstructor(message).",
+      "Якщо істинна — return true."
+    ],
+    "starterParams": "condition, message = 'Assertion failed', ErrorConstructor = Error",
+    "starterBody": "// Перевірте умову або згенеруйте заданий тип помилки",
+    "tests": [
+      {
+        "expr": "assertCondition(5 > 2)",
+        "expected": true
+      },
+      {
+        "expr": "(() => { try { assertCondition(false, 'Дані відсутні', TypeError); return 'NO_THROW'; } catch(e) { return { name: e.name, msg: e.message }; } })()",
+        "expected": {
+          "name": "TypeError",
+          "msg": "Дані відсутні"
+        }
+      }
+    ]
+  },
+  {
+    "id": "4.20",
+    "moduleIdx": 4,
+    "name": "formatErrorLog",
+    "title": "Форматування діагностичного логу помилки у рядок",
+    "level": "Базовий рівень",
+    "goal": "Напишіть функцію formatErrorLog(error, context = 'Core'), яка приймає об'єкт помилки та рядок контексту, і повертає рядок формату: '[ERROR:{context}] {error.name}: {error.message}'. Якщо error не є об'єктом — використовує 'UnknownError' та текстове представлення помилки.",
+    "reqs": [
+      "Визначте name помилки (або 'UnknownError').",
+      "Визначте message помилки (або String(error)).",
+      "Поверніть відформатований рядок логу."
+    ],
+    "starterParams": "error, context = 'Core'",
+    "starterBody": "// Сформуйте стандартизований рядок логу",
+    "tests": [
+      {
+        "expr": "formatErrorLog(new TypeError('Invalid token'), 'Auth')",
+        "expected": "[ERROR:Auth] TypeError: Invalid token"
+      },
+      {
+        "expr": "formatErrorLog(new RangeError('Out of bounds'), 'DataGrid')",
+        "expected": "[ERROR:DataGrid] RangeError: Out of bounds"
+      },
+      {
+        "expr": "formatErrorLog('Plain text crash')",
+        "expected": "[ERROR:Core] UnknownError: Plain text crash"
+      }
+    ]
+  },
+  {
+    "id": "4.21",
+    "moduleIdx": 4,
+    "name": "safeDeepProperty",
+    "title": "Безпечний доступ до глибоких властивостей об'єкта (Optional Chaining polyfill)",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію safeDeepProperty(obj, pathString, fallback = undefined), яка приймає об'єкт та рядок шляху через крапку (наприклад, 'user.profile.address.city'). Використовує цикл або ланцюжок доступу. Якщо на будь-якому рівні виникає TypeError або властивість відсутня — повертає fallback.",
+    "reqs": [
+      "Огорніть пошук у try...catch.",
+      "Розбийте pathString на сегменти через split('.').",
+      "Послідовно перейдіть по сегментах.",
+      "Поверніть fallback при помилці чи відсутності значення."
+    ],
+    "starterParams": "obj, pathString, fallback = undefined",
+    "starterBody": "// Безпечно отримайте вкладену властивість",
+    "tests": [
+      {
+        "expr": "safeDeepProperty({ user: { profile: { name: 'Дарина' } } }, 'user.profile.name')",
+        "expected": "Дарина"
+      },
+      {
+        "expr": "safeDeepProperty({ user: null }, 'user.profile.name', 'NO_PROFILE')",
+        "expected": "NO_PROFILE"
+      },
+      {
+        "expr": "safeDeepProperty({}, 'a.b.c.d', 'N/A')",
+        "expected": "N/A"
+      },
+      {
+        "expr": "safeDeepProperty(null, 'foo.bar', 0)",
+        "expected": 0
+      }
+    ]
+  },
+  {
+    "id": "4.22",
+    "moduleIdx": 4,
+    "name": "createHttpErrorClass",
+    "title": "Кастомний клас HttpError зі статус-кодом",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію createHttpErrorClass(), яка оголошує і повертає клас HttpError, успадкований від Error. Конструктор приймає statusCode, message. Встановлює this.name = 'HttpError', this.statusCode = statusCode.",
+    "reqs": [
+      "Клас наслідує Error.",
+      "super(message) ініціалізує повідомлення.",
+      "Встановіть this.name = 'HttpError' та this.statusCode = statusCode."
+    ],
+    "starterParams": "",
+    "starterBody": "// Створіть та поверніть клас HttpError",
+    "tests": [
+      {
+        "expr": "(() => { const HttpError = createHttpErrorClass(); const err = new HttpError(404, 'Користувача не знайдено'); return { isErr: err instanceof Error, name: err.name, code: err.statusCode, msg: err.message }; })()",
+        "expected": {
+          "isErr": true,
+          "name": "HttpError",
+          "code": 404,
+          "msg": "Користувача не знайдено"
+        }
+      },
+      {
+        "expr": "(() => { const HttpError = createHttpErrorClass(); const err = new HttpError(500, 'Внутрішня помилка сервера'); return err.statusCode; })()",
+        "expected": 500
+      }
+    ]
+  },
+  {
+    "id": "4.23",
+    "moduleIdx": 4,
+    "name": "filterValidEntries",
+    "title": "Синтез: Масиви + Валідатор. Фільтрація елементів за безпечним предикатом",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію filterValidEntries(dataArray, validatorFn), яка приймає масив елементів та функцію-валідатор. Валідатор або повертає true, або викидає виняток при невідповідності. Функція повертає новий масив лише з тих елементів, де validatorFn не викинув помилку і повернув truthy значення.",
+    "reqs": [
+      "Пройдіть по dataArray через цикл або filter.",
+      "Огорніть validatorFn(item) у try...catch.",
+      "Залиште лише елементи, які успішно пройшли валідацію."
+    ],
+    "starterParams": "dataArray, validatorFn",
+    "starterBody": "// Відфільтруйте елементи, які не викидають помилок у валідаторі",
+    "tests": [
+      {
+        "expr": "filterValidEntries(['hello', '', 'world', 123, 'supabase'], val => { if (typeof val !== 'string') throw new TypeError('not string'); if (!val.length) throw new Error('empty'); return true; })",
+        "expected": [
+          "hello",
+          "world",
+          "supabase"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "4.24",
+    "moduleIdx": 4,
+    "name": "chainWithCatch",
+    "title": "Конвеєр функцій із фіксацією кроку аварії (Pipelines with error tracing)",
+    "level": "Просунутий рівень",
+    "goal": "Напишіть функцію chainWithCatch(initialValue, ...fns), яка послідовно пропускає значення крізь масив функцій. Якщо на якомусь кроці fns[i] викидає помилку — виконання зупиняється і повертається { success: false, failedAtStep: i, error: err.message }. Якщо всі кроки успішні — повертає { success: true, value }.",
+    "reqs": [
+      "Зберігайте поточне значення curr = initialValue.",
+      "Проходьте по функціях за індексом i від 0 до fns.length - 1.",
+      "При виникненні винятку негайно поверніть статус помилки з індексом кроку."
+    ],
+    "starterParams": "initialValue, ...fns",
+    "starterBody": "// Реалізуйте захищений ланцюжок викликів",
+    "tests": [
+      {
+        "expr": "chainWithCatch(10, x => x + 5, x => x * 2, x => x - 10)",
+        "expected": {
+          "success": true,
+          "value": 20
+        }
+      },
+      {
+        "expr": "chainWithCatch('test', s => s.toUpperCase(), s => { throw new Error('Format failed'); }, s => s + '!')",
+        "expected": {
+          "success": false,
+          "failedAtStep": 1,
+          "error": "Format failed"
+        }
+      }
+    ]
+  },
+  {
+    "id": "4.25",
+    "moduleIdx": 4,
+    "name": "safeArrayTransform",
+    "title": "Синтез: Масиви + Цикли. Трансформація з заміщенням збійних елементів",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію safeArrayTransform(arr, transformFn, defaultVal = null), яка трансформує кожен елемент масиву arr за допомогою transformFn. Якщо для якогось елемента transformFn викидає помилку — на його місце записується defaultVal.",
+    "reqs": [
+      "Створіть результуючий масив.",
+      "Огорніть transformFn(arr[i], i) у try...catch.",
+      "Поверніть трансформований масив однакової довжини з arr."
+    ],
+    "starterParams": "arr, transformFn, defaultVal = null",
+    "starterBody": "// Трансформуйте елементи, підставляючи defaultVal при збої",
+    "tests": [
+      {
+        "expr": "safeArrayTransform(['10', '20', 'invalid', '40'], s => { const n = Number(s); if (Number.isNaN(n) || s === 'invalid') throw new Error('NaN'); return n; }, 0)",
+        "expected": [
+          10,
+          20,
+          0,
+          40
+        ]
+      }
+    ]
+  },
+  {
+    "id": "4.26",
+    "moduleIdx": 4,
+    "name": "validateMatrixSquare",
+    "title": "Синтез: 2D Матриці + Вкладені цикли + Винятки",
+    "level": "Середній рівень",
+    "goal": "Напишіть функцію validateMatrixSquare(matrix), яка перевіряє, чи є matrix коректною квадратною матрицею (N x N) чисел. Якщо matrix не є масивом масивів — кидає TypeError('Матриця повинна бути двовимірним масивом'). Якщо кількість стовпців хоча б в одному рядку не дорівнює кількості рядків — кидає RangeError('Матриця повинна бути квадратною N x N'). Якщо всі елементи числа — повертає розмірність N.",
+    "reqs": [
+      "Перевірте, що matrix є непорожнім масивом і кожен елемент — масив.",
+      "Перевірте довжину кожного рядка (row.length === matrix.length).",
+      "Перевірте, що всі комірки — валідні числа.",
+      "Поверніть розмірність N."
+    ],
+    "starterParams": "matrix",
+    "starterBody": "// Валідуйте квадратну матрицю та поверніть її розмірність N",
+    "tests": [
+      {
+        "expr": "validateMatrixSquare([[1, 2], [3, 4]])",
+        "expected": 2
+      },
+      {
+        "expr": "validateMatrixSquare([[1, 2, 3], [4, 5, 6], [7, 8, 9]])",
+        "expected": 3
+      },
+      {
+        "expr": "(() => { try { validateMatrixSquare([[1, 2, 3], [4, 5]]); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "RangeError"
+      },
+      {
+        "expr": "(() => { try { validateMatrixSquare([[1, 'bad'], [3, 4]]); return 'OK'; } catch(e) { return e.name; } })()",
+        "expected": "TypeError"
+      }
+    ]
+  },
+  {
+    "id": "4.27",
+    "moduleIdx": 4,
+    "name": "createSafeHandler",
+    "title": "Патерн Golang/Rust: Кортежне повернення результату [data, error]",
+    "level": "Просунутий рівень",
+    "goal": "Напишіть функцію createSafeHandler(fn), яка огортає синхронну функцію fn і повертає нову функцію (...args). Ця функція ніколи не викидає винятків назовні, а повертає масив із двох елементів: у разі успіху — [result, null], а у разі збою — [null, error].",
+    "reqs": [
+      "Поверніть функцію (...args).",
+      "У try викличте fn(...args) і поверніть [result, null].",
+      "У catch поверніть [null, err]."
+    ],
+    "starterParams": "fn",
+    "starterBody": "// Реалізуйте безпечну обгортку з кортежем [data, error]",
+    "tests": [
+      {
+        "expr": "(() => { const safeDiv = createSafeHandler((a, b) => { if (b === 0) throw new Error('Zero division'); return a / b; }); const [d1, e1] = safeDiv(10, 2); const [d2, e2] = safeDiv(10, 0); return { s1: d1, err1: e1, s2: d2, err2Msg: e2.message }; })()",
+        "expected": {
+          "s1": 5,
+          "err1": null,
+          "s2": null,
+          "err2Msg": "Zero division"
+        }
+      }
+    ]
+  },
+  {
+    "id": "4.28",
+    "moduleIdx": 4,
+    "name": "parseConfigFile",
+    "title": "Комплексний парсер конфігураційних рядків із зазначенням рядка збою",
+    "level": "Просунутий рівень",
+    "goal": "Напишіть функцію parseConfigFile(rawConfig), яка парсить багаторядковий текст формату KEY=VALUE. Пропускає порожні рядки та рядки, що починаються з '#'. Якщо рядок не містить знака '=', функція кидає SyntaxError(`Помилка синтаксису в рядку ${lineNum}: відсутній знак '='`). Повертає об'єкт ключів і значень.",
+    "reqs": [
+      "Розбийте рядок на лінії через split('\\n').",
+      "Відслідковуйте номер рядка lineNum (1-indexed).",
+      "Пропускайте коментарі '#' та порожні рядки.",
+      "При відсутності '=' викиньте SyntaxError із зазначенням номера рядка.",
+      "Поверніть об'єкт ключ-значення."
+    ],
+    "starterParams": "rawConfig",
+    "starterBody": "// Розпарсіть конфіг із детальною діагностикою помилок синтаксису",
+    "tests": [
+      {
+        "expr": "parseConfigFile('# Коментар\\nHOST=localhost\\nPORT=8080\\n\\nDEBUG=true')",
+        "expected": {
+          "HOST": "localhost",
+          "PORT": "8080",
+          "DEBUG": "true"
+        }
+      },
+      {
+        "expr": "(() => { try { parseConfigFile('VALID=true\\nBROKEN_LINE\\nOTHER=1'); return 'OK'; } catch(e) { return { name: e.name, msg: e.message }; } })()",
+        "expected": {
+          "name": "SyntaxError",
+          "msg": "Помилка синтаксису в рядку 2: відсутній знак '='"
+        }
+      }
+    ]
   }
 ];
 
 export const ENCRYPTED_SOLUTIONS = {
-  "1.1": "cd0c734d2bb71fcd101bc733:0657ee0d66893a71ee7223dbd153ad17:ba43399a5a6949944d1ecebbd2cd3666755f72d2f74f9a470e050cec577c9af3e2fff2b4869441f095abe1869739b035774030c8a4f4d7f5ebcf9e00357cd795aea39135c8ccbc69bc4a715cff54f2af32792487f9f038b74e3e21b2d92ada90d1c53956353eea63b3239e31c45eb69da01579e42d5b8b74a7020e4f9021dc446b958fd129",
-  "1.2": "a257acae3055498be874c928:6e62fa6ccd1e3969f7ce33e80ce67f55:dd6b71449484e518a7c3a18f5bf7451d36321adacdb481d7c67010d886548dbf436109ac26f050c70b91eaf1a95384e9e38d0129b41055aeff1fc96e06c86f6a52f8b3e3e0317ac8a12e6389bb12e8fe44af36ef48ae87d0de3fecbe4c921bb0a3ea1ad815becac8673bc6950ee1ac7f3d04a0f9f1ea2725613ed311cf82270652e2674cc9dfc3031cd85018327f4e2e11761f037a0b526a8e9cdce1c63a8408a02785d3dee4f3a3b7ee72",
-  "1.3": "4237379dcd83d8573091bb22:3828e962e554741b2a00e4f1ac1d97dc:3966fcf1a3797922cb005a8865",
-  "1.4": "f8c59705b64544aacde27d3e:2acab66644685ae05d6f7b9bfbe859c6:4ad80a09253909967ec808985e",
-  "1.5": "8a1ffc254695a85479326f68:ef6c09e510d4e0d9a35676f6b709a780:7eb6eaa44304c547c7f33ff8b7c062bfd34ee8b00685e350160a352d65faab80a148554822f05f385f01c5de85609d23b5d977de3b5b700cd96b9ff11d10722478d8f54bbff6dd0bd98b42abb951fa33a41c43639c0bc573444a67152b3664e610d4e2058ed9e8a8e8638b8b00eb4a0786011e3eb4fca3",
-  "1.6": "0a7fd78a218624af6c63b972:f265ee11ec89ec672bc96dacb8306d9c:7bc4448843912e6634bbb95a1838d2dbc18a14739780bca6dbb555b471b863edb61a326b0ba7749cef9e31f3f6d2320ec2087f8e37ca3cf40a901536faa1d5d7c7fdce767824fdf22315b6b8293417bb0264e016ba890efeb28948c1e6e26e7510614e0371eaff920b6f7bdb90d54e748de2208721c7c3a5edc60a64ce0e41c18a1a0e8c57d0b007648d594da159cdc56f71de0429f1a198f5dc576da691af121c62f0c0533bcf4e24f0c84818eb25331a8b5b52eef0cd2f06d474c64695457ee8191627ccc5b64762f1df9bc0361c67698abb5377b8d68a1ed1227d1cebdeb3ad92f4c2",
-  "1.7": "f0312cd6c4c6161c0ed8d3fd:f668f1ddd3581b3daf7e36ecdbfc1ac9:b8e6cfd7a712097df617f30811be205ee24d00e552237dacdb1aaeca486f873355e4add41732dd48b0637dc07ed3fe6f7d79f38c49474e20373795d9091f8bd13472bab4dd2477b69352fb2196a8af72e5d1b6f9e533a8b48d50f4d0739b63f39a0302a7ef2e90b9ab48144a1906bfc276b3528b0ee8b0d7912c5844b3a4",
-  "1.8": "ca4b3d29d40d2fc157616fea:4e943002d8a7397ead150c9ba777117a:4b4f792f4e43ce08149c304dd40558bad9675b5e59639ba3833f3daffcf58b06ad87ae57c86cdf5bcc2441dca763efaedd201fa8b19b815fdac2a05302cb76d63e6eff277ac4b4335eaea671b78d02de6702bef09b491e5739716401d1c98f64c59f",
-  "1.9": "d43d59b4ccf7b7f51ff12433:348f06d85b0a8f3dc49de44bc2fc3176:5d0bccbda0e08458cd3563d96bbd3649cfd2eff48e58f66a47e81aa8ab6825e3c5c1f919d390422eb2bb4a45ce7a35c441fe82625cd1ad461c1a12fcac4a794181f3e61c523bdf8e5a6dcaf667781a4d2d34e3411a333775a12a779b736cf35991091ec9bd327a3d711ea188df484f287457eec7155a44111cc2642e0df7e7fb64b89b7b5d73624e9cfa01b36bbd5b1956081de32efe2d3dfa8851999013ade9ad98d37defaa061006e6e616edf6371ca6dde51e6a35aa",
-  "1.10": "831f79ed3c1873b4bb30002f:b9a946b48cd8bd62339b2c34e8373dc7:54d5c61f206c2afce50c23224ceacc0ceb57442ac7304d26434dd0bb5fc05c824298a03ca9f9f0289d93fe",
-  "1.11": "10b7fbaf2a321c145c1b99e7:aae2cb067e994b67f5e8c2768d92e5dd:d6d7e739c5b945a4c4dcfffec5f21d3e84f1188bae8601fcfbbf055e1b2e3dd666a5faad1af7f79dc63abd6b4ac15906ed7aa379a3164d4c4061c4abd5043b6f38c01caf303895f2639cb518b0a848b60d598f608f81aa84667237106fa3060445bb9a5152885099f3472cb2305eb7a82074825d54396b1998f194d225dfc58480db5725b85f875ba9ef56693aed97824d9d07",
-  "1.12": "4a1a648f00f4109ab5238bf6:4a3f2e13f2a52a53ec64e83766124283:d7723dc8a9b5155ecf379c076bd813b8084f5e3696031690c68bcacbda6b3aaf3cfdedbe75d85612022a6c576ae1869af04d3eef1f33e66dcc59de38cb5f112d0250e1f13ba8ee267068fe95548c650babdb4e00477cfa4a077ca2251dd3cf25bac5dcd4f48edb8201d62d09fa344619db66b6c17fa7e3b7f7696eac041c031092221b97a11016c5493fd0db0cd9545e6c22c926679f0689ca41b0a4a7f4f7e08436cb53f296417dea8a1de592963d71b2b5ac82f19221884e296fb5afb3e7706f986198829517267a15481180f0ce3e0ceaf328c5b5cf7165cbcf713fd849a70170a326c0c4bd84a6612b5be371df35f0",
-  "1.13": "30ea4e47f8a89c1ff2ecb4ce:d820da3acc3ca0d883cd350e8e90bbb8:478373dc0c9b27555caffc0e3b3d604344701f600372c7395d2c504167ad1293846dac654730fcf8c993af449e65d4c7cfa5ab43a4fcb8238eb4d3ddc0e097461c9dc7b6b3a78820d05f921e07c5c2639d8088afb6b80a72930a0ffdedb9717a69a31a0edcd0311d6a874eecb7f0bd42d3f3d58c5e47f0f70e548e355b41b344a01cb12a8a42a9cda61b45a4ef5d459e4d2d29d6f3d7ffc7b838ce672c",
-  "1.14": "cdeca4fb57a013bd2a3c05ea:afed5513865c902fab7122e71bd4e6aa:022e3c69521efec6bdf08af081670eec96eaef88087643d75a3a88b771ee80faa6cc34eaf80ac24ccf6e224217d4deeb86b36d3459d8533a7898700a7909cfcc177e16c54a74490cb526eda270419ba1466efbd03110237d77d1b767a62ec47b929a0418dd5ab04076c86f9b595ec013c9382b5b5aeac3f78dade70cef4ee0a8dcf2392d0e4d13e3abda891bcf28c6177a29a18115a3e635d7e6a8ab3d0ff490f64f52973dc148f1",
-  "1.15": "54d7159d6641a4e44d30769b:caab6bf9ee990f50159904c50394a35b:e3a1524dcb30a79abe84a8e4912e9810b1675d78a5b1136803d7e6e40d9064fb29",
-  "1.16": "0bfe7748831cc43c7d252546:6247b511eb5b4a581df6d44bd1e6b39f:2e08afba1fb5aa31ee50572f6430ecf665c993a78cffafa9646f226ee79f51ceb954da19ac126633fe38b8e7b5e9f2697e29c80beeff111c14dbacc0ae6349de",
-  "1.17": "65c042775d326d926356a075:927c605785392407169dc0be6c5b5668:87e0866781ec2e72ba7a7a21322a339daa961d5eeb95021a6f300c55e00ac050822efabb4ea11b2bbd97594350dc14dbb4ef2b95e0afc1305dd52c8a525440526213a3f4e00bfeb6f4666def1017c58c37a4213020e9b58cb1604278caef908aaf9e43fba546683cad34f51ea712f8ae86d541fbed5351b68453c96de8055078e5fe72d146a4ca88574b1a3134f9981b8235630d541d966e264a2f44a8500e570ada4b2b7f91b3ed5d63f58661b69dcaa26f349087cefb1975bd01e156ee9b893b6a04812559c715cdb85a1ca36d43d8d2905b03f95ba4f4dc758cc15d5e1b9902ba88edb36bf01075ed37f56bb817",
-  "1.18": "5637673f1147a3085bdd036b:6061c57311ebaedcaafa3c0276c472ee:83290581fbc1b7bc515ce6fc761267c9aa839ffaa1e55ba220df055737817adb8d5b7f62d195ff9d9b20768ebca7273f5718c70ba4c8a3b1a12bb6b562152f1e3f8e432d42b7513d3f60f64df67afa346e17f6a56a6a00b5cc62b8c0f94e1550ae9ffef7a140be66983db948c8e23701b5dd19de23cd8666fb2c8d029c140147fb187c7119b395aa9d0f29a6a7aa2c2c94fc2a17125b665d03575323a8313288764c4764ab7c5769aa26121b556ea607924be8d918bd3e4cdb13b9f3eebbb8afe243cb18f75a1a783114cb86726eeef4f744cb80e578f2c1572de5879fe657c2cb07817f16518ea9f98065c27930969ee4574bd92451f7390da5f1d53891dc61f23cc61e7cb28aacb834b8d73dfe847fe865892d1fcf09972b04dddee277bdb90d29cc0534f4f7448dd9866e0af3044d62d5e9d9b58ff0fe12e0d3b182ac256ceaef9c177e57ac55707f12059947fbf6d01adc2fd91ff61b6ce7ec7de79db4c9de724e0ef02ef113bbf8b8523bc2dc3ce8d8a1430b75882895d0dcf1bf032e36779f70a8801974065d77d0ca1833",
-  "1.19": "4910a0c9f794b4c70d8b1108:a5f38fb057e8815440d1de6129541a0e:54a9a5f2e98cb83016329d18c4bfc6f0d5d1e2fd3d81a61ccf63ae6b2bffc2679d",
-  "1.20": "f5661cf4364445d4677e8a02:95b11c680a26ef3671679248df9f48cb:3ad0ef38b104eba38e5669c07692b6ed5cda5c21f3be573ca635",
-  "1.21": "5616deb0a3767ccb255a6dc7:8b06e599291d7bd8d2ac4d136d0603bf:31723b26d9b29c977cc150d68c257677952ef2b7c6c0a7a08a3b492b89867fa1dde5cfe16a0ad9da8d0a9fce29b3874efebc5a97c1abdcb384dcd0658f4dd77fbea7907b796e3ea892dc31da031a27dbe2cec8b6a922da1690a526a73e63af1e440e00d2e9ab752c86be73b99e5bd7622e8a9a888625",
-  "1.22": "f4c8f3d6b95fd0fa4ec7e2e2:9532d06a8751807396479fd0a49395ad:c230ba129da4b91b2673d7b6f20929f1a298fb4cf9d6f69cce33d8fff333098b6b44aee091284d1b2a22db33a42501fe65dc84e07b5f4d113a993e4787fe744610ade34901d6b0eb15cde86944302ae2f1371592923eda8b226f270c3f5f87ef1739b5fe5e5be4a78411f65448edb6a24e54c354b29729bbc828c8e4313b2776a752a02d8162b5f07beaee4b25a683a7d2c5e9024500428b2f36c1835970703894e28996858b58426af302ec799855c34be450f66b3d489e948f7a3372638f03f109d3197dcd54974a7b",
-  "1.23": "48dfaaba73c293c3674ce0f5:21ad29e3ec5938cc5d13afeea0efedc8:42b83cf8789288fa5a9805d3fd635505d69422a2c415be9df03f80a0458f8f513c3c082c0a6f57538498cc00c69c409e87f9da9e3a9d3b9ef2a4b81eda0e21d376b227fd5d54b3a76df8e5ef3100bc2b215b88927fca11b79330ddf742b778b2c3182d05ad12fd5a42f62711f620ea478c1a617cc75221015613778dafdf09c131ba9347d4",
-  "1.24": "8c6ab815f5ad5da1eb932ff1:24418024e97aff7a3186707ef41034db:4fc8a04f0e9a357f47a08056d93f57bfc3c37b452f9e3c48db53c65437c18883d6666942f24630ab13da4f3347a46e9f51b0b3c3654fe4b103541cb0a192d1006a2d57dd85adf64ab9baed90e56fedfa576ae3579a2c8b0aa49f7c06690bb8a32cac84bb9be27661cc1802db8abba90da8ee87ded2a858b10e7385804a9104625113604b35faa7121844c1c41f6b70e76bd919",
-  "1.25": "7db64ec93725d70c60078cd6:5d6dcb2a399c3d77c5ca0e41d483b28c:c926cc444b9a0f82d42cd486744d12fa5fe907c07e3912ef636ba59e5ddda1731260fab8357a9288e670e1625b2a3c2669cc09a9451cf29324fd345d1f0f1c8c9c41a5e4ffa43a1f9a19c39d10e25d3d925bf4eb6a4303ce4a5557723c85f17e06ca8ba6fdee194baa4e5a4c9b32fb2485575a802c4ba447a8c3730112cde44efc18b8add1d53f06b3f49b71d2ab463d11ebc49682c7e835db4e3d5b0fa25a4b53735ac79a069f09ae04ebf9e05a7aa0aa9b162f9ec10a5bb5eb875435fbda6f71c4fe90de05712bb7ed29addec0cc1af9bd4da66b7b68f8d1a3",
-  "1.26": "7e36386baa16a5ecaaf261bd:206afde07ecbde5408c4afb94f9e1107:c3e1d33505455a27dc03c0db39d3e9fb99a85dc9222907337121fd5d8589f8b95fcd1ba07ba7b6e842f815a64a90dd16f54b696fe63cca0e5b18e811365297a5e3218decb6c611c6e2146e045e24090438f7060ec3c03158c41a4b37bd4a8882ebeeb6a5324bdd5ee6e7fea5ae26d7f0dc1ad16b7a4304a792b68e5faef8864435a8511ccf3c582a0fc1c6",
-  "1.27": "b46ed3981220e6a18f937d55:11f1a460fe3e73d9d62b3531b016f110:de0bd2d185b17e7d378b9fc8abf51d5df7f32d68261d1f90f5953bd3eb41f36cf48e5b42616d0fba3f4e9e0146b72afba7593a1499ccbc0069cf725432b67d0a90d3e737adaeddd8119f0501d1ca641689f94201921d84d162dc1cc49a1bc63f9b88e2fb1e6fb80a4fbf0ae144ae90feb0b86431722d9cb8818e14a108ef1acdba23615301877214d39acf4d85f74924b7b1699653e80ee51dba10de7187abe2fb6247300b20eaf8769fbf34c5461d3f1b13e078dc8e10e687a3e647c7799747c643c843",
-  "1.28": "c84a274868f1700bce544430:810d3a377cff34859b68dd0247be129e:0edc05af03017750100a5e63543f80ec23b531cd2cddea626f2338d054b92b1e9bf55c2c1fc21ca5a450fae3a8e199bfe00a2beb7bd851fab3d0a2ab3f88758f20e0eb65b50f7c9080b3c13b115d23136bcab06df390d54cc5343b6d6003a70b0a50f566fb56cb0ea8928b3f6c19f0a672b1960859d9a34e8e569b13cf38109f3477a270c045d89f0f70ce939d8c524c25e32ff01f66c8ff2cfebc55b65dae9093b86503eb6f0b1a5ab6d758df039d3593b54bbb067b5ea6809a96574d538f6b5fa4cf58bc07da68978793b629f5768d6ea2f689aa5397be95ed9705bbcaddec3aa6",
-  "1.29": "9d5ae4b61f3531402913bfad:5b6de470e34ed651595b41937697d466:efbef33e2ec6e7d66195e9cb4de878889c828c04d2fc4e7b59cfc7977898d74e0c7b7a9856f97f03b2b591d355822ca0ec3bd684f50aa12b0f0c7d25b39c5d87aef3f42192d4b10b400de61bddffb0096c861abfd497129ae19d69e18340e0f1452bdf7ac2797e36ec19d831b68ee7c637ae9917653e8a4a15794924004df1cb5d482a725618d84f02b90abbd420556e22d38005586de4d490345a74442b0e8131537fe2c2dcf6f2c7dd513a7faf3c611170aaa7b5a1d9e80fdbb9df525930646870",
-  "1.30": "46218ab2acae5771161d3765:01b77dd38ef273fcc7a8d86fd44a2053:800c61536760a4a67f29b6f5aea69b4dc7065928f3435b63263dac91ea32ee8eb6263cc81b6117a9ca7e76169ca301d74dddebd3723bcf0c05fcdaa1559f2ecda93d87bbe569a21ba778c6949818923441bd2c30540f2cbfb37d3393913be26fed5d99f715b937ddf021f24ba3146c98dc95a0d8b46b63325ce431b3a3cf3dc7bbecf49c289e651fec5a90a7323c5e4c45b55e703367445d15b3c106c9a0df4e6103582fdb996c3c66e52ad91bb9367526948506c9eb588d6990eff9ee822f83febab9862367c7fd5d323785ff6564165e45af3e6851f3720f717a59a49c2d49571c8490361bdc56912940d12acd1f9ca0a996d88441cde5357d0f015becb024ba0b986b97af1d7bacd80543927c58ff36af4661d54d77c3745b40",
-  "2.1": "761fe1d7c1fb2d601ad24cf4:8b32c5ce027c1f35001cb8ee02f76f9e:2f52fcdbf4c583788511d94568f4dfacea62be63b535270f97430303b75955cb8e5cd29f3b9b978a7571909fa7bdd4d44d928e2847022f044b780fe38bd7c1e6a516e347b2acec172f",
-  "2.2": "fe913d2a43d3412210c8d218:f21bd403831246a81b77ae37b4219400:fff35059a634434c8ced057ca8d1d48846ca24fdcec783dc5c62694d60ca37d448e5cab18921ee8ef64d0229e05e89020c4f520ce82dfad0298253f52d90b95bf5bbd91c13295edc228167d46dc64c3bf6a48667768d5f603795faee468b32166ff3c256aa66baad289b30da061ee81c370ac82d40562d1d794168f4ce3fab83fdb94cf95f481487e99381cf6e0128ec157e4df89f1e4813c10743c242e91fd99fd39f8eae564f851c283405602cc7a4041143a109832371e6d314c8c2863f68a088a8d9f0de4bc6bd15dbf46c297d211bb5293f79e3a55da446fefb6ec545f3d4c9f1ee3e1ca5565079ac61a90488e4a8f3770a4789dbb56f87e7d86b356d3fd763ff0e15e6130d7c9e03f0c1bc9b384d9f6865672e49c088a5f1d01b86f123985f07f765a99dde7dd1d232d424535b5c2833b87ab193bd46142d8115827b92baef9f826f9be2d27d9a3c149e3b2643fd53ed5a98003b58c96cea6b07b08c39ed4c840391bba82f3bf2c9c8573c93d88240c1ee9d47e4cda45b313a8160b9123553a30030b7cdc266018c",
-  "2.3": "7ba8a8b204f7c1e88cab46c3:0b6ecc2d9aaa33039330324699c41f15:f5116b027109bb9f84ae0c9a4f9cc3aa9705127901503004e5ec79e8dcb15132aaa2e7f9c04777d8871889e72e354f44",
-  "2.4": "ec53e2115983e1012b0c41d5:0a2f7563de95852dc62dfd0355f33d01:9c0aa15db49413f664515f856a6e813539dfae4e6018d1827402025a9862ba4c0e41504ca3edc2d14afa0ce1121088bc14a70a9e251853d1c6a3cea4d8b3f23ff5bf943432c9cbfd52695e2972988835ec8c2f55cca3bae00c07b7a9d4e94733efb167ac294b5b0d0a2f0a1eeaf8b499fcfe97da50727c40f6e06f8605db6727ea57e83e975d39f41e63e18e91f5ccf1671fee341405b0145b0c353c035d8938766b2ddfb4f225fd0e87111309e86da9d2091dedb5baec0509c0e725fc5e39b2c4466a0eb836665238eb87a638d2a47c0d623f12cecdd6543f0bdfbe2bae5c3b9f32183254caa3342605b4375e297a201791409bf5e8e2e955dede7869a75a2ec2103e4ce58672fd63fa11f8e65beb47539e22a2eec5c292f960b1864b2f275dd04a153bc912d78d877e94e881956c90337810a54acbf09c6bd71fefc5be8c2341862cb3ef04774c5c22f963cda3acc592c4c5a860f880ddbbb25ca18d8e9f",
-  "2.5": "01cf8087fb0aff45d4c8adfb:56a1e66694dc7307676e21ff25129fce:c4feb88beff396b0c26efee3d148d8d148723395fdbeaebbdf539f891035bde5d76642681a21694ac012458d577387f7141f44bec7af13a279acf88b11b836a59dc4c0d7a8fc51f23defdb2923c9f494e449d5",
-  "2.6": "0e2961ea4d43e4672c6bed93:caf73d3a19a26f138b2b07d623818811:81a62cbb4e17725dade9b7dc867da476656ded81b68bdf1b3a1e6bf80b08b3e0cfebaa293ee81ab8b92d70216e4827698c038acf4515bdac4227795d69a9d6e5df87a1de91fbf501b55fccc0cab717850cb2eeca3c71e3bd72d835b33b74",
-  "2.7": "3b432a67765fe2891bcc18a0:5c8696671739bec8d22639abcfd37c9f:682860891a3486fe79463c59f4c86f23750ec1f6b0ea97ee57fdfb02e377d7931bb944d626f9fe68e55c89462d4c4853c41274de288505586b71dabc628a7f95013f5aabb60adf35e7d0af5dcdbada7a09064d2ad0aaac62f646f6fb7269dcdb0f83ad0cd2b79a1631a6a04d5925fc1749081492f555d2d752a5453806fce5b67793120a528f77d5",
-  "2.8": "466e8cf4e348e18547b774b1:61f219d66aa3c8c7879963c890a14810:f40d5436e73fe8734ca9d057b11f6428272b14e9858222322ff428850acf919850d0b6d082af3490a3fca3c7795c212be0a8e31f9116401ad66bb1104ea8e36459e409c79b7a169d731d2fd21b5de456f0f5205cd02b38ae8987965a9d527c6c58f80320ca32e22c4868f8eb40a0fb3a8cec80db1bb6c427221b2519c728719be5929d8a40c9435c0da1278a22187ff6644d03e15e663ad5f110f74724aa16ad5b8ab129a1d5cf06bdecce1d95a880121af232f9adfb8f0d06a9655cf0da15df3214503a9c594fa23e728869539354a306e2b2f7393df4920f145a7dcca129b5c8c65b448f8ee8b08408e080c2",
-  "2.9": "ff62c510a5b980e9b0eefb34:5aa8f74f83522b51e489e196ac0fb9fd:64c33c1cd79d21c682d4fadb1c08cab22964c3467c0d3dee739946d689ee12d02a9bc75ae615c907c45a01a168d15f819d0353710d19621caee3d5e1468596524828c29d563415540136187b77b04d916c23e56aed9e87ceeb46fb5c15d023e89912b21becb3e39839e7de157a175df6b2b4808aa22f27463b943304cb2581054c9ffc2798f90da29cb0c0f9d6a7c54c311dbb879e210639bddbdcc1dcb1103be127abfa9a24c491a6260892c3",
-  "2.10": "a15bc9308b3f86e1ca6d5c20:f3d89f8eb2747154215f62ef91d58f58:baa045352c66a1a30fc170b8df3537d5b02a4f3734838e03ab629f9538c2f97599e406b0256997e5c32e576c3e3a9747567a598e708f06583e741e78b3e429e6175933cbe397f0988d6e7983c3d31d2e918a44de073021d2ffe933d2d312a91ee2f56d857528b80e610205ce3a02e4dc1fd6e4a305a38adb1441ffef664bafeadf0f1c591001fd0a6cb16b97acc4ba751cc52eb89631668b415285331542e686195f5667146aeca13f8c41c53f95c21a42d5e513659dae2ff491c9255a33e33f7de32a8bd3c31e8def8f189fe2ff",
-  "2.11": "b1505e5f2c242d1221f3dda8:b5c5565448adfbe690f1b345a0f17da1:ecf9ef4768cdb2527a60ee8e1f266dad5137351ee517f3a070c218ecfd9d27a31feda88451acde174b39aaaea7c934478f6b91545a05abbe56becbb0c1e43a096f3525abc98fff2128329daf7102f3f6e9969ff11b521c291f07203f91c7384b057715326816d15316f84dffa3fa40eebf01d17ac30986a7d87db987424888bfb094947279802bf49fee8d08773eb23e9a959e46cdb1bcc5c3956b7c472fbaf2576e167c1b4fb660209329324e32cd4eb1778fa83ac8b236018c37902a86ab57247dcd17e14db688",
-  "2.12": "e7918d32118e2c8727655bd8:943da33b2baba0358c46889a136bdfdd:26b2c513dc333eb2a60077cfd100e6b5a12c596e47ca798525cc1b6c71897ed9f5d0afc8d97c1962b629f7313365cf9f712d03aa9b7871a624200d13b02fa14f319b73d3deff95c0c8c87940f2ff0f1877c2fcf1953e5c29d3c5209ec65a1ea5582b3f2eb339b7c0c93864932b998c10e5a1ed39",
-  "2.13": "7e45a712227a87b65f8df778:b0e4b09c869c29b22caf55fa289329d0:70b270a451d16ec30dd580bcebadb476c9e1f2a006cc66c70b08f5745e561337776d3d63ce8fdaed8b3e0e84575343032e00f045c2bb6c74be1d9a6d788266434894dce05c570b5084e6f51a1706c666fc87eda10e5f7b895a481c4f606b725728bd239ed1992e2e279d87f985018c72256e022e8a456a4eb663d510c81b57bfdab932cd2f7080105cfb6a5345f75b08cd8f70fedb2e7ef87f7bc17355965e3ed3161191b86edb39c7507b43c764b0522ac8d938bdd4185ef2b69e0b0480d1",
-  "2.14": "999d3a97574d704874e82f7a:b49db10f806a26bb14bd3176bd3352d8:86b166ad5ef25eddc90722b15bbe0791e9f0231cf2036a91d02910182e015858d6b8cc4b1a257ae088db4a75856380c884cc8cb2b4a6df37beb26afca0568733487f014ee529f837b651315e25afd3f29ae7b1b0535aa954aa3429f83b71efa06f428ad32d7956f3aeda09e86609f8985511a33019c0868ee342f041b24e6043df2ccbad176e884f0cae01b8680c085002c2dce067078196346aa68ad777471c68c05b16b8e758f9a8192ff17fcb808890beb330e345d8ce4a47bf784f8316ed3124302c5dcfc5dbd96e66a80ced6a53c67982f5650c2433633df99f9640e310858226099d1335abbc79bf4f949d77237d624ca289ae64a08dd9b243bb6c50c2dead83456e8ec96acc5036541713271d3eed5c1b35bae5acde16953ff56e97ebec773158b794599bb8fa60aa2990d94ac2c925bfa5473b1777da2ca29503dea026ad0e23e6292992aebd24d7bf097414e5641b4feb7cbf46220fc26eebbaeb47f98a79f4028c",
-  "2.15": "c8480787eb5d937831112785:9bb1354d60a15b334b3b8d215832cf76:8dd50cad9b0e6a11aec6e798ab88bb85eeb8e471c9f921d6188fcea57cbcb422a021952070fd73197d8864bf98ff49c324248af1d6177cbacdff87124caec096c92eab69e6ffcf19b96786d037d1bec2eda21db4a667dae301322822661cdede71ba1a6df22d2055a400b200d5764cacde99313b2a0b5d50c61db3439867abafc208dfd98d6abedf348d0b9ea350f3a3431e461c4cda471bdd9d3511222f2a3c3caa11be6373a02992906e640af0d191924a624eecddf135c8a7fa24b2479ee2c2766a0ab54d76167213a3ef4bd06bd5892efc742ab2f6dd3a65d918253949d49623917488ec667c84dfcb36b4d2d9d4bdcdd890dfdca1379125c22887e7767c7b5b0504c28e4268e6f94f83f5e228aa417561f5f76c34ff9fc66e0e20d62b3e530e0c27ec1283fa6b5d640e6b44d99f130054e1fc5e56db82b1fe38c13d49da2c17b57dfb0374c95ba45f7964e24965676ecd8f4a7ad1ba7374b319d365a56daae301ed07ab808b",
-  "2.16": "b6f91b2ef0de7ecca47e41fb:31752bf408715f3d90f4e5a3cb1fb7b8:56058ce3fb614cb56ecf61acd4d7b5ef613acea929c8e613e40f52d1a507c4846e868e0fd2cca9e271efde0e759d0af6de92d4625eefc604637bc1f243fc61616a78fd256ab00af9814176d03f574fb8f44b427244ea71947459958a729e3c4242fdecf591353ff9f8eb34b0aeb1acaebb7f464bc9ab52d8f57e56effbedb8d8224e42248a3284ae66ca5e3feabee6fa7bf6ca14cd038f193ded48fe3b8c95c38b7b3f824dedcf521ae7360b14d42656e4dec6cc1d19673bdd07b8f0f93f64fad7ff4340ddde3d171b3dbbfcbd40b5e11d14658baf3ec2bd144814b5ff792c8627ee506f29251c8410e3399e419bb957441adc220011673df5fdf53bb7ee415371ecb33602494f5a70d6cc82d370e92da1f951b327d8ae09c81dc55902b0fbd51f0820e0522cb2651cb2b3e9abfc9188cc1475e1de7a3ad52022a792f2e87e24be2121188b0c017abced76870e9b3177df8ede600aa63492edc2880e5b19b0570390fa33bc99cc0cf0c6e38b6788a02f2d5138403b9148552bb5035663b98db882540c5a7129df0717be9b4d3e692890a8dd58a2797463641d98d8a832",
-  "2.17": "88922a9be7ef8dc5e887cd79:1ae4d11f26e8f6b8638f62f5a9085e07:85244828ef20212a746ee75d303c7720aeaa1514bcbafa8db57fd443139e2488ed7a7d30d9ec869ccca8747f6b7e6e48f4a249a8e0c13293d80fa44f82ebdaf1c38965397dcd70fcd73863a35b67402a645a9ae562ba209b913aaee5c01c0f5eb2b89978c1af87bb0880f8c633d4bbfe78a7699dbefd79ff548b2dba249e9964ae2eb96d5f36f21e4e1cabc058a3e809dbb3091f4d194fb900155d496bc0ed4962c9abff4982e90f8c063bb5cc158888b993898936a82ded919276a3246ea628670ebe0ec90e875eb615fee37af29f7f3c31e668fe09f103d1fbef4a4e235c4d2f1c609ba825a554b3df579f7dfa25d7e34527adb245d8fd976611dc62073f999b325c4eb12f307acbde194148856b042d22bcd19359adcd8d30da0659479c394fb514f701248076a46a4da2fcfe8c05f0d111f1023bd6240e8029d5",
-  "2.18": "dcb1cb04ad94a41e5d29f168:96f66d5c2f61a7e7b8b7f515936f85d7:0518d6a9aa41309ba7f3add0203fd44341e8b9d1cfe504d8627a70871919674a092fa0e4447788dfdaa88291180e1597821c423b1c175c77f79202d086887ac903b3ef5365616c7368226dc0e9e9140c2afd503a55c3fe0331dd1e6e44191893dab5e19d061ad92ef43228b8a84e7d1a5ece863c31a3186d536c3d6e02101d4637c8013b87251db5fd29001eb3a76e8c5e566da13c4d9b04cf6c799eac42bfa9996ff1217ce3085e058d1ae40d8b32d556ddd7fe34b7960edb84e7407159dab15916d8350673116405e4adfec631b96e5694994d2c3068",
-  "2.19": "00d98828c8160d89ce2b97a3:8641a172bd6956cef2ff77786270f599:49eae97e57205534f653df52da7b1302bcc8e1b7f6a80916cbe4c99e136b487d40f5cb2e01c58822b261b1e3ca822430104cc0ec5c6b83b0488dbe64e6ed82d7b89a11aff2c6296f1650cdb84e61bc7f66b46a828aec41814455c3581d891a923f3a3107be6563664ec1c58b825e112a3a307f490e833d6ac748730ffc70e60ee5ffb587dad3005d6d65ba31408d3a57b3bc28218e7a69d6b95252330ea82362bdfb27bd801f86c5946c010a319dc9d29ac9",
-  "2.20": "d997e684faed8165ebfe29c8:aa1b4f4ca0dcf8db324f09cc350ac916:7bd0e924c1cf5b97c7db5fbb080d7f334a837cc0e48396d1e6c76246fe432c69a453c01e09fa82d38efead1b46629d88c2368a85290e9926c0d32b23a6796a159ad90f55ffc8c0ba845d7d7c08d7774a79d84b60473414dc0c4bba9d53425ba2a9c49e7b95b9a0f7fb1e50145643d8aa7a4928787ad7979f48f8dd14e6d020b055ad1c82748581e1c8f8187143f56803975584d8126a707d338a5c255873899353bc956e37f6f2fa47e190bfbdf0756269e02263da494ee2ef1a7f",
-  "2.21": "6764e48f18680c2ae8e0aed6:1eee4455882c4654035dc725add861b9:1c7080da784c371121624f976964e00d81ac115b585fc5b0fbb29e178cf1b8e19839e9df58f306754b77f3782bddde21225cdf92133012900fabe13e8cc56c25c89f3b46a38fc9b97a2966222070ee2ef9d1ccf875883026dbc90554c0d49ded08b587a8af30e35c0e98002710e45ed132d20a8a613544267af0ce3c3c4ce84d6553522c105ef76c3e5793ed005eaa437a82b51c26dd6b2128afa08663662967788b2636b957a3c94d7820ef5690127e5b462f9ebabaa1fd4101a046382d52af138787ed126074e57003837d83ee0d395fa6edfdddf75140aeab19",
-  "2.22": "b45d42e023d70c0bced4c170:100642f852f7a62e1759e232c9b7e75c:da6038add2d4b3d70f145864fb764b54eba9d2b1203f13208956391a7f254de1fc1d9004bcd9082b48eb74ce9a8dcdeb0effc59130add1f3bd887926a9abc7ef5b5679f2b6061ff6c5ab86bde0f4b33b5f6242c978e81fcaef8f41d68af0c646ec7a13598813128fa3f8281cea750f36ae75b8937a2d7805b065b342564e1a0b4aea14b09d2d9e153a0788c3ea499f90fd6927f32d2e43458ffa4fc04b342df06354942a7a4dbea4a2a65a1114dd43057306f50ce699f16274e2410871abdc0a8a8dba275dc5126612e4f4397e45b04a92cd9d590396192b",
-  "2.23": "659468aff945c3430b6db94b:d3fdbea455206847ed598528d86eb9f1:202a0380cdebbc3ed408fdc59bf3ae66d12fe56e984cc05a21d250a0a81fa383dac9fe0856a87d571804b7b03097fc1d8ab4322003db6d6483e08a43b426f8db7d65c5636410b0e3277ff58334701b98cbd79b10473ec4fb32d1fe5f9ab1367b2703cdc6c147b91fb1fec5c5b2532bcf7fca0a9a5d854de1cfcbfacd7d7d4f9e38759c62799de046f411761b82334095c16f987cb8455525d03bbfd955c69362391653bc7ba6e01e3ebbdb3f70320e754b624b80238dd9791b514a3352d8177b515a5a6d1a055a999e23e18d760946aa9d8324ec925fdb83f969e9c243af0ca8a80af93a53622fc13814b64ae864f7dcf1377c27d06d00654275a934fd2898d8840589ab6e",
-  "2.24": "3398ec81841238ee9b7a93d9:a419ab3c83fdcd9e447909c96d565b61:f8d0088593356e92f00f8c47a849e9db0ca3b826d1151ab41c92d004af66383211b932eb4e7aa09c07c985469c872204be18793ebd7361be1a425db32b2fa1d6ac631ea60aed31b0af0c8629c9728bc3b273fea7ed9615195703268e55e66c79d991f8e6fd01289d1eb91198041ff5bc205abf4d265b39a06f6e1f952e09f454eb2a484f005a71eb10d2cb1ab94e274dfa589b4058cdb6f921a43404a5708184e395ab33bce924160e103ca5633ef0178431aefc831e9140d86c48a883be695c7a65a232fd1e16c0215e2ea26db5db4fafceba4d9d1f83cc83e155454cad0805bc0ce7d86aaec3d0b754b565fa701791164c07910736fc706c12f456230631aebe5513c03ea72dd593435e306e81f6e8fc9ee0a77a3f3a7f550eee062d948d1d72548a2bb06215b38c34c4f3fe4343c2cb9bdafdb1c58a270bd96720cc128e0026fe73873193bbbab0a89e3ab7eca660f657af787ae0f8fae19366b0292f4f3c15985c88d56cac1fb00b82b733f4f9b4256e247690736f8682e0fd807b51f64dfaa0ab30cfdc4d40d613678f413d1d48088682af085785cd88da00fd8c135a3f3405a49fba32f6c0db31f2ebacdc5e13729951a29953e68415ef70168107e19f18e3f3dbf803f611d47367c7ea2174a5421caaeb3d52c50cee74722ea6746176bb60ac925e29d14641ca24e55353f149ea4d95f1c48616d15dee6c365924d5291fe831af6017fc833a8ea9e6a45be68b5ebfa039",
-  "2.25": "9374d5a150e2f1abd7776b6f:959293c5783a064dddc0b48d54d32ab9:528043b13b049c100a994fd4223f39ec92c5d286903b4472eea4d49cd53740402c3a776353c9e485112d87361d3cdec953811b49079a96187b43a70d14249dcd9e922228e1aa7f91174020b4d1416a69718d381d567d05f31e56ca179c2960be8de87c206588e6feb45cd4760e82cc8a20accdf81f9b6dbbb9925b02b762c758a2680611b314ec3bd26710fd319adee30b7badf2b61ff24b15af8a39ce2c888508c94fdf24fcb39ed861c177a4b2e99f8f41184d3598e36f23f3ba369b827664d0709a6ad7639abcc56f9278ebc77a622f7d9dac266a4e8d655ffd953fb478f53a91593510da5934220e54286cac94b37f1c4ff5583d081df4ca94b57b2d60f487db53d21023a1dd271cf11fe8948062df929e7fd0bd1c",
-  "2.26": "d69a1e18af4c0b52dba3ee54:9538f07e929075bbdf9a0f2f560728a5:29b7b0c9f957df30e560b19bf8fec02fe68caff4f4774d347c8ce4ed942540b2410277aff7768e06e723e28877f044ff011257843728986fd3c6a87cb7d72dc0643c9f0b4a2c721e7e2cad80b0bc5e37ef331fe84a9cfec5ab0ce4bb84ef949093d3358ab7c26eba744e8aa8f609cb8d6ab62926441c41ed15485174a7df11e7180389c669a553029095e6f06971af314fa99af2eb7ad7911055261f31db75ee936d39e7c09e81c17835b477db0261b342b8b62583e5c2ae903d1c25c2e0f4ad34d73c1267b096a913eb2218c6f99ee030827998b0d38a5528ed4eb87b578e7e05aa570029e348927e3fdb14a4935fc4438c91824d08d7a59279a960a8ea888bf32ef4cf4e7d30ec0dcaf5db0670878592432040dd8fe395",
-  "2.27": "e7b60b8a1dbf6b3c2d4dfeea:8d3aca2eebfe93c093a172ee9ef42c61:ff0161432c5c02152dea0f7581bd715c492982757556ad2f7e15c49a51fcbe0af9a01edb21856437793d4dd30559cd33b8d4eba3a249fee770a6862477d0bb1175e1108c1ebb670d43bf07b346ce0878b069702fd7cdfb2c9cac6abe21b4",
-  "2.28": "b243aa2983fe1ae898de877d:e62d59c268baa2f7fd1d9b780c0c5c1e:8dcf4e918bb365f43bee655df97fd5882a7b03b8c96fdfe053298a20f51d167d27734b8330ae805be11f8091f355b0cb9db984ff45974c6c93e2b5af117987d7968fcae003bd80e2d55eab736621caaabde54d36b892e00607ea55e5b9d3aecbeb76a4ab1d00a8f5bd17883fe19aa2b6974ab94cee7b8f832f977d4277863371636dbaa2020f3e8f3a2f8500232b4d36c32d16575ecff2c3941020e4685788486b4d748ffad71c062a1aa8ca9ac3e815943cba39b18892a94faff49e3e34317a5462df83de2f1473cebc011633da2c1c6a6c8ffd70ebdbed9c095a42ea2f16770cd7c9dae0343e8b70afa1e31a9b8df54b0b0bd704b5e7f13d784f478dbc1806862a7e1ffc797e41b51c637b311c22b00e1e3cdcfb6fe8910946cea25598b9195188c51560d9ad3cc010a96d6e9a963cb5456cb93ace19fe2b1e339bee3c79bdce5da53e13",
-  "2.29": "07de87cd1362f2524b5745e9:e731a86bd504aecd7d5840587de81ab5:972d374238a064dad19f08d22759299f05bf54c88c13292ca53cecb2776b203611f43502c1e7d09bc4f6320759eb8614b63e90bbfc563099617f60238d00b627e174c061a33c7e271fff5e4f3040a7d227ffbe611df61df4834b13653b12640b7b85d5bc7583430bd92651afa73c6140c498ba2ccce559338545211cc2294a2d81f0",
-  "2.30": "9d5a2b15a2929ddcca5f9ee9:45cc9e2357787d3e51c8fe3d50c8950f:622fb3b787bedaff754d0e565305706022531dabc4ef03b904e5bd479b31b5477840d55028b6215217801e22a776bd1b025949d0287675013214754224f91888061891b5896758250315549e756d3fc5add8e90769c9fb0e67b1c774f9d0a513e54f6a923066335ac509eb30c620360f20ae2371e34481ad47b2c5d2c0667782b1482c93bd0e9355bb012525bd80b75a5d6ce3828d3db0b4219014623c7c2007b3c787d60815375d048147bdfac7fc347672d75968fdc67d0e8596de4f545997206ae0eedcfd995851cd94589441264781a1fed2606bb311ebab44",
-  "3.1": "0a7526171f422705f0a42591:e06e2295a064e6998f5d9dc322c5d322:a75bb129efcae8cdd57d74d131490d4e49f6e97a64afbf10e2d8da3c8d8751d9aa20c942cc12b6fda1cae2501ef116678199e825ab3e938da70f0689884620ce673bdf9557861f4c99c0946221d420ae0fc278b189f88caae03dfc4519a3b87f9546a05420d3520aea78ae27e3d78f643a905fff545d0d4e5253afd393aa5482ab808f0de1ba835c308d46d2f15b467af1cc9bd79f7788d04c2fb6887f55baad5a0a94bf82fa9b3e0ac80efac5da9e933660d60490f46a733d03078419ceb0ce24d63a",
-  "3.2": "bea09095ee7a49a906aa3bcd:4b7b995ab85862098dd1b8bd8adb2cc6:1b3970e7e6f4160c4ff4a0d492172e6b2e279afa8fd01cf9bd1f26bd4e48fe9d9426a4d9e1ba136f6d9b325fbcfd4b108f78e213b9a2c90ffffac90e802f96ceeaed3f08d55d60e2339af2a91dc918f1a2f91445dddb249a73a9e72cc59a02d119caf79133d0adbe487f21947ec05f0948bc57ac75dc9c97af33d2c2e7d35f04f1360c0af9c8c4ba8b35912d36c5030eb2abac649415392895ddc51eb70cbfc29b7f680629887a176b00f0d76f2254980e936161b58f6801f19f4e70a62f19b776bb05e808b01e12faf34a7f65563284663a1a3e0a2c594369aad0338d9fca",
-  "3.3": "6f817ff4621b4f1d8db666db:09bcb1242e90e1a698320b8e6e48ca6e:dfbeb40bed7893ac94b1e586b59ffdc9cdf2043648e467d3646ac9edfcf838454f57b20f182a71d45e6f10bd61114426885c99979d80529b611dd53e0a97af2c493400db56a5406a7611be2db5811fb3c2f85941b473f3ff6e3487da34667247710fd46d6c9111548a553854d86c2c98b3ed851199402ba6a030893a0f91473173bf4135a602170f6b4a4787a887256938a68a125073dd41611dc0d001bb8fb60e1c3b60f49d062b7f9d602858c8fcb70352cefe2f8420c28d171a3624b87c8b4731e2f388c38d7696f30ba65877fb2924f7652046219150a564599f4d14d0ff427869725be812246678348020abd5a29322146ff36cefb66a39d9921ec391ba3e8c7adca0088f39fee47cf6a71da40e13ca56ba27b4999a1d71b11618aa3adcd909cf8be95b6558e271dd3caf38918c86eaf30b02ed1f6aa46ce559265c2377c94ebeb3fa",
-  "3.4": "a7570df1c6674a301e4f398a:3d4b500d9ef06129e5a8b154760a2d28:0943a62bbaaf6932af2d882651c84002f73cdc07886ec2757b3afecee45f9a581d2c595e8bde9a6c092915fca84d59db5d596ac47eed9c3886e236c1e887c27955e131a99845492784cc3e55",
-  "3.5": "e1628da1778c41e464177d2b:6d6e1899df13813e78096b31c105ff0a:7f4a78ba80de6c400a4bd531310d59e3a48652b0c1348a72be382b94e93a8e0647cf576f37b67ccb5a7320522d2e36db49cdda9904134dfac9fefb514b5fa9194afd5589c4ba202d79497b06ce34a31cab",
-  "3.6": "fa7fef024f4e37ea4e967eaa:c1158b2fd869c6b4d53b659b8e24d164:77c4a16d6ac1c72880a74c5758980fc47ad3de4c8569ad35cafa",
-  "3.7": "00ea37c0a1ffe95295c86a5b:c0200497a8dd624ee17e9b38e00f6f08:a2938edb56331269cc473ba1f049f5645623d4749171954ee4c5f72f0a318e9f9af2c2dab72e8761dc257def734da079d35950d90cc5c7aab2ee54c5a9f8a0930a7122bfc3dc12140d5a2273d6cf4e2afe97f71a9b6bfebcc6559c658ffd14935c10d917ec03a27955394ad6e3d3f66e514acca90a27ddf3890401bac8a2c2da382501c685a9d66fc168277f65ec32785c66522bfb69c097ce85c53742112e66b42eb18a8cf1e51dea",
-  "3.8": "5ea6a343292d7af93d50d806:6a6776345dcfdc0f14cca34ff58154a4:da8213cc48551ff54ba6bd027c688a050aa79ab23b09b5741830155ccf615496423d75f8dc8e980ec928cda9981e064f604598046ca48b65692d651d8afe6e75cb3d4c665c90afb3d1def4f1d2d4294cfa75fe772888dccb33dcaacf043e866de0b4b7713cc5b08c6eb11843fc1b1fddfa97a445e60cf5df979777218b0d54c0ff56b351230dce2d7d33a9bd774b438c7f5a635f41e887036b045fecf59f",
-  "3.9": "41741d3720bbc21ed79bb57a:441c94bd511db8a7fd673e39a8440ee2:4565c62d1404032f242a5f33765ff2cff4fa5583bb01232557c115ed35eb3d6bc33d241426e25ac1cbd48325b0abce6ee73282a85099dc42cde93221b204798cb888b37a7592d98e8599c03866efc55b79fd632e1395bf98f2ed49244bff1c71fcf4049a98aa01e95d2d102695dc81146fc582a7fa9daf0e88d0b99e0d8a45a37940f5260c2a1222686223c4f74f9ed2dad5b1194ec59fb21be309aed683915857c6fad0",
-  "3.10": "176c3bfe1d4462d76226f7df:0ae9660ac7d7dc1648717824243869ba:6744572ee10489cbc734d3f17b389ea6b403e3660913927a84340ae4ae16a562fa160c69bd33c84da74862da49a27a0072a9a389e3128360f1d7708947f46273332d80c9ea42c80261363f41a7b04923e9229bb7296fd8dda052f5f3d8830e461f19251b5bc76db8015192c929a4f374c8dbe12f638dc0bc4d89043dd0edcb32078395a38b9241bdcada3851146d4721d6f7d8955b6724bea28d0406efabfc964bcf9094e5842b8ba257c5b8f9d90f4951dfa143f450351246d92c751066af8011d71eb37b7389ebf91dac23aae911fcfb231cb294da89f05eecf23b66d187d7f1259d31412e33d2e5345cd8a99a9e87468a0c312d1186f8ee4105",
-  "3.11": "1b8d0aca625e2b7d54fed8ca:8a7f5b63d6da753aeab48d125cdf992a:0d50fde873c2364b691c03acc59d091f61c9f1c7aa3133ecdac980c8c2fa9fcc14ee1d482417dd2633414b2c111122b07fbb051c5b99fe6845c1a3c8baffe8c70b7ab7c761612e63e297b9652582f19f314e1b7f1876074b0a36e398170b31818846104b53795e7bd6caf93cce477bf0e7d45a4a905bed6258e0a040ee288d867040c6fae540638865e14cf65e3e45bb880d11102a35607b5c13ee6577c7a8529c3d7fbe346708402c2dc0a5846cf92d40b4df31e78971e3907f994f1fe879ee3f12cd889149e8dc84c6d731f3111bac227e34e6be106805f6ac1bc5f942983a0061a7b8725c5c90a962d4731e3fe16a791437aadafb1e16385d",
-  "3.12": "bb2623ae5605daf574d99939:34834bc95df8f279eca0fed71a83fa71:72045245a91ac5f7b096b327b0e3789cc2af82de7b2e51c04f6bfbe4ba46c1ab2275310d9f9cbb62fba9baec076ae98152fff39774eec3acb489c53fa7d7c89184d445a0b8f5a24b7ae2bd121e3e6789b0071a0d1a0f77bffe954e8a4bdeedba9ef226a739bc28fa9fe489b1314f774305ec7a1630445978f1d40d96b10b9e7d6a62400e8337f66e213c35b9c2d8e7747972820779e33e0cb3635022ce3058d76323ed951d5d90bbb9c09700895bd19d7fa69970e8d83a3f5d45f4cae212dfb662c6968c95a9b4c9424d5fe07740eed564a222345485d6b3dcc7d07042567136bbad3a869884383f9856337586ef534d00f60c90e7846fb09b3097088e512edbd4e61b5437b3a9abfb400ff2989fe51d5be6d3ddaec95ddab2471087aebdd51588e03c663b067914d6017ff6b3c3e8399add6c0119b01c156158ef716a92c5a5eceb18659c4cf103d73dd4eba6aa47b6a1d63a8bc041bc44b8576f62548598d3",
-  "3.13": "2f99c5fc8a73361bf249ac93:e424f732601561d68e281eb310814dab:fda24ac8b9ce621d09d7f98e6c6935ab96365dfa6d28871d4e7e79996e65aabcf959136c8a8e350a011a53b1a984753e31e5dec915bd1b084ae6d06e6db43bf5f96534c49685df102a01c45584578e0b8ff18e042dbb8e39dab03eb0e207ec9d5a11871532e98d7e870cfe3de29e1918a359069a534c9011fc465689f90ec748efe33e389afa4d8a1e1af940aa84281fb6e6b6e65c6ec0be28f17a0353d4961aaad81451607f09e604ce579d148161befb2159ce4c2158dab5bff5b43fb36a60ab29b6b6815c1e126ab69bc389fa994f0ef618f7bb5c4df34061fed9ee2f4df0b711a8a10bc9147aafb371d0a6fa77bbefd947a319",
-  "3.14": "c2ea7173b980a55e47f326a9:f0d3d40409bb7b564df8f86a7532e7e9:9d77c927db58b0f36fb81e47f5ef3452704ce8fe5de37aa82a4aa37bba02d9729f78bfd7dceb8a6806eae2851351fca73a81e7e80d8b7424d9c56f4a200ca4eeac17b3b9c265793b73b7e116394fe7ccae31e51a2dc756c1dc82fd8a620b526e1f4bebacca875aefc00f3fd43ebecc431400505c09eec538fadb2b942556f7f52a41e1b4dfb97ce0798bb75b3cb34d5057b6bec3fede06058decfaa5fa014b69383c2346c091bfa5a9a17ddea2301fca5a90d669720129c62b9c789a204f277a34cf8b6663fa7ad17246",
-  "3.15": "9060f27794d28a553d6c6379:3ab481c73f6270b3516f1196537cf94b:fa9b688734df7388b7eb60bc312ca4e3ce81bcf47e8e4185135b97ed11093e8c58bd3576af59bed174cb0443352ae8439e8913ded81f0c0b57004b0f714f07ffe8992f51bd47d8730d1cc3615e70fcff20abf84c18a06885bac542f3dfe4d706e4eabe1d11f861379961686b89b4c782b3421c0a23bca19c59c3340ae25e2ea71b21f16f3f8c9b634675775487a14b80b4062457d747ad8a8fb19d260772d0c5b7b63e4cc1dd564c90c332e9cfbdde39",
-  "3.16": "3be5648cc1fff0728167fb43:7c4c27b6b3c91e5916d041f71805a8e3:23da0ddd9ae0401f2c6581a3f30394097f96cd170edb2fee5d4e621edb83d9f99580eac6c1f05247ff2ce0fdda9bf5b5ab4b38c6e94776cf8c5abfb3e03430019dae4c1ba7758f412213ff1e51745cb6a84db1bae13e6df10d1e94b4bf36ff2543ac2795e5e59e6dc0decd351401755e5bfc7e35153d5d9fa119f75b0d67ba40e54738f5cde6daf19756456aba6d4e7fb5b43994954600ccb8f6f0ff187684aec6",
-  "3.17": "ad6f6ea7835166e9d162ab56:bf3c13af74fbba3ea47ac95ea495f67a:57387c3dc7bc8485a64d5d356f1fde5e8b6f12de0153d66758cf5ba4aa44ec31a70361832c5432be9e5a63d5f1c881500864d361a2b1e9139dcdc748e595554d1139b7c3847f4bb53ce40c101a20d129f911f2d8b33627dde929e2112d06967b72e42d217f16d89406ef9c2123d6f7458b0733e6f4143b78447a8a0d943aa5dcba92bfea6e5344c7bf9a53293ef2ef2339320f9389bfa176194574eea31a02dca22d1779c9c428a9017a4806cfcdc28778002785a037804400d9ce7f93",
-  "3.18": "47d9f877289e7f0b11c69a44:79665ada070a995c73a1c301cf096709:d53dcdc7005b9c208796d0ede45df0f94ed9f6bcf032dd993c04c66f578bc332b43196c8faef6b461e9824b84a26c55cae385ae084c56591c272c33588207027",
-  "3.19": "fa20853c971772b8684a20d6:0b8c771c625f9cc9a5d4fe39be026aff:cf76e66b656fb27d497b5d844b7ea6e28e1e72268c0a06f1147fb98bd3f8350f09ceea1edca515d293b0166be16309f73cb13f8d98774174f0c7fa1aa0b62b3651e2032808430b1ef9a92ba2c66b2420a49a68b5e63a7dbc58b831721f220782784779121bce4a9531282a1897750e5e767cdf229b26f5100cc136f677ff6f2564a4454b118813404d492cd33972339a3de72e3203d8a9a1d1b58ef25942c61a8fe478f81e54fe1e64a9bc9b85c41b94962bf81c0d736ae8ebbcc61ac2773904046295f7ebfd055be1a28036896a94e64084537193b4389645dcd6f4fe8d1d1c179337ccf5821017b2d0bbf9d2ae78aaa08fa470b4f359911529c54ec5172425502332dc31",
-  "3.20": "940fb267348e918654ba32cb:a5ca8f7be0d4432b63bc7ee487abd726:4cedc23d64b288e34141109432abfd377299f089e970632b85897412a0034437c5077508828ba908732575b1d4a9d70dc4a308151cca25f38e7b0ccff283d268510b0e5b30a345f89fddab62c1254cc33de8287e62a252288d789ed16a3cbd32200fe79bb0cb3b02f9b29b415ca1fc762cfdb398168864c0129b549c3aa509d8fa30f02c8d1dcc1e51e5a5695ec4fa0e282924f2bfdf7947d288dad97c1e7ab2f78a7e4d97975c5d81277f6bddcf03653cbe762701c6e93c08959e063c6d0ce30cf04c2900aa0035f915da4050c0323ebd68446ad325c4509378056a25f7486f4163724963bcd52fe7e2dc7ca17cc4346aad7616812e5f499f18c5f1dc",
-  "3.21": "bca96f9d9ce523d80c373c3a:758d0056744232610cd188a4e162078a:df1acb3f79ca485e5e9cea369268401772ff458a94e8e952c4401ecd5d7e4c8aea3162f90c53e9a11ad4697a3e3f4dfc1a395bf94f8ec125167eb088c2810b0336ff945d368653df2cdaf8e07093ecb1ac61348741fb6d1cc982dcf7e4b52acf91d6f46e04fe70d4e6feb4b71d594b208eb92f72d18d30947347af2432f51e8335924972eedb0027e1d0e8d75fba2a2c0c589684391103c03474e38e8816589fd3f68e099e5e01e1a787fdd1696f73c44db0c4a60bd5c909486b198e0aa0aebe0a54e749b49119782ccd4cf2bba13260053bbe7a4ff39d638ee94ed851900b79b87522654c4df80e283f53566cf9bdef5c7c2c341e47c30b4117b520aac2a9d8b14d344fbe5865cbb34285d256cae51e51477a47c961e3faa08f4b0d29f86172ca7327b97b62a2b95f7c",
-  "3.22": "85664cfe74230ddb3f83551f:e13c05f6acc4d439e31e66689346cc56:dbb3377049a7f8a211e8091a6eb827e2a79bf0027e263993203ec883494c53adaee9bacf83e7739bf2a306c820b3ff055f5341b75c259b9a0973d91400b3238f05f395de5ff2af2d0bf870588b12135919635abe21f8a91df498b704b43519b3c7eed2adec83f4454cb91686e454b399d208f4ea2fb73801af02c2277550b31fb8d29fd5c762f7c9dca6082fa1f3315b24f2e16f100de890d86182295721f8e6cbab33b5289aaa2c7b7f4586d2affc61f4e1940488d1178c596aac0058bf421beb0f1fe8c640f00cf2d724bd6b665a14efc840f26d38ab2ddd08684b4ce67f5a6055cab3e1a79554d3b78bdf35583ecb2ec93379a6a1292928b6f65b77ae31faa7642fbc2f009957e30fff662c03ec102c8a5542239de294122679ed27f13349c1d338afe4e25237f47ac60673b227bea5946c2d6fc597f8b55741785463932521f131fa652c209c3f313d8cbc28fdb64eb2890f517b49ab0a128c03c256261279ce3a36174df9162dafaccc95fc00f022284384d3fc704cee2c9c2a0476a2638a3948351e5b2da0aff791924054b2c00be03cf0166a7b9a03b2885b6211f1b120b60244f826a421446766495a2ab8dafa33aa10ed53b9bce68bd408f55ddd4b42979a3175211d84d47c065bcbab178ba3c93d9812eabc5ad11f4e8b60e5f939fc52bbe7d09dfcff7e5a82816976e0d8fbd58d7548ffd8478bd84117f6ea81d49cbbeec8104c8a491f0f514c48bd562a5d494e1584b0f2c166da2341ecfbf374bbbf440d7a223720e620bc463e59b75140976a978a196170855bfa5d693476d0a7636cff3dcf5b4d965a3b98648b60672676b818f293771d5e3e37a2151e86dee8c01e0404181bd0cf43c287963a366242d7c71d516bd331e709063590dd72b9b5e10ca6e211fe44a7868848ff1d428f45060b15fb49a1173821a84ba4c44db2cb56072591aa721954a3a4ff9677a4927b27bcabe1b2492c2390ddd90be8bbc9424ecb1057d6e1e9993bb837749e",
-  "3.23": "d3413a2b2c50bc54df60df3a:9b06592c94514a6b7d6484db6cf4251b:ded666b51bd6197f40381c656df5d5749c1d01ee570ab422e51eaece07c9b5f2c6b70472a8c569d4fadb11412ee18276fec6e20784119a2cc1dc2819b58ac6f1a58988a978ad687b6ee0048a81cb9669b91349728da86142d4432ecbed657194f1e94e8ac2e2b20468bd7b262fde565df11368d4df07c8bdfe207facec44577f8808564ad126324b9e2244785fe3d5d70fe92686c624bb31a781d29d982da5a0a5a995588fb88d9fa2883b0e2d5ed54e0baba5a131e336824ea91540d662842a80bbbed261171e05f14b978e65ae862379ffeab5e2d4c2a6a4892fd7f1815a742101b557ffad7f8421cf9c827071b648ff084b8884f456e59962ce635098f361e6513b4918989ebf0146ed9a765a5627769ca5f238b4d4b65fa9ca3a7808166c42143f19",
-  "3.24": "9fca02c5f155a17f9aa74d50:40628e6f6fcaa833b615cc27f56f1dd0:fa2bfc1f93c71acdc3d19b02d99fc9ea4322e472d7ec840d046415c39a7a9d2e72f04ae29b4906d248e65a2357293cdac4a8985d2c4395dd2df9365e511ea8c0827c9d1b9008e86da941c6cc9a6d0dc1dfe96d1fc8cc712dc838d9c67462a6db543ec390c8575cb49edbd063962a929607f7328a28fcdfdf86369239ccf382496d854652d193227fb7ba2ff0e4893d",
-  "3.25": "51b192c47188acc802fff24a:02c302417886908bbf93c7044321774c:118600531c6ef802817b09ad39f9952611b47ca9a393f530f5cb6888e008928e155b9c76f7bcb6e5d7ee2099deb213cba179320a4a16d9d3baec15c3e641a0b8e47ace00d3e286d3ffd8752761415f0cd1bf93f49cda63eda87884d4b86d9db4e00ec236034858f77e1504bf70932efa1ec61e204acfbf271ac1ff29041723bec9616810f3c76b7c4f84d138ac77a34264616a833a1e2862c37990b7017ca432e775695cae27af4e59124aabc6a2cb9c914390dc5fddcc59fe1e2d84007f21ae7a2510c80b7ba43b8f17bcc0f720e533f8ed36fba92244710084344528711572ac1954c9c94d52fe0942126893cd0acc8f980cf879d3eacfc80cb7d32aa8cf1669fb41d1eec87d40b5a3481fab2dedb7884e5d01e9401cdfddec62041706c86a46ad683a0d109389f97623d7caf22325",
-  "3.26": "efb4f5cd3cd30e1f834a1dee:2b1dbee8ee86c98fabc77c4f23474974:933437caab25e894334a3f556f03e37ad949dd28adccffc562f421a3a231e05f9836719e47bc273fc48a96821208d8a65b8da2aeeb8d6c626f08c3a004fa9e9094b38567226cc39cf50fb4bcd96d926ffb52000b7e8d779ed2f0f1e56db95674e115f76ccf979f728963d6692416ea453721227f46c796e2f9a3b7dc5ffd47860934a766f70a7fc2756d38750fece4aa3f43a2d0b80d4dd92c78",
-  "3.27": "8b17f95c66c270b3304ee529:ec7836e9b46b85ddc356fec18a0bd27c:78bf55073251d629f8df3fdb175af6ef5f0498686cbbae79bdf1f7dfbbdf275d659e4090b1053bac9a393efc60c67233d95769723c7f1621dff6b41302ad06efa12265912cbdfe6c913b2a9846ec70bc96ad278b8402de7ebcfda641710893c137e685f6cede256b7ac62a703cecdeca83edfade0a3da3f16b99d6e6ad948dc3cb1e9a58850a47b9a1a97bcf71924ac18cbed7b4fbe974032cb7e1e5cf4f52e2d0a48131d643951d72049a29e16740a1305b8c5fb3562439e2ccf10cd1793d2cc3eea652d0ba155ab2bfa5c0737bdd6a4a4343c31e6133ff79dae263678d533f2f41fcf1c24ece801c9fb34295fa65597636f090281daac77c5c5839b693951f1afcb73c832333d4460577bea7fbe43e481f7db69620c63d0146",
-  "3.28": "2120b82cef06998043bc004b:0652415db3384d4726206a377a6c9117:88fc104cd56d97dc5960f1cf9d8ef47bf7b03635b1d5615d8164c222983522955d5901910cab4872023619994f21836b32c97b6d85c8fbcfc35a3dc6cc0de449c0a7f2320294aefb804bd63615a908f682725184a4b18cbf357ec31f735bee9f68801d1f9ab42abd7ac4aa25a503ff403e39",
-  "3.29": "1d596c72e7dec129ba4a1044:b19a9d1df2023bca1e3bc255ca26d097:2a602f671dbf0d2547cffff01b19a24283d62be6bad539bce34e4e3b9bcdc4fc9a60b1e39a5efbfdff160299ae9c4f216c6a5335b4290dc23adc6897e172ec942c73e39aa282c3a250fb84dc49f2c07ad13b3dfd97fcf61a8b679c6b0438cd00855bdf4bcfeca5d5142e397fcd1ed8fe28d441871fd857be1b77b25f134f0b765d45a005e634227a23d6d7dbb2b80b111c839444946f8ac26f5a61e84042ee8eca719f8861deaa5ad51200cd7c2f97aada6339d5ab230ddb2a6aaa340f87a9b08703ab4e8226351a31251ac9a2240f4b4e563cfc57b5d19cbba2a23562",
-  "3.30": "f6cd091f45cb9293ddbdb34e:4c6a62673c8724b8a9c8f6228738c3a5:f1ff227b0d34b6148c388dcdde629e840204c165af0d34971caa59caede811b5fdb6e7768fefb92ffc91a867f8d54428d9f9b079d4dde5f7d06a07568681e072e681e22c1876a46fad69996898ab6b65a1c0c9d5a94977bfae4f310b2120f14d5afc367fce18cf150ea909f38188cb365e8af2515506779fa1e3d6f035717e6a87602000182d57817430b16c37e5531f2d6faaa64c",
-  "3.31": "c0807b0402a307a4ad2837e7:188d84569f3cac428625fe958688c782:4e2f3e83333c56d5987d3b32d3926ecdcd39e558e790b173a091ab203f8c5a47419cba88738a5f080cb14b1c48833e56c45eec71f6cf5e1914cd9f78ca73e21ccf90b213a60ccb7e19302df9c05d977a68147b493ae2020cacf736576a34951c851fc3699c6255c2576edcf802ae0c68b6e167cf5239a920c034b1ab10c7f413c00dbfd19271785dbda267f59587b6a4cd60f614ccd36659b5e6855369364a72ea3dbc4a077ff708525f026cf2416263d40f9097479632de8236403912af8fbd5bf8d27db48b5e77da28f890bf52b574282ea1789ede68f48fa65a2a44c47b54b16f0c797894f8143c72bee9fc4ca478c47833e3cf009c5eba8c5c54b8e5685a177c777929732e07203c056d2592a1e4f6ecac26aed002d4c8ad86d5c3375913dd551743ee03ef033c43570c829e88bd6f81792d8b04db5c48dbeb41adabe6d025f6f0ec3732443ecfc1d0ffab6bddbf58",
-  "3.32": "2e3a3f0cdcaa6d47f872e086:7441519410008390d446cec1fd4b0c16:6b795154ab529559527e950afc519c39bb48554c3d4031983100afd52db58ee702e4fd9597262f3696bd84d903374f218c24ae8f4c16cc57fc714a8dab3c49c694893dbfffe45a631617fc4352608fdeeedd8fdd66c646659c901d17b2fe3be06b224fb6761810f1a59d627b3f66c8f5b0b8aaa45543e06c3869542255f14c8716957ce564ae77ab7eb47e3b01afc7718d1a6059777aa18313a0f0d6451c504e6ac7ce7920a4c0985d393e70514e01e8833ff37d1e341e6714e2972b17dad9ec9c3eb1e5afa663096f3731bb838e8e21d42821e61c27ca8c897cd8e69a26c520956593672535086cc611eac6c16c8b3fee53445368d40631eccdb24c6838d69ac7248ae0a21e14658839ed773b4e544899cf66c734cbf872115f16f8824ea37d649bad66775605db0d1430796e66290192b0080ecfb329dccac0c5463265c9abc8265d608037c2bed74bf22208faecbf72d334c82fb44276366572130246f72f5c5b14e837fde99b258335bc7b4e4f07187a9c9bb56f4b75c36edbc8ec5295560da736700b193f3be562f66e186cba328112beab00f21db8e15f790c3f250a6e34d7a46c7406eb473f1961a047a7f69f0a7308c9bc2c91a9001442a29e811c9e293f3c9f3b4ecfe1981484eec6b29848b7754b705b0bee50e4c81fbffdb2e8397896dd40713a6000a5f22bba70136916923aa3991e2d01e32fec4eaff98e663d4624c482621d7f5b61fe1441c257dd8d544c86481d02fa51dd59ec"
+  "1.1": "75c0989589b4effbcc960cb1:3622d69b525f26484babae397c5bf96c:99e5c620a9bec00ada4fd94ed48dfec1e2e9c69cb5f1f4dc7e8dafb8ce7ddd811d4c11a9bbcd09c1d727b5d4f4bdf05258877dd38241b243b2968a577e4ad6cf5c611864c98309ae1d415ad9ab78f3167d0b29f8be0dcaa5cda8f7e7ced1254363cbc9b4f136bce995a22adf2f28e16431930a6512f282d86439be031611fd1c1c17456498",
+  "1.2": "fc92e0769821616e96266a87:8e28a675f80db8911907036bd447a8de:1d678f0008359df1ba91b4452274465916ebc99bb58c72ebfc47e8fc4c89fb2dfe5922377df991c2dba17632e955df4a62698bfc07e2f265fb215da488c77fb2bae1cb660cbf4b1a10d281802fe98e7710bb46d3fc1ede14f1fb45a14f9dc423b2f28c9efef48a05b94fbd45b94d660efd8a5583306b40845de4250599d5ef0f9c91357b1320b75e3c6d4ecce9f22cbf981786089266274f934b4d1f7fb2a2a15a5227e824e754b3a631d3",
+  "1.3": "923db3efd03c7587527b0988:1748604c480e6bf58539a428656f2af3:27d303da5a6c61d7dabb9996ae",
+  "1.4": "4f0c3b85aa35ef2acfe1d754:ea88e55c9967df6ce994a7afc0161a90:855be4c3fa42fa67b546fe0a73",
+  "1.5": "ccb62e9b0cda2b312f082dfe:641c7e2a0a0b20d0ae255f906c83e215:bf90e54c1c73dd9fdba576b30bcd0274d5228c28c8b0dd674e73f5154fff56158f3ee1a876d4e98f34e23f6f311adfd681df4a8bd4c3e961b632252e0162a9c64b9e1bd9cc99f1e6e38a1a7dc737fc6e6ffbd83601d829d5f717279e3b47a7dbb83a321824b0b6713e26dc6807d4acef3726c01c67fa1c",
+  "1.6": "40430f7faab730b235d22dcb:efd658ae1aeae57efb9eeed3a9366271:6f32748a6a89dab39bc866ee3dae5ff7a74d2c301a68d9e987206c2bfee3ce7fb45c7b9ea9cf9c45648ad724d98111b4ec6169540032219cc74ecf3d6cb6036469bd9ee15c710f794e7c704d9e0dd239a08714c0c167cfe422725971bf8c6cf4d8489ab0f4ae11023846591370bbef88d36b1378d60b3eb46020db0ce296b7458f2ccaf3654c2fbe69c2d16c23e058ab1a69dd6533f192131552f4f316f544f8105ee807fc4aaa8ee618b69529963c8b5498a0a0332cea1739bc4d6df539cb8aa0a44aae1f13dbe33db579202548d3509bb61ee7f48c6d356ac862fe48dba21ebd520fb1",
+  "1.7": "87c6519cc0c57b76dd17a6cf:b1310bb4743ed7bd857099825406eecd:a6f502419e33ecb4534c4fda1dca97fd392256989b2af35b80464ef031ced67b8109d88b6496403cd3f5a975521eade6e3c7d22229d07067fb8841dc85396abb1f613dfb68cd17d97188c3c7f2264a29e60e393b521a5fcdb069f68305df51435225b57a461aab371b28cf42d04301718c5fd37a438f2df29da894107094",
+  "1.8": "c198f1774e1bc3a505f7bba8:21f6cd3f3d3c5ba9ef52cea89aab38e1:69c3d9d563d1baa46b7156993ffacf539ce3688bb538149c56a26ff1b482889aecb8e7bf9cfc5ec5091d9e5034999127c93053c60afdb51ff12be4427c74014b7036e5079606487dce79134f45f253805249a140ccb5d323c834b1a6aad8239e2329",
+  "1.9": "8179737b408d06d30fe95f6a:2f1b6af78d7905c917dcd1035e1d041a:84781ff370d6af71c72a5cda212d454c3e53fb5dd69b931a66349a5f4be24c1f1a5deed5dd226e91bf2041590959f90636d7ee2b9c730cacb1e2e18b9e8578a92877e09796ec17a7412dd28eff7da59eced1218e77d28f888ac18170045b2e8c4a1a4788727b220aa65122810bbc712b9e5a4ac988675f305d791a9140253ee474167de8fbed13b8b1ff0a4e2a55b030c18735e015d4e8475a44ba294b50f68dd4a1d8b6599cbdc5a377eff1fb69f9504769b6147dfaf6",
+  "1.10": "1c8b71d62587baa1e40f14b6:44b47915e7317ede4372e568d0bf48ac:676fa03d41c8d7dfbb5ce3ab4665e5c735bdad867b3638eb815fa86fb4fc5e2e0716b75b3c3d7234ad73f9",
+  "1.11": "0e5d34d0df581578796d0ffb:9e06c7b41de27ebe115c49d471d90451:d7e3e77595d73c6bcc60ec4cbb20e6f721641fd9738a13adef3cc54c4bfa73af9f8df8b17d3dbd005e02a4c2aaff044c33e9e3b141d43f75fe4585a96289eed7c19d604f0ac886eb994d52b30f51837888ac233c00567583eff34fdf6f5b261ba7e63cfa30d784bb4301d711656be17bd69ce83ccf9e0e87d4d9f44903ff0c529412cba2940a51f154ffc6462af5305c0b6224",
+  "1.12": "afbe410fcdd3f0693fd3683c:2ee37f344e2c97c25957f0922de206b8:863ccfa23301a1c17fcdbc50ceb6b763a505ff61368651420fbc83017096bc7db4db2f404746b48f6b369a366125a536a1ec26a20839f2316b7fa36a509dbede18491dfd721eb39ae0142b5ad0661faaead721e8c0af85622679977278348cd73c5feda4e627e79ef37bb938cd461bc6f363cdedf563c03ec4e96c0fdcd7ab108e56adc84ed3bc7c59ca035bcec9a64fc213cc9a3cc1129aaeb41fbf2a046fb96fce5df88b72fb645356602f3903703cb1c1bfc4e620d57b60da504f1f5984d3e5dee487f50cf8681e1a9d44f775921c6199390e6b150687e20bdbb706cb4ccfa356b839fab02d392636265f96c65be8cd",
+  "1.13": "a037f036624efea913e28815:d4db1d971f9f67496084a5bc09581597:2b6a090dbac7a5f8d976beff94b6e88a84dc7018c16b94b58e5f739231f0f21caa035bb1bf5072eaca64db0aac7883c148101f10b6fb9c9d8099b7a08ac2e7b94318e3bf98ed40a30879f85e59363046968e22efdcaa52d9dbfd14edf4101ff9305496f95833fe77ff4b65960aecbdd6c49c767e068d9645d360938a5f45aa556d11176c9ec443a0453d12bcf43398b499edffbc859d8d2397a4e75f81",
+  "1.14": "b7014c9f1ece7c1eb91622fe:8c15e1e94ae80798e07f6de6172ef3e4:77196eb7322b66d47dc99513d932dfc484af39f61b09f5ab3864a370ed92642d84debeac5fd348b49bf7cfcb8d630d31f0a9c3d5fee9db7f1e8a49ec27bb7c120c500c62af9a48166168e913ce859321d1744cbdbd686a5420b3fcff7f84f7534b1da10fcf3fa12817eeec5b609ac3aacacbef2008aab7d35ab23cec3a21a82127ba1cb261084b15406975ee574ae3bbece47396fb378979112c9e42b17c9c29430bb651ea0f94ac",
+  "1.15": "14c4744e1da1b8cf7574b90d:085e9a44d0fbcbd38f4a935ae69d4886:7d6463870ff863b0d369e99de1e7f307e57bb0f3d5888ab3cea3b9a287feb97039",
+  "1.16": "70d4ed7abab5a3d75c56aca5:40af22dd1b454435509b707b457f4df4:57b67cbc8ff2d1250999a10e420da03afc75bf4aed77113de22ec8b61d44bee1f7c5ec2e6077b29efb801819979884a255caa724961eb3eacc18f5e1791c6b4b",
+  "1.17": "bb86b04938568864b866ab78:6834c94e152699a3012279f7e24955fc:cf089a582a33061c090831d41022410dc4118e92515e37d1370b5a17c28258ca05691129aacce34610ae80ce9cbdc7c103a2ef52edf1932e782d24eed0e92c17fdeaf3b6454143953a1d07cb3fe51a335d2059db0509307a91eca68932714cc8ac13511004c37bdbf45b6a889fcb09a46697f81d9bc86f56e033beddb17268cc06f8dfacd8fc52db18d6345a5817306a56e3601bf8c565a6e47d1a7f9a0fb6d3fa272e9fa728e235493873cf53d3bc3d575bf078b7c93e5133754fa6bba353a147e2b7b9c76ee9df51a4a8b547ff318ae2b197a5b1e4e721bd1f3f34d22a01f6f3b117046523b69c7a821febd7f758",
+  "1.18": "b2f1b9bf0343f13b2b676e74:4dc231e19e9fa2b9bbe3cad430da1d47:0d80bc6b125592a4f8cc611a5f52413effd7f11dd48fb1b0fc7868a201ec58779b97d9369d428dae0ad865127cea177b7e1ba74837a4db9134c48f472514229703ce46063d5e327104ba50303b2eb66caf249ffa350d94670832422dd2fbc8ffeaaf7af019b90e942e45ffa38d478b5effdfcab8de5f42e7bfc7f3f3ccf22b400771a83766c29ed83bc56d8991b90aa5799194c5f27c7d6e0bd24fa08ec5877185927b4ece42a7edfdc666e205d61a2af073519dd6d38b625cd8793fc0f6b98915f016f16cb3fb2f1d682ad47586a55c0158d44629a83b033c6d2a98ab2b1c1561382c8bf5e80b9895abe5a3cde90dcc759317c939370187a214748698a7fbc83cd87499f2200350d2281f43e5254b1ab6f31fd56a177e89e7b97f384fb56626faa0b845add4c183eb5dfc1233b3175bdbbcc5a0eb9ae18d08aa1bc9b1aa94d0d65db3bf86206f73f915790e8295bd0b764102bf4d2edc3eeb2fc83ad5828e93b66446f20aecc142ff5db850eb03a1be47320fe6c93d2bae3a194f68d9ca0fedbf0c27646bbb2cc2631015735308",
+  "1.19": "6ed3c03ed4e9da47fb7f2776:cae0086132138f43aaf3003c90771649:17c186a18a21232baccd44d73443d96fa6e70b6b7011c105a029279323f41f207b",
+  "1.20": "77f4c039429593312a96db34:9efb3ab620ad15291b17ef93a081e250:df613de7064fd379a25efed3c0821d49aec0bf0114b2288feb17",
+  "1.21": "28d6e3efc761679ae67f0622:343098ffa778c61fd54e712897db434c:6574e25b73647b1210427fe19d33b42bc5b113613e61c6b76311fd7b64bc57c24805fc0c1652ff3df463e829bac00b183d8e20f96f178a153d9b0a81656153bd7969424d45e4c8bbb9574436e97ae38fac6aa4deeeb63b69ce1043bb8a3ab513f0e97ae3b65a78b8f895d571d047c9bb0bfe60eb34a9",
+  "1.22": "c7c81f7b0e2a1998f572caa3:34ac90ff3d7f40cdfc5d33e262123510:9045c306d424db67b0ae99e079c86e98a554c6782d3f63ffd08f3e1fc4bfcd14d40fd3563af1a2d7cf246380b00880f4a5ca55929ec857792e0d4a1b7ef87ea74749e537a63ca9470e672cc65da5f566743e1b68454f6b2be4ccbccf293d42dfefa89b684eb798c3f431ca9848968b55383543eba920e39b21f0fe144da1875d1d547546ecee5e0240303ca8f9d66a1d7e29200771b109ce05ce401b49b57d31870d135ae8839e6adc07fc6bd7f6f7fc6153e1fca748ed0568226565f37c1bc9a0307512a87834e6eea5",
+  "1.23": "15185810fdb5d527e93903b9:9398bcc2da1c4d57f60bf9b2e7901637:d63c4fb0596c04268b82c0fff47e43dc2178598e6da854f0e55a3920a79320c42cd242830c6211ec8cfce13c7645ec7bf6a09a543e256842de051dd88f4ff330feebfb553df01953ab470ac4e51eb92e80700c82a2e46199f5cb867f078e51bc36b2c069309972ba6ce0da6bfd623dab945c1565f000556ed4b3cfcbef9f20889ebd80a5bb",
+  "1.24": "836882bfe8a4ca1defd939d7:b1a080c05c6dbc09bb7cebaccff42333:b12ab90b5a5c08da772af6bc454a32836ad69608f5d56195f1fae3e073c45b37bd429564b1a98512cc0eb1dfad98a20a51838a322051657cad52eefb8ab8f82578cafa9bcd9b7d987d0247374bc8d43cb4b1c2df246d30e98d683e68ee0423f1c2e463edb5db1c974f6ef019174a56eda4e1a418f090e1eed0ff879ed3df030ce139395dbda735963243703777f4c270c88b6f",
+  "1.25": "2e1ea84c29bbf2c89063d102:29ddace46085ac2a35b02ef8ce4f91e0:c97a87637e9feb6c126e9043277e7e43e19f0ba0617c3a326b7d61eb80947f637ab2feebf12c6d53db619cb6d9e9b9593eacca25e7e66be9ed50288ce462fc51ea9dd6a1f934f0bbfd894334d2e6736253a0b438b9ba32d4d3d4b593bb035590a6ad7f6bfe1008fb6ed027b4611d2d8dc6fb7d51a8c30c5c287cc7e7e9f89e0ca1c05c3f2608767d84ea37b9f0487d0fb558e0e7cf7272e1181880f4c1d38722e8c963082decd2aa11d2e3d1af8a41c9b957e2ca651adec93ae94fafbaec767970af4d210a4f75ed5ad137169414a46bec3e13743b5b3198e48e",
+  "1.26": "7661157950f020cbeb02cf88:5c1c71bd486d284c14a1a277b4c8ca41:219999885a8790520f2842a165ce618e1562c3aebaa2ca256be7f9f7ccf590f0131927bdb9131d89fbca71469e2528c60ea1d7e2dfd1f8dda7339455536ce316a65ec7f1740d47c123429b28e88fc8a16cf23f1fe3bded6e9471ee05167cbc79a686ad783261ca1442d340629b810a56cb9aafc2a9338db032d83dc78349abbca7d07871a3a2f3deb39b40",
+  "1.27": "19517417c66f8b47579ab5a1:7f9671fe54bbab075dac4586322990e1:06e85d11288adeac3bc615ef2b07fc64e9cb8b5bff740eab0b74c12eb02f7cdc093db4d967167fa5af62ee6f00c56a6ffbee79ab49e2cef473c163546db40eab37d9edbb6d8cb35fe0a21a89e2b501a9c0624fe94b276ce669d75c9a8e7a3fcd567b37c1c6bd53a5bb395cf07869d0d3bbb5f4247816f7980b266b21a102bdbcb698d3490cf39b03da01751d4af8dd10a8be23a11d9c857e0a2329605afe8275941990115f4729b2588b782cd0c8e2598e11fb558e6eeb6da67831c85d3b56ec03724371",
+  "1.28": "bce1e3153849d8d4d18c59b4:5bc98f29aad36fc2bdac779e589d1899:ce289158e63e35fbbd3895739a65144d3ac93bff4f26bb7767a2d7948641b27a4419e79d9267871545a6fbdc9404c58241ee18d183dee1ec3b8e2b2a550512a438c90c1605dd72c2d4a79d74c9f75ae3d8b8fb90d1d1ff266969c689f520ecebb05231adfdf5d81621e078b8caf0e377174f905bf3e45aec7fddebd9fba87439f3395410acdb6ba8cc52a0b14941f2b848a81233d6660e1e4e3265f5fd75a6da637841db0ec41787ce3def708f75d384525eceb713324c92b1339bd5a4b4919f61144c407622fb9e6e94974846ab6774fdf735923347995f62e14ecdc933efa6fc68",
+  "1.29": "4da07fe2cd46143bb5defa53:0edb37fa88f1871587c64e4b75096ac2:f09e847f64618b9cec5bcbd9baeec8a47cc82acc9d751f48a89d25d44d56f73544b04db9eb206ca1489de4ef0068145e03430b6795f5ee49206d9c98887290ab01499496a76b5539a2d57d755bc6fd784d2234b375bc7848101620e301e1d3b7ec4da5e3788cf76d4ab6260e29aaab27f8c1e65637d8e0fead77d242f222e58b503d5409f16c634c5792652fb6f292b807175466e585e2bc1c8c26ccc56901ea8930f8c406601ce2f4765631546fef493996bb14012d7948ed1f2aecc4f9d8cda7e5",
+  "1.30": "87743a3ccf3c29bcc610f3fa:e9d0e1668b9afb716f4c1f5e1d6a0280:0044c9e9b97e573e4686c8bc30a524cfe2d52eee953595f7aa1e32bcd0bffdaf6624e06dc80308673fb8b0529ebf9007e6726a174186435323582efbbc71ea523ee3065733b51e80a5f9f42791dd4af76e5dc3b8d7d049d3a40112f46031baea7f842dee421f05ae32dceb1ea33b2b1cac7ff2b7e4d4e5e51583b3a99fa6e91336f6d460e733d889fe967e345547b4ef8c1a54786ca9359bfa6afa2d8de3bf21e9c882542d2984e6a880bdb2a11b708022157458e456aff164047286fffe6f10b71ca0b75817264ee7eec953d42cc380a374af1d56980f06630540976cfbf8d66688eab6d20b779fb40c21208e95075374bf5380ac96bcc4f4371e689ce3b56a71b901e09e938e01e2da386bd40960fadfcff336256f0bd221c97e",
+  "2.1": "82e2bb8a455f2ebc4cc5604a:60e885f9819f39aca97105220fc1346b:0b4e1822177c9b31ed7abee4c10b91915304321423b4f05ab3f62d2c2cfe0d580b6e41dbace37ac3b1ae81f8d9bf4e3e8092677684627365b55281ca9894960b9560772f477adbeb46",
+  "2.2": "28b695539be2f4d2a96d660d:22761cb11a582412dcd28742c9f53d17:bde987ca2577ea6d83611946d437e7282da1ed4f206ee42cb31a8adefb3b3739bb7a6cd3e55a5ea2407b7bb0ce48401d84304a1a8e13ace5b2762582c1474e04971db70e2030a2c18c1fda6d9aae62a2c4612cf857f749359824227773749b0359fc3f73dd143c1f6ce684e477c23640c3cca2c8e0d02d79bdb5e68b5844fdb60737ff4375238bf7867d34ac8d93d602529ee0a4d5ffb9734c6ed3202b6829586854b2414114cae51e212a646909d715a888887238eefdac0618c370ef611cfeb579b7cad2302362678b75ce7654aeb65e2d800a173d2269bf4326b1a9395c3767a880fa42db02874cdc11b5fb0fe80cfa763afca9ba972555a6902a2e055ac57571606d0e432dfd703ded46659b9b25d3b6791989a51015cd9ff2af78f32b9c7665658233bbce8f811e9815fa7ebb02c89029aef36c88c8b8e5cbdbc5d1749f316567ba3fef624fb3b39ef6dbef8b33f61e2ec9463453710b46da6bfb5e4576264065ff7a9e0855114abf17590ac029ef02a5f24f9917e133e155c48416e5a1224ba116d1bed893ae8cb7",
+  "2.3": "0e59fe58f0d1c744b12571c8:f4e186dbe264c6bed197a00c9ab8e04b:5924e93cfcdd6a779c07a6f71cd9d8b4592ba82073b2f5a8771d5c37e79c27f82a3f0f0abc8dd6e8a6446ecbb2fa9474",
+  "2.4": "8a0660725009e1ec0e28b5f2:6402b8f6369ef7e9e913cd8afc6aa9a4:74c5cba80248e314f2104fdc3cdf798415faff5c7fec0a17e7fade10fc1da530ebf05288e5b0995091a2ed0a85dae9de24a99045c839f15a4d76253bc0d93b24eb1933197f352b17b540d4ce51b5dcebc800b87796225802476ce6c0210a20dbbc4d717562ad008f388f190e93537c1d4801c8c7a4a44d39365b2d77a4738979e8fdae71ba88b44dec0c0adb08f13e23b9d9006b7568b1f9fffbb13020ad7722eb1444318ffe69f326558f51eaa57781fef5e81d0c84816d90c223721932ae69f40e0213b0632a5a464f82cb0873a981ecb8b8235680ef329fa4b829a8d58a4f7e084c648b0530414a1ee38002bfe81dd7b1ae9774698713a3125daf388b1fac05a1c66ffdc65a9689adf2b28f479a41e6eb42d822dd9739198b4b3042f7545c1822256a2658f92ff0387c8824fdc4545099b74befb07e22e9b033a96fd239a8b24db243c4274eb4a134de39d8371b3f66622723e6955aeb08410e957f75db",
+  "2.5": "b380dc5dee9421a8141e56f7:e70c2ac1d1f7f53638acc8012eae9b48:75b82fb084a2ab983cf4c6b7757c8b6724e2550bffdb1fbe581651ced8053a413c388462698c0bfbce9f7cc607824fda31051a8ccdb1929c5e6736219b250deaa624754e84f3adacb71cabbb8ecc7f887554dd",
+  "2.6": "c5bd2be038a7d56bdb70b5dc:6b19ad382ab213ef7d7031242362a908:29f07c6d6e196f8c42db43550aaed1ed03411f03d25d8da4daab0f3a3717813c8d7a5784317c9ec73e0a60bb55a3e9662b3152d1bcd3d88277c0a1162a0edc0edc8ed581af8cba869923ec40ce30eefc66d2be0debd4fc723e5ad613020b",
+  "2.7": "446d9449d6904656714d7b7d:1a19d0cbe999415e53cfd97e4872864a:784725376b506e6c5225aeaef2a55dd1d0742d15d4306577fe12743fbfaa679721a813a9e281abc24545e336978d5daea97aa4decdc9696aa375f8668575d077f83675aadd0d62fd730534f02786159c36c785a51609de655e50a45bf92c4cbc51b7193e66a9302ad624dcb896e1b9b790e96aa867be69ed6e3d8cd9136fa67fa016f7ad7be48691",
+  "2.8": "21773a21e6e05f6eb9ae7384:ab92ab9a81c182c8fdd59aa1ab928c0c:e39ea5fcb46d7f10e871e569bfc8f4e472c9e0692d96d82f5e8d382b27b365666aed84e56dd6b8beeff552511acc425474d45b042c0ed4fd7e82f9c323c721a61410d2cd641114b01e9828443168145ba827da3e3ebe8879aa4aa461486630b9771da78e20164e2319c3e34702f427ac7115686ebbe0789a9b51a671d98afe7a2983cb47e06d5104574cd516f2321d0da5da50c8601168d3434dba90794c748ca8c0641a469b3fe338c096ae3ee7db6d95bc52e733770058f0ae9c0d4fec37d4bbefd5584cbba85e8f0c7f8a0241beb7994bd82139e992a88061b12ba5d1a70bf28e2a28170031ee11cb6f7707",
+  "2.9": "de20a2e3e50510108062a4e2:3077ce4c8a02fa58de1a33192ccc3f72:2753e8e6be00d46adb7c5fe278db307fa5340152a1baf0aa2ff6c9565b31780612e66eda9100ae1659d2b9f993f52b86fbd22a2af22df0c5443e93b8b55243fd7e0be1510c722c536bc06eae8a7fd280c76421f8d69b48ce5a5d43df64a9cb9427c5625c3c7384b5207434a191de1f0efcef45a16740a937ac0c2ab3eb3e20233a2c0c1a2ff0e00dcb762a87e846f7f2196c69bed0b9db497c1d8bcb0729d7c61bc614e11d2fb7f0a4de320d9c",
+  "2.10": "6c204c771d3c64c62d8bad19:6148b24e16ac895cbcc00b84a563f924:58066709de60e89ab4b6f9ffb66ac0022ec7eab9b0b63299c8f19f2550d38baa94dc154df7c1424da9be44bc2612464040c783082b5c1cfb87733d1cb68bac35699f03986fff11a7907ab48a6795cca349eda4b780199e87b318538dc669f3bc760b235ab1e5acf126ac33040ca0d6a61ec0439794649a9fbf8aa58211cd36c38dffc1e8b0c0c0a5359d5575e3c098a11649b78c2e34de0f229057ae584bf964b5373482274df3a747510c60b68598723a0c384258d9fb5639235a2cc091ea690c6d63961f59fdd12709e431cf63",
+  "2.11": "1d2f04cb336c7c760af6df15:8363f85f83a621b8af4bc8dc0e2315ec:99a04b7800cfaf8c649a572f631f59f1a6f68969ddea753829f4eaf70f385aa222360eca939cfbfabe790fcac425417ae0ad29cd924ebdae3c22f6f2c9a6bd60049b89fc3dac7563216682c2c7e2b506abd86b793795fda733f4ae857f49e9312db776008bf31ca31ac280d789a22c1f75d11ee11cfd192b9fd8a29fc79da39538918ce139db13d5ec5e9238fe327895a0e8881157c4dbf5d5069f2d2e4080298106c874763ba0bb7d3881583571d0e3b456de2ca407f56fe9da2f7b16fabf88805392592238e022",
+  "2.12": "15a49148f664eac7566180fd:35fc10d41647b48fb673fd5eacc2263b:50aab26db31c39ea15ac299d9f9c1b1a9b580f9a8ea0fb4a3c7848c2976096daa9792cd2970cdbb557c46c3526f93aed509a2c190d2914247ca51725685e594a311e2a31f0c084c87c8baf15387b0b7b3f74d90240290b394b7f8cadeca86ebb5883cbad66a98341c699a42e049c5aacecba24e1",
+  "2.13": "16d146cbfcdc9379f66cb188:053fd8a432c590dc7a050bfd8ecf5fd7:900b7d14c32a89133d905e6f953eb7362bec717c640e1e164db7d75f0201ea060a90ef08124231f1e2502eb0bd87cdc6d4b08632d7c15cabfd83f1ed5eeb0cd4ea85298c17787559858e62fe7f5ea42bc42c97e7b8c90212e693fa645ecfdc5ddbe1923359c275e221c6604bf6589c8037d1cb075b58c8ead1b35e8fe2cbcec5c066c366a697f36dfcb0ebb4e7d63b493478dcf7f9cd459c096a3129c7806f8b6c705961410fb310c14f878a0a962cbbeac39969eacd898d3a993c9564fa91",
+  "2.14": "e15657b9262d94a6350c46d0:7f46b7cfaf40f1db146a383e065cf36b:841ad33d0f2894622590c43a50416d034f7254880bbcfd0c522a7a6d731802f39e17f8a1933dda6e6ebdd88dac1b9360b626cac6be16a3c419671148475de765edb95182a295003c43855dec7b79fb96cddaed438c4b28d85f1f09b4c4057e557e1cb7bd441eb44f967c9c498c6ea900d333d10bb4d94d9e99157f39472f0dece562ed0179884562dd32fa01e0fdfa2e12d9c3292bc43744499bc34d54697ade6c7d3ed91c268d174281288463cd281d1d83c37e7f5b7d8792f9a7c322fbe4adcb026bab2d8a7f615c49421abc7df5d76f4bde9f340e14f88cb8369f419fa847ec90cf31db23c5c3c21dab263fa2687d9c77c5905d7cdbd0d763d5598fe131870dd6a7fae5f3f4cd6522264e76f1e12a9e34c9f181d97287848f194ef35131fe1f8f03fb44a709a7bc3c6b1750b946bfbea3bf308dbcb1fd17bdfd672d2736e500a941108950e8c4a65dad70145dc4a36b1a1c69f0978f72f62da1cc5c0ecdf2bb8d2c1faf7e",
+  "2.15": "61c743cf1d06424872c2d9ed:72f987a44e47c3e7ca68542462e6ac4b:21b0b3a492b5c9d185484b28b0fe0ff5e7b69ad725d482609e994ee5a546c2fd20fdfb236198d009d8efcfc8234334030f998b9cf613113b5dfff8dbc9a7721b2573850e8ff5d677470f567615f82209bf77a48de002af694dca66ad3aa5186d050856d75a2ad1a180ce3a322435e1e227fff65ef86fc8ba66ebca3238e47dcb3b95aaf6cf3ca7623c1da6bbd4cbde9d54032c9a39b561b7ae9b8de7f611948ae0a59f404053c632ab18f4d8e73d7eb7f751a9dd59e97847741fb8f5056318ab90508e07f23b286e42ddd91d746fca085c3d8291a951ce6a8e0388fc4e5313c31f8dbae447864efd82640cc7c8dd9f9ad1cac2fdea73e9ec928c0ad84f635aebb7edd5dd008712cb621f439087f745b0752a4109653348c1529bc89a426df4b76c3348b82022d82b3fdc5772d366b3dce433548b1607282967b98ae7f08608c7727a8a711eb2636cfd3e3010e584970100889c7c13b2a6f2c0c0b6e68bcb74e41407b544c445c081",
+  "2.16": "2e8bf398e8bc0808140cea19:28a9ad219ff4ce3681758a41cd714445:9b95aa8a6b264b6925751b6d593a8ed2c99bf2989e7840dbaac5b30dbeb128f0333bdf9a8f1d144e72f5ab9ab1d2e0fe668ab59050b5c7958a40660bf2c067cd4ce031b3a4ddfed1cec938244539abf34b334a7737ec4bae6b50a6bf05e0c02ee5e361a0b1d04fdb7c82f14e79db8ac205838ed11a549e9067f7423f07ce022e8d95ecc409dfe47e9bd968b08fadf01ade605ba520bec88ea6ae83a94bc9d48c3912bb0bb884fc205c77b090efe7a54ab80fc62010396344b70483761f56c6f550a3b7cb8653d6f68be46aa7d298312b21b7b40f18eb83afc6fb38bd22d970e779a0cc0368abc8a2c264f0cc9ef8d0263c1d3695f7f1690991073ff897c1598dedec9faa2d6e4fe7505db8d768e4e5ae9d1fb8d5deb749d8cdd96d2a7170e0af6900e5c7dee7d317b8b9a352affe1ed596affdaa0231068a28a233f5efd327f247a5822e4d4bb35adefa89767267cc0501712d06099e5932cab1d014e22e3df5c1921e94ef79cb307eeb4a7d6678848b9652b5feb32791dbc0f2ac2bfc2975eacfd3642e0a9b5a212e1049161bf484758427846ef875b052a00562b52a",
+  "2.17": "574bceac9cbfaa431e78e3ec:391d02dec9e013a84780c2f1cdd4a755:972ea658ea71fa3465d938b77b860dfcdbfef78441c9c10c6cd98911d1a7b24f907511e9b0b795825f51ca0d9d3fab1f2d3e593f2da40428fac8ebb4775eb7c40080536ef4d2164601ac73ef4877fbcf3eb72fb5a2aa9ff01e552708fde08df709fd9187237062218f2657b11358255951b1856ba5aa005ddf1b6f7651e5187c7112ee6bccf57601bb05b7187af42ecae5eae5f77b925accaa842686b35281471cd95d6b9d2b7cc990584a722eeb93366f7a371aafa2b29ea0b042c5200246b6553c1246f3a7cb4468c5bc64e252a23651e156695d288e22ec3f5d80e261837174c14365067327634b1896411a9f565dd6ee7d1ff56adac22deed67d1181c217fceb00399136778f46b0bb03fff6727138660c179cac3855a329bc8e1d133a458344f3f45d37e7e403204f8d90b82b612ae4863fc5eadff23bc6b8aa",
+  "2.18": "e985d771a86dfee9a75f882e:657b99e5cd9abd1bd40e1d78f3faa14a:7e167e0b121a1f106f7880a7a67d127d1f9444f96a333dd235efb9565289e58ea426a8f7ccf4927acbcb262cf63664f163432edf0769e025400a1a17f36dc5c2cbf27661e9269f8ff4b2db22e37d0756b4e0f70294b7f59a510a9ecb2b087d9424b3056b11579f88b43c71ae15a94e79a82d25a1fc55d931b1ce2e4b1b438ff55c3425e2a191e6dd59c34788e5d71dd73f714482cf09535137df8570bdcd7ebd6c5cba7b60fb0b890d889372396888eacfa0b049ce47e4c40ffe3c87a059127c2d3268d2923409bbbdaa0ac1a59bba4704366a53857345",
+  "2.19": "63c1196f6ed31cc92861543d:dccc6bdfcd2ee9123a295275408d31a0:70d1acba5cf2a8fe880e31b6483dcd4df6085fcf4dd8f25bf8f831485ef55f3a2ff7cb2c7ba08a5b60a0944a67265d67db3fbbcdf48f5aa852a778448e947fdb482e354589e68a3a24936649ea665f7699327c93aeec76af29d4e31efe74a3f1d453868e429546bd24a34052f3f1442437cf3bf6136b07a4598bcca3571abee919041a73f73c8ac7b65304fc64c9bd4f33d4d9e0650e5847eeac3446d8dbff597b134d3a756be4c203fb653b11e8d3862940",
+  "2.20": "f081c56205bdeea8341c2e37:831c8921315e5adb3f20226d41387718:eb14b532061959ea67cc2207d65257d3d1b627fe5ee1cd81dcb800b01e16744fe841e9b4a41b19655a64b29e437d180329d642ee5a3a94fae597d04d7b7dbbe83c5f5e07461ae2c8da99a244bf6af7715cf4c61a840991b0ceaef5d959a7c1c5808cd4a83ab3b2da8d8cb077031e2b2a117f5c6009c67a6e9f19ff48d3cf087894fb1bdbc9c1f8c5dc239a996299a5be399cf06bba724f8a3361b1e3a5e93516eb57ea14181e6efc616c084f99b7928aaa0c819c61df5055b8e8fe",
+  "2.21": "b2a34acce1b25fc13a691c76:95e086d5a988b2822e44d8884953d601:700e905f1a948f05ab59dfac9cf4ca9c253951fd60364b15f34b85cd14c3b0545e41a9a3e0222c2141e6a6a035038bd7f67b5eff1205c20e48f0e44779a55188a03be64d9fc22284dfe8cdc0341b6fcc42d2472899d8abe022ffba93720c7c3fafd70761a5a9396b31177f0b24c0d8632f43d0809e4272628f437ad1babf114c8f4bbc0fc6beb03e69b83d2468f716bd658518de46120d0da0d8bfcb7ec5f10017ea34faf28a70828b050c779dcd2009a94e03fc7dac0b303d04b0d88dff96f800492f597049af58bd0ab7ef29c415af880f2288ac4e7379905dca",
+  "2.22": "65bcc598e54e7b7c47a04e91:b0453d781d3d9f91ada6962dd6f53d06:3054e39640d83fef0ab111ac11f293d40dcd3cbb8aeffdac95905eeab6125fb5d214b4362521a62d26f003a10428a91194957e4a36dcb81d3cfcc6b976092114113fc5a228346c086a1b51698d26de39971c41534d9b0d232eb97858d3ca3b700a586b49f5183d85e00a5a99b88ff145d3830d1d3005f8d5797ebcf116971c0175b03f66fccf25964142f3964f5f02f3d72adf9c2647ffd43723cdb022732d7e51ef107029347b7ea3c8ef0b64b19d00893ea81dff36adc5b63f84e7236de2226c5e54d90e0b7f1ce7e6becb23f2465fa7dfdff9f107c323",
+  "2.23": "f4278376d8ac24b3b75e342b:d8a67ffcdd9c0f92b980604818ac9d8b:2e9df1d6d16c4eacecce33e3e30c45db0fc576f6ad85c8ddaa8755e1dcf15070b8cfd75f1fdf07d962219dd440994c67bf3acb03ba247d7a40200547ad597d7c9d3e0221f86a5b0a1d8dfcb6ad97458e0befa06aa4232a09915f0af0b77ddbdf557c2b03f4041a76d260f52d12b97f08079e2195da0c624421128c3c953697ad4698c6ae09017e8197f02cb9b39d02530fa467fb022d0ec36655521d59f9fa5f3a0c7e2a20734fae6d7be2ea29b558eccfac3a02b255712f89ee17f6f01d6e5e84f207533f34dcea2aed005e1dfce5066ca9ebdfa95476838e1869208cba83c1c86c621dc9509a678471f1c6fe14d1639aba2de2a70011a056b3ee269a05e8b0dc07e8b059",
+  "2.24": "a0feacc62dc2e062396aa8ad:926399698d4c80de75d231e9df3e8f23:42e398943066ef948d65029f6fd24183784c488c5f9bf09f0545f56c0c4145631b13130d2ecc55d023e7c34afbb75d0c667316cc99eabc9daf890b58f6a7552870a7c12b8d4dcd6d5653c3c93a7d259330b1168380f64297793dcc9f4da2d029376c27a72ede3d0e604806a5901a6841d0b97e3a0bb8357c7b38626870e16d8424d02b74995f17323b021893b296fa408f795144d3068937d17e75fd4ec148ce364dc8144152c699e20f97fe10b686a43d674202fc373a6eae855ce0f890e7b8950b45c550151a6907ecd9bb5324a46c1d0f5ac7bacf573f9ebe0494e32393f2a43d992b6fae63f4057e34e7d3245b7578f42d6e9e2a38d50cf4667faf00ce3643c1f7cf41e01f6aa1024311615c7d52be95c79def54a051d441a15840495dbfd27317ff15d581cfa0c8ad165126b1108b6477333acfe99333c417ca725296faff390f1b0c611991842670cc22389f85447cbc6bd4169d6620f8c56af1be0f96147e18a50f0311f824ff5cf56122efbd1bbeda29dd4d8f76da95204f4a016c6d6a05406a9ffd016c858b4f585de35470154304c409ced6b0555a4bb0a870633da7de97e9a85bc3be53f1fb881df2888f72d8bb30278ff523d1f27f08869f95b97edc7d4182dc6a0eee68d7632984715536382b8013f104ef9163168af3a6e30b75d4476e48edb5fed2449942d39589b16a2ff5bdeeaa00add0c5d908f82096666f56ef79b6938b475b2f2aea08bdb56051847260",
+  "2.25": "b1e6b084682aca62ec6ae539:a4d0232dad68ade1a8765fc02e7a71fa:2ff0966e907011b001c14baa7a764ab9bf2dd8b04b0bfd90c6b3992b8417795f7c0c9cfe5522e2087a55495f7dbd9ae58363f702182cc8af6241c8519f723238d4d582acc44d94d521619bed6f1f97b2069e71730ea44e0ecb55be2dddf8f93c64e64301da1142104fe4032c07d3266bdab9595e303ad14eee99b72ca62f79a8b9eab09c87ef9c60d2d3e1ecf620217e7e15dbd4bd991b579983d964b8bd252e96bd95ccc65b50b36555d43795fcbdc398b8849252c4a457f7fbb13098722631b754a5186f19bc9c9a39b8e23628c052abbb335a4d7505686a9899f33d599c1cfe5cd7f929d1bd280926596a040e1d921e05ef21062431024fd56bf9e93c4f75f75b46807c123a225b501911d049dfe67e1cf3f1ce2db0",
+  "2.26": "ecb15df32c2fe41b6aba40e5:b802ea3439813ad25d431c2ddd0b624e:3167fa7536f50298364518486867d35e808f718a65cac839d8737e880a24f67620e8b3a19efb9ecf4e1e7b09d74288ad7fd1bae9b70ca10e6f7caee18a57ae0f9f8adb9eb24942031a9aea72667ac0c490ad3bd1a08fdef3d763e46bf48702c8ea1214e119711cb427759e947f3e0501c37377b1e566836fae75bee2e0bf9ed3d0a9df11c27d3800e94bdf07c9b86ad4d023e179acb387d7fa24375534c85a26eafa800f4e75e6c0c3a2a45378063f64685ba3606a36d99a7fde72ca0f81f4460acbf8af8d3f0aa9f0a79e4db1848c6dee698ee2d9e8a714e6a357652c3bdcf7851f1e9dd0f17b9b4b7c8f2307d56d49fcf6f2dc90ed8446bb7b8c7c24149801ebb7e23e99129515465a2751dc167ffdad33918a785194d2",
+  "2.27": "c22745d7809b2181eccd46a6:d733dcfb55849439d9a695585224e92b:98c2175fe3583ff928b9e15a6aea94d221e37574a3e3476b49f8c9d9614c2cee8edfd1e8810beddeea722ff1779d3585d439a6a075cf6cf4afa72f439a5eeeef98bfd9317d955b73bb2182e26976bda0b244156210771294d8c6b630fd2a",
+  "2.28": "143f823d575fc4bd98702627:1126a00079d33259c52a66affe9fc354:9fa6d1c52e8c4ce13c8716b71955e1b27d92a86a661858625dbb385be10de8e66be3fae37c509110e24ebce376ca90a8f765466dcbada79d90b620fe00ea8235d55fb5393472f1a2d8674f45751f15b05c61763aef66d7d70bca364a7eee241c4c9023c120ac4e128f006f76a1211baf36f9425f568029541be81bb1f90a9bd11e92c7e0bfb67ba690ed8f5b2f9566a198037c9b1ba6d2595572e896afcae4895b802e4982f7e4fc0b51e2d8b2bd94fd876e55e05c99758145491ce3023889d236a1cb56547bdf32044eb23da24a0a3cb43ce66b8d44ac4c8fe443a013cf3dbf7288df0e88ce3a70475c6ffae8ed80a90b55b09475c4aec0b81b56e8ecbad26c093730bf22423ffe5fd1ba4daeb32c88d4ba4fb4be5e2ae5229325b97bd0c64e4f3c6af9b0afb7836cfd8fd97221269ce48af667e6b0602a71d588a6c87298fe031672651a",
+  "2.29": "585876bd33981761f0ddc36b:b72c0c6381b27a270d0cce0ec1676fd9:1f62e58f02f1baa1edc3cca1abca42be66ed70df3fca4682f34bb6990e51f22a9005a471a9199926ce59db8a8c300e0db14e781ee2c89a53bb0a3361e80f7a1276c530f57545deefd9c6636a80674807eb5d6a4933c6e157f936222f69d13bfb85d3f8b134eb420fc27c193ab696757bfe3b3561556bb6f45f23dc63e35ba3c3683d",
+  "2.30": "f2fa91d27c21cc7dd94617e7:207c87dac76db8d7ed8f68da22fae18f:15689ffc5e7317ece8e6f158848978916e5864d2e92bfcb22673d6106b847e3000cb154859fcfc5e2ec508dce0fce820486fa0b976122b18fb790baa2a767011929a7deb78f8830130146993a32d5ee330221cca453d85ab61a7b2eb2fc4e4cc944c6bbbf600de3633935dbe534b8a34869d8dcd39d941a48f86645622ff1630173596c794950b550741e8d36052f34a48ec6eb639e5bd7a1a42d74e226f43a0eec1a06808c8b9cf6d7874461aca00f2c3143b738673cab4f022ef4ad215fb8996ef0e35ef1a8f5265812c525c5d76cd65beb601ff7367956dd636",
+  "3.1": "6af65c5952b2c834f8fb2fd3:e9f950d2fc23662fe5fc4d80af9ce6bb:84a9b0f39a8a9d58621a54831fc4760e02e241172953f95df5e85913e07d43c58a863a5743949c8f2841a168c00c4fdd0a829a245512648ba4b0cc680c326a52b1e4d2d4a02c15b984c21543bb0ae94b1cd3c2a4c7760544932664207e1343ea8f995c4b50cf253caab34023763859ea3dc86d7c433d0a1a99255b1e13d0124f5a0f215739de859ed28dc6dcf1173ca0ab1354429a567deebe08a97cd76cd9447dce0e45a1479ea962e6725d9cc0a96294c1e85035de97ac73e4823cf6f5c8acafac97",
+  "3.2": "c1a0ab0e4bb590234d8c5336:d390bc4e45f69d9b93a8c9e3d328448b:846fcdcb2ecb9fa3cbab4d27633b1e46f18ffad23f200cc1502dc29f99f109d0a740a6455665010f7e947469f31aaeab3b43aafeb636f472d2caa369c716d3160aa44633b49d40aad54374c2d87200fb6d6c96d786490e041cc9594a2dce48b1fdedeb18f40eefa73b81427969d652fa278b0d8c0314541554f6b7bb2bb8b4ebced255a8588488654c945f337e1bd741249892c21393eb1f2a020c263af2e0748de9211f9398bf071d439396e22412e6d5c3f4c07d4bd2e744c022d0079541f7a6695547b85a0f3e66e3447500e8e4688874dfe4818583e8b3fe7c47ccf1ba",
+  "3.3": "82dc30db3ce65982e8d6d2cf:c6fb13222f62e34cf95d1814ce564e0f:9885b87774f6c33be038fe9ef429f83b592bcc8e5c3ae55fc8eec3c08eb3994c3eeb21ae77e2c9b712c5cac121f5d43021df638da1512d9a9a2aa2ddbf2479d37fbe611184bbe71c3e8303b8c1e60f8ea756282a68a120676ecbe1662adb4ad979af73dd30ff160e8b7f167d0f99c5f83da322bd3f666f2cd3ca3ff712fcbb467eaf3a661b54c1551b5b5b19ea850241b82dc40d5a2b7631b64143b17c7b554cdfaad4b9bad5271494acdc8db14310bfcabec515294e919300fea577e3f38d9f768e87541c1bea7519a143d3522a94012b7dea5c2102b882606acf17b0edffa6016aad46cd91186f5a61a5020a842aa246c322d90e5b3525b30e7a57047ac902f4cae4a485e8bd4a3716de7df8023efaed6091f1882c48a0406f9279812508436dc185dd10a72f45b13d93067600e963f45aa04bdc979d4ac8728469566613b373af9a1adc",
+  "3.4": "2fb1c316de4e631833fb32ef:5969b34d5f0b34654f79c794fa6d2826:8989b419e37eadd4ef2cfbd1ea58e74f0c733ec6a65e599836d7397489d4ff3641e065b3064f149779ef38d662000344410a8fa2f1a487d29000c4e72b5d2b7bf1e16a913d546db4113dd747",
+  "3.5": "2e3ef962daa0b02d75bbf309:293082b00263e620d3ed43ec47ccb023:3e3551a9bd62367498743265b4f2156e2e78e50fe088d1b8bc5d7c0ca4ad3d66921f5bd93a75683fd6190d3d1312f5c6d5458d8cc4f46e91675fcd1350567d300dcfec3d1c79785aa8a79759a4110df104",
+  "3.6": "3f140cf73d844ff79a1e7a29:1de229876fea3a5473295d8030a825e9:d34cbbd6da6196df13c5030d8841aec6d6f67ed9816d95210043",
+  "3.7": "1a18ae43bbe48b48794890be:249398367574af3e6a6880ff740c91c7:ce6fb7cbdbdcb03ae0feb61ef6165bd9b0ba0751d185d6d75e9cd1a7f79937de852d199ef3114e7c6adfc7171be34eeb3ab8e47c86d8e519e10faf1ef35ccd5e5b53040dd7b6b31a548d3d36d282e2de870ba144f3059e28d612265c49e97d87df9ac742b3c70383ed2521ebe46ea15728f686351d38525837e08ae18c153d2005cb01042e81f7aa390e3f485d5e0d3ecd76f231d096eef7259d7da0c4b05146c7e7cb70d4c778dda0",
+  "3.8": "1ec70a98537542dd6965a4f2:be7bbdf11a861b0a01d7c22a4e572f39:61d81dbea886be344410d7b31e0cfe214ca0239f8b569b4603918f6323eb9458fea6027dc5f0952967f39cb2ff4183b16cacd73d069ed1a12b021daf81fe22c0e3c9e7a18cffeec6363460f3c505c546517836c1ab6bb0ec608c21063a195069d9f0bcb7467aebfa37a4f8f87fcb6ff37e3c2f7c4b98c2a9e2dbe1bf0318df15debe933e81e8c347a9c1059ab5feb23000d2884c3e1641e42054464ca2a5",
+  "3.9": "a9bae41ec7473475239946a3:c1a8db3fb6e4d7b5a29ac54f103322c8:a6485fd34a83eaf21a964d1ce7be0823a4e39d93f3ff65da29082666fbfae5b2ae4f73510189aedf482429c983a2d3fa974b2f5c48dfa96e922f3879b31fc007156b98eefd1c0889ef26a5b5401f03b28a492fa5dd143e4f787c82538c3ffed93cbc966ddac45d397c70f99ec1cee522cc7552ddb7f54c31ebb50f3c91117641ea4f37a2fa81c72edf1625af3bbf419b35580179fb0fd370fcf8b4da2d7eafe9223eac21",
+  "3.10": "f9909b046c6f2e1f8f9985f7:a4ab56c65e1a1c4a010b71fc648a0e4f:9462c77ca62c73bc3ee0c9a41a97290f7ee05523f585b6039bba63508236b1c3a6e4bcad5c9d3cb999dc4c79fddb9f611c72f6894e92e263f531bded5eefdccee17bfa9a6776e18239ff154dc30edeaa4c778d84fd6770ca4f6849fece214d75c1ad68b17ff73cff43c02a53155ff7b73a56b9d970ec0d9828682c7f8d6287cbe5e6876991a6c4ea581b8911ecbe5435a8a7616cd001092b188138927121ae45815ae7db134cc5991cd8357e38a9543b53628746897a43af37dbf46f9f339716e508132428f1cf1a19692432f8171e5c59ee3c1f68339579835c3c338c983329266286d3678efc9e7cdd5768710268d15eeb89accd6c19c0ee3653",
+  "3.11": "ca512315f014724ac37e996f:c338754bd8f781f21aa43fb2f97aec30:78f12d9e5b97fbdd6f33293d4ba5fc1131fd2fa670875f5151776e467f08ed4e0ce627da2a9ff7f8f2175a9aa2e5161fcaac9a495a089c159b81ea7c31a172d03b72a505416ffc393e2d496e1106fca1a09526a846b4c07cf48acc1a0ebc71b92ec22d44ec5f6ad1591a5103bb621c94b9c1ebc00f17499cadcb22276e62268e514886d4ce0315a1241631ff14b43ce68632ecb2885e5d3d92f8a8bf5a7cbb80642ee551c1773191cf3608a12df4d38e87af6c111d0efb8a8e62a0483b01d58dd0f06c74584ff92a91886f339bf8f7cc72578d68d479e5b56b6c3e6acd5827b904077631183593d7bd5f342464a4dc11fa3decfcecec3b21499e",
+  "3.12": "d9d905730381ae22b6fa23e6:3eeaefe1539c44076de33ef3620d6051:1b2749fee795f566898b92a33512da1e5ad6614b0942461d93a7bb74e20dde7b89b6980a2d7d7a5b3b2d060e7b53ce3d250f165564ed55b5e831fb8adfbd3de32d5fe57a6d973cb8ef0b57bf38c5bcc255109667378fab05aa7a0ecb7c155d7fd6da1571f2254b201ef46389d47652d5aee01d59d7552661f442d90b2d0759d85cfe6dbfd410d633dc0934f8c76553e9a3ebdbdea4fe31bd96415ddf53f0c74d064345090b6603ec477429f29ae5ca77253b0c17b7668deb11aa63e99a33a8576d2fcd565e5c3578f1b8a5d06bb04a1eaac2f021c5ce1bcac500163f9f6fa3531315d24adef1624e34eb9095edb324da89faedc9c548e937201e9f491a5f28be4ee53c56a067cd6b38098dd3bbf67568a5c08870781865c5bc54ea8dc20d0368754428966ebae6176137dde96d46687ac95c067059bea5eb5ed6c4ea107e7b3dc8f7dee383dbf0675759702b2612e2f79599fea33e42294722194bbfa2b757b2",
+  "3.13": "1ab0f3407bb8cfcfbb5df49d:d0860078e6bf3c9e37f04cf930328ce2:191f9a69865a04ca22443a3ce0e33da51787daabb4e9ddefe3ce1d787a7c5fa777323a81f74040b48f0e4c402aff35f11a1aac05a16d32c68dfd04e98d87834eb2b0da6a737116ebb303ef979a975a2cbfad942751ca05d0a5c8ee266747fc33bd4cf1c36beafd5e3c3f5ada905be4ac177907dc83bc044f4694b6b3c035297b52bc77426f913b691c11431aab8801c61c0a3cb661c7caa66948104ccef1ed5c36f1989349ebcdda1804987222f4f602aa55dafdd9acc5db94a2163bf0dc6a03fa007c095bf5362d6976c65990471ce45c7a4159cc9d2a93eb2d78dae947109d6ca09bfa646dd69f3e57ed25e412b97568109f7971",
+  "3.14": "3c407faadc32afeaf3042088:fdd4e75abe738c7acd5e93f544907c84:456b3f88220b94f7488ef72b14923b5b01f5c39ef5e270951cacae8a4891c4311a60c09b44de174a1712e7a39362dec7585fa8c1b8c12c55dcd7801d5979626817c1bc7368458be3b9329b0558d65062aded284759dc7f344318c5c4afdd6ff16ca55fc71bcd229a250f1058a792aef0577cf9e1927aeff60d53e1de9817f0d470858edb9e779690a885a628f9a6cd469262c64191b7d4a5f52becbedfbf2ac4bbfaadb974cfa86eebffc16ec72438490022dd86756807e246443db23424611f43cc457cee98b00e2ff4",
+  "3.15": "28d8beed211bd699f4449cae:206c0c16446aceed1c97da5c13ab5592:e92e788e49dfdde687fc56724faa11d8e9126cfd08664f0e6a141f2f6982196b8db8adc2df4a4a047d4784899e229695d0fbb907743cb7fcb819e9255122dec18ef5eed5e9a387eb4a89c08dd8990188e63c45436030853f0ce6165a5805d9e172772a7788616874cc10d35c7752e51e5e6365dc8bab25abea159d7ceb9f785d70e489b64a95fe9d48494b386629c9328999172d3f7d7d9393913beddb1b263a2fb829de2b3849405f4e90f884812bf0",
+  "3.16": "478270c850a8b8a9a386b58e:3ed31363a21c852252b5b66297064429:2b256060f4c691a45beba7664e650f97b905ec212aff1eb23f9772116d4ddf7b698aa8ebbce8f593f73d6048a04e4db20382cf8064eba51cf7d9e62888a7ad969d9a108145116a4b84f40d8cf456b8ffa3aeb2160370202f5fddcaaa4df24831d078a9a32e4168c92248556b3623489ec7313943adbb5cf2483c79c891ecf25f7348f2f1de0f8c7cc68f95f50fed18e03e97f5d72709547ecb821325f16cc8a5ab",
+  "3.17": "ffbd6e15e1b30136a8a3583e:ce9d810c976742a583f74793faaf25d7:40884dce4d9edcae30ac580b3beeea5486b4d87803d1e15fbe6163e4290be19cca91ecb801101bffeae1fbbb89596a1d810489df60dfc5b2873d761e1edc45227cfd4619a63433f9806dc697990c7cc4bb734424daaa875a27ca594a1453517c082aada3bdb1da7346cc2ca0f0c792d6737154f02323fc3f26cdae7c9118dcf5116b49bd1ec227bd77310b45275641d7f522f88ce0e26e022334ddb1d17c2a2e91066803e7e14ad1cdda6db7366ec93dd9f101bdff4bdee3085470c72f",
+  "3.18": "a99b94eb620d06d936997202:707afd6cb9e4c01c30a7f91fd6c1d6e3:ec23abe06b2968d27a5a96495ffb892e09e880868d546464ddd167af84ef765729cbae9dce951a6aa5d13bad6fb88e44ef933020810763e36bc25871219b258f",
+  "3.19": "555260d48a9581b03a5caf3c:7a4de4534b07d3e670fb4e9099dcf0a0:2a7f85028d1de32c7723bae37a22fc76d79d537ee407e9195c4c486a2971d6596e0a06d49c48920458d35b6b16b622e5db7257d5da4e458bdde69bc60868348d6755d30c8bc8aa1e488ef64b0c57dc6d39914908aa713ff576129d1a71b49183da99a213e13153a6da1d8b425aec84f92d958ad8df7871917cac0be5f3ada54d2549ed4c24101d2f7a2ba5c1f9a51ab2c1c318591c53fe2b423ee78ed8e1e7312147bcb5d2aad77fb2feb364a180defb1b4623bcd3df79b046a69caf282d20c356108ad4a7af78e619781e01d67e76826c3491d27459093177bbb27d0ca74193fc667808631f532fd6aefc36ce86a3b38f86b0c19e429750febc90aeaf3778e3d2f0789270",
+  "3.20": "918cc33be9c846995f3ad5b2:6d7811d4a0abc706f5002b8cabfc441b:d42501bc3e82c91ea11fc50d3fd648b584445fb5639110f6bccbf9a2737e80539fdc2ae74f416ceb7044d334f8003d11b4f487c5c0303dd436649c9cb3479a50f378584c9f2d9e9041a6b7f2ead0cfe5d97d793369546d5ad7f5627a8edd4fe282974c7b3a55c21224328fbb62171eb5763bc7299c29587f343d5898bf5f7ea29391ec2a86fe068b04fc432d56aac75271889f8b54fe28478032e167547b3518778771637c63d4ba6a575eb27ffa1836b91f819148bf2c43ccf7cec040f55abf22d90aa25715083bc1a6c945a51b91b10d96129c85901be3819fb854707a02c317b2ef8d1bc9156f28dd8d55a3896d8d66b10d439cdf9c28557696d4d9",
+  "3.21": "21c6a5f3d642a571eda9999c:8e560f3b364998fecc411a630f9d2de5:9cc9c9be82e59cbeff74ee39e7906fefe50ac112c31dda7b1153939315f40d8f004403446486a10850175c8c33263431ee1c44581bd2c67eb73b936af3170f67c4ef35b868b46a5ffa9070355c765fc5f897f5915d4a4df1f98ff3996075c3f11986fb461a8d0c5f77b03b8577c2189b7b566f43c25fea6bb47e68c5f553bea569471a212817ada85641ae681f86fef97ff2d6b9292f9bcec019ba690d9c07763d3f6038e2fd24856eeec5fdd5f485472aef4872aeafb97e2c69a3b6db403e7bd16c9b9e27e77477891aefaee5749ebb704f4a52a0a9e080435f65ec3a7106965fde6f8dbdaabf4ea4610a321e2fa6dbc858a14f7787930fc2c5c7475a75c9a7dfbd6bc43a8d7d3730d3c21528886f48f522972b8ac04a9aede1053317659809533c125a012a661b7fa2",
+  "3.22": "3f99a4fb36ef404bb03efbc4:a1d1252cc8aa8d4bbe6e73b8b942d948:4592092bb12b71f2546e349208d89a54d96b4b58abd0868637012579c4580b12b4487d1ceeb937d863185b0136c3e14b34eee5665985ef40d54cce5d2a3d6a63c80f0621a0828c10717f748f030e5f0c8b0d54b6327afbdee134764db4f9e39bf1a300b6f792fdddcc5de42a01a845f11c549544612209de6b5a779ead56287fe05a4a5a0d50ef1910d48c237dd23e24c7fbd1d8817e5603354502cdd0736906e29f50489df13313eaefd1dafd0721062fa1209c94ee485d11d652cd123b0050c6ed92397eaa6bf8e1606d5bc944b79202353da15b08f534e60e038f72063116ef9a77459b38d8292dcc18dd9203a98cfddd6090086255ebc07a18bdc0121dfb777be133f9dea2458e84d8bb16ea93a98e4c4ad87291d41c60ba437eded94d20544602b497c881d424009cd2f6102a35d46f2ce5c69e336b6b31685f76f8aebd34bc3399cd6245b568d36512fb73365efd6f2d2ce53c79a16230da0cf4c4591689512caa381a63f15ce36de5b2e511f0cfd6979f3ed0e92c60308f047466611f0bb153b95f333518ada71aaf59048bcd6abfb60186fedfe2bdd07f1e47fdffdc019e0fa33dd617931133ffd3ca52f25d145a72a611696c8d2042c68bea0ca1acb864d988518770f5510d4ca79d8031ad4bb664bed5808d5b7e0e425880110464fb7a2175278ff47b9d8877c492b9b09601c17200a17ff49461062d36639732b86e9900479348635a55c56485925cca2085d7ce8979c4e57c2a5d50db267da97ec13e3fe0b657aa8a05b84c3e1509ba8fd16dac16e2fecdb49640f1714993034d94b4ada7b0cf9098984bd1235a00c796d47574c92612cad1f25e020c4c2a668022f8f7bc1875a3253811da3d42909fa8a59334e6b2856b5e0eb0c7276fdb8d9e3e0f316e18737b2dbfa7e09e7f662bb03c315ce4aac6b0928b2e7a7a94e63ddc3529e934f572a32e9a5442bab0ceb14bd9631a3c79da6d88747198ee7b56624b297b0b777cb3779dd29e21ba111c",
+  "3.23": "ccbd1cb09cbefe6f4218a050:254a1005e81e470261d908c0be223068:f00e4d2c2ce35b6b3ce9509d4d7c59d7ad6a35a3aa9427f0252d80ccbf0f9ee3ca6f1900aee3aa0e12032e43ced42b1257e77befcaddb8a6fcdbf67b2c430d977140e26e75a1f78b922372b146ecdd1b9009a9411471811272bdff92ea6fe2ac730c36b9cd631984f54708ed017ff169b55f8ddcd773daaa8613b70652d40dc7f03f3ebd6683a590095bbcf3924b1da73bff8eac2b8374d058b7d21f17fa0a7659b6c87e2234c77485be78eb3ed695f7a71fde2082e051d3c6189315eb1c8c75680b4ee2d51d308fcdd561a3ebdacd3cabb9df20593c8da6e405014fed3f02baed019eae2b64a5203182c0eaa382aa000d61210f25f6f0de503a4dd412b1ed2bb965d415171b0b4ad2586e6832d183195c02e3e488c9f75d56abc8109594393318fd51bb",
+  "3.24": "ae5d62a55b703cce207b1d7d:14794735abfd5f17ad2e4d43806a5314:39abcad33d92e433edd0722c9def8196a696aab9c09966ae7d5ee00c11b17c5c4d550d7cc15309a06e76fd1876166ba1b5b5becdf53ae5d73d41c254a3a0452fbcc0960b2529276f1d508ae8843abbe8638373c27cf6918927c2d1e471d40beb79a4146eed2329e991957793774d7e19806ba4cd45397fc9672481964724d5eb4f77414f29d655eb8d8edfa606a622",
+  "3.25": "94c0f15dc74d050476059c51:1672a3176a91bcdb9e9bb046a9f3b2a2:18641af29920a4c952c163908a60e305ea2e3653398eec0e84d05c55e6244f0d596f5e881f9ff7bb2349281c8f4884bdc6617f4eeb090377e831b4a3eeee1b83e675a661fc01ba6e51b838eb5bd73a7bd0b481397e9ca66a39aa5f6f8f806f54d61e9df27d0fcc3e88d239eb3dcff9da8c27d0542db47c057a04f668f1ebe80108e3496b5fc8e62ebb402161a04f8c3e02745d0bf20cb6d6f339033c094595b366028f4224dac2aabf20e4aa41833195f20a1e85bcab76abc0336957ad5975d2ceab884540b9a393843c381f34db4264a5eb708e47747eb99083f49c669525bc0110d3fe492c636a5901f0f7381cfab75e94f3f8019b3d228df9b31ea5d589e912c41ba4ab53c8766b3f39d826d1ff65bd3c6ba2347048f2599051407b28c6df43873f64a438154663045517dec6234c",
+  "3.26": "4bbb440b8cbff4415e11a0e1:5ad6b3ebdb4faee2ba1de029f29e8a2e:1d284f62ae5b6aaf6c2ff397688c4a1a693a721c10b8cf62142f0167025445f570594f7c3f433ae6b97ad41bf8206a453b0fcaed6af83b9cc471e8661b689e8fb667b202fec6619f24b0e2bf94673f6b07f5f45b36c73adccd6e199873f15d0e2ea36fbc8f3970268e8d8cadd5625f2ab1d78b6edb81297163cbcb76824e0b86bc47f2124e590206125234efaadf60ef0691fbc9e499c9128889",
+  "3.27": "2e03b6d6694ea89631410099:07c468c19adae255f5958d46ecf8a87c:16258de95dc7fe91a8412298417a1c923cde7c2fd322353b9b9fc6d68f3bda7b7a98c7c286e9225cd0058f7815ae073b70afaafee0974f98445d2940e4a4f2a5e92721785472107430edb9333ebae11d98de9d07a5b48add812c05d37193e338221b5bcdb1949885df0e26e10d6748939281cda7159f38409ec4b7f429cf2a7d10aa8df92e6489bceb617322c3cecbc14a136d6ed9ba6cc248397b3f5d4e8bb44d4e5e7852f257e3ab8f1deb6ab6cb8da5ba393f73bbe22fc75940cccfda605c06aaf2e66f55a0b6813177d4bc100a0aa253edf1247b9386b0f1cdc865a88a2e8288710732f79a8b535a05bb5303e3cd3cf15d167cfe60fa80fae868eecb5f71217e600842f4be48b2815a177ff0dcd5c2fa3a436e9b1106cc63",
+  "3.28": "923cc84d02f5a37e023a3ce0:2eb6edfd9271d4cfd8fe104799a42188:eb17ae4d76f40bb8d22c2245f63ce9e349b02b4db830dbb92fcfaafd78e44e0f16726f285db114d2ad5ccba2ad7b7cb8c2d712d2fc7b0b3b5ae1bea34938a21dd5b21923eaff2361142984ae715d7edddd21ebffea9ecccfd5d1f6d01bcd62f8dca21a590a13c06d8f956f40647ea0fbeef0",
+  "3.29": "530024d40158a1819c48dbc6:015342f3edd2e5a517bba32b45d8067a:181eea06a7e3b8fd2330d05b960c8b03674485a30abbf861c26e986ac548ee0fd4adf53b4d008956f3d424a3ae6a669ef92a5819fce87679bbfb470a0856a80f173288668b8bcce6f7d3632de7b6e55d64dc4f9206c12486fa056420dcd6864f02c4c4f1c1648d477abd73b31a797f0d59702b355a7095bfefeb28474db059264760f11567f12cad30a4dfab42771030fd42f7b9fda3fa89569627b3b1e8ddafef021ab5caa0a78fb3986e5b050d1b1ae34a3a3942d90d217b539a41075f85d1706b3f1bc3375d00cb9801433ce50b220ee50461b5faa02b7834174d24",
+  "3.30": "4bb173b69d12a3e361ddc091:a310c74151305d3fcb2694304d491570:78d73c3f6b13370034c0b37cd6d15a0b8189258cdd9aad4d641a49701e45bf563fc8d6fb4a225eff74bbdffcd0f3658ea4d2c71047b9448f448805857d802ad1a153fcd85e8bf402fd797eed86ba6fce7242d2bb7bb49672cdc621ea1914090fffc8c3acd9dc62694bc8f60649611b80f844c99aa2c6d2b4bd60f4c6577b1092dd43263f99f348fa87546f944a6e4b07430255e47f",
+  "3.31": "7364e375d88c6a3a4a79df5d:92304570f9af18090ce734ee18c02a16:70380c37cc6f30afa4dbcabf3665849370708b708cb892ac5ef033b5d458420967e48cf5122b4aff30a50fb564161827094069003bc6d9f67a1cc245e932c876dc2bb45ed5492c1eb8d3a49a9dbf15f31da7ba465d44c39622235b4d480378bfd0bb46919507db1b8e5953757048935641f9ed18dbd47b089401c3fe36e925f33479d4dfbbd0e06f169d61df69a9dba966b7bc57e8229f059f6a5eb4b46469b6e35a53049bdf4a43184b330747af3154d1048dd8c85f14f5fd7ae3c5060c884f96258e976e012aae9e8448fe3dcb9ee5d1241c7af99f6160ad158c94939aa00e7f4db3c54ab9a5af03dab2e78fcbf167fb0e215bce28d8d7e79afd9d9009db0c48d16d41e5f44814b9faf8fd46f33d216c535ad7bf8f84e5023f2e47676524f2e61ec15e4b99136d75981865f8b91e99bddc0467c9b6ce7ba8b7f2cbb6561df0574ad8922649756e50982ad418fbc18121",
+  "3.32": "85e3aca118a1aed183730a9e:8a2b6c7bfe097681ffc61b8f92d30462:2d05a904b2616913e695bd48e5cb04c29bae40e2473f37f7c8571d1f0415dc7d220f0b1f3027d4d6d1bd257b01d88c34c9ff294c2795055774fb31587266091d9791697f4b240d5f50d4ea26db165b275a27b543bf68896fb96f4376725c11b21e8e86b1816ea354e1bc5377f22122a6196965af8b86c2c150e70243b978f8a72b10dc88fe94921a2b23f914608dd4728e85fb7d86118ba261766a509d8889cae3b55d73b1b4914c3eeb6fb16438f5b3c8e62befd6f3aa38d1e5a2baf58466cbd47bb5cdbe477d1b432e131dde199125ba29413c70f82524108faa92390029fd09c9f72104ac2467187f34c5c5a10027ad5d39b550c88bcdba08a24347e97dcfd6b93078665b2c44e2a8ec234d82140e4ea809fe287430f0acc4bfe27a87995d2b5074456fe02aaa33f4db866b5fa49d16498d1f6ef68072e9467df8d52a6c1ac59dafe37f6116636a64ec50cf5c67c9ff2e0aee68e1342ad05b95eda66203c3058792ca7cc8a21ee625bdf711279308022de44a8e41f201931861607a81087c0bbf73ed9c4261b12772b256df3af760a853ad94b751d97c50bbb08fdabcb39065782a96d9dfa309a1657b9392d664db02a85268da3c071e4b6e6dd6036e0b277c197701bdc9a9e1288b30c8658d9f7a216cc4b8321b66dcf10083628c1bb44600a3915ebfab8bd230518f171513afdca7fb0abecd5c342bbae17ded1366388569f427961e6e70edef9d555095637c82de43d9515b2aa712420d2a",
+  "4.1": "f29c44cee2e722170324b47e:3a936b20c8e6a16ac870bf4818014d5e:67b21c890e8402ea9e8746e8d605d0f183f70e551a84d49d1d6929bed6f6851e84a91a36104de71c9a26af62f6dbe424e186a8d6273ab53b7a13097bbe360368ae7965055c02c4970c3daabd58af5d9379b219",
+  "4.2": "93fe85137122328284253918:feedc66fbdfedb5cc03d2dd72011c8d7:914ee419bfd4cf520a21b399c26d5303012b66533ef885458124a809312fc56e8a005674719b05a6685ce2b28b405d1bebb3bde2c1a09adff52e0b8df2119957121f6cf8430a30eb19574cf47bb0e3411e3754bfd89b177691826da693066c2b6249c9ddf5575b3bc77b4bf2f136ca0353294ad5b9042e8835a2eeb0a07b4b6751fe4cb83541d49949a4bc7b8ee373bfa52f710aa90db4e825e1bde2a47ad5e9f2886a45fc7b406e6b8a9a56",
+  "4.3": "92a143b61193a1c90f65dc49:5a09bb38f751361502f1a02a984ad2ba:94ab004dbbc098039b7e84f4b6f2438d97f1f2608b0ae8456b2cadfc4d401321fe3c42c8842cef9f7e663471734964fba1a083c59f5d1a432f2b412b9f33b01c30f9127f610f42a66699cce6697aacb01ffa492e15020dac7f08d1dc58545033dbaf260deec97a941d00328870b521558c3816f3e5a8e7c4e0a429e2fd12c4945f30c3851c590fbef1a2ed6cdde1f8bb9fc15612c97aa26177d219110da1fef84d3e7c1d8b8aa7ed92bff64ac98288038a79064ad7605835e222aca64c072110db10c068d18c6596210af5fe89994be11cb038a32b434dcdb464617b7d376a8116e4d003c3d241f77cfc0b52e50aa40c1c0dc6e1e1f7361d534e775f0247908ef1a0d63d42f193ecb2a17fceb8648a34898b1230ea121466f35bd36f1439d84139e96cb7a0ecb213e5a1d1310c936538",
+  "4.4": "f08399344f474f20adbb39a4:a5f6c0bbffd08c6e1b9483fbaa551443:fd8655d21ae2398567a4984958885e7e05af51fd3a7a5a8ac21447e2fb0c5e1d5037088cd4db103ee52f4d299e78e24fc5fa5ece3a5af839deaea6902164b8cfd32678dd86175241555f83b5b2082937686a504c029277ed78b5113de25c6a816e45b97ca16578c109be586d55b24beda5f86f42d4b00e2357b91bc8d5eb59b0b42a14e14471425f33d2284e098407933c2d374b33d4f044039525379b828033b5ecf1462e02f58ab29ee87f00d73ecf83ef8918b7f382dc444ddc5a3762ade5efd9fe807398f25abcf1f0b972a80d50fdde04a867b23b397163cefdcbec404faac66877ead45dadf1e8f71e78fb4b04812328640139d12ab96b7257cdc53d3241025c1852ea1ccadb1559251bdfb46fc81d0f66efcca8d2dfac74f69b4395",
+  "4.5": "67034d973ee187758079c45b:c1dc3f9bd248fbaedcdea2158b2a2e6a:06fab146cf22bbc4cac33c6d2235fecd16753c4800fac79edceb73e45f382b6af969a188a9ddcacdd19ffb1833990bb52da209151178f3835141d4adacf66010187394de91e214b9dc3018bc030ad00faa476d38c32abcbdd0c3c16f8c23502381dbfd20046814f218a40fc227597445298375a6e7085766b30ecd78bf6f6db5d8dc30a986253ab6d7018400de460c71882852a67250b6ec29031c2f6406521cf4b54eca4b72c8e33400834768022fef6794e916343d4b3d28f6621a40a24814f5e7d8c4813855aba7441fd9f985f6cc3a75f0685fd044dbf16116c98ba32af96782954151b06d86f6975bfe87ad58114637209148b283855c475768d9b3c612bdbf9a9b4c069141366f9cb69920e18fb60a38167a12d279966f70e79fc6b381a99823",
+  "4.6": "2f1f2fb5aa02a48c12d87c6c:c20e76c491fbdc19ad49f2cb861ecbe5:6f2bdf63f1765e8303fc06ea71fda881a111a9f8a9fb6bacd95a5f7fe9a053a730cdebd44b545a3013e14b1109cd34f18f0ccb64773cfb450d0e45bb4d4c687b0a3c5b19c0554b0be81f32c601828b05393d8504bf75ed40336f4a6315a384cb",
+  "4.7": "119db26029fee1669ccc24a7:21ece402a77ebd231f3dfd18d565f377:1d2b1e5599f13e4017f720369898153ecdeb1c6b442502436b60cfcdf709f3e8ff1c37e075f6ed52b6db6ea4c8b626156b884eb3b853576c24bfc6a92c3ef5497f6918c3164229c12ba972eb3a62b02c4bd833fcbf9048658e67f3ef976931eb5b282b7a",
+  "4.8": "0f00c8ec3070f5025c2f429c:3d850ce6988566a16f0b6454dad347de:5e0fc8442aa1d1dbc83db17a874eea01a1de2a181307522f8dc425cc6655199442af3458ce0c703f354c7357f7c251a21a311c41cd514f346236eebeb708457c995d3a2ecf514c38b60f2e2bd4e1d8852e65aa3dc83d0f7ac84b5f1b3eace693cf2dfe204139000ba630fcd2633f8ea9375e317926d51ab0c2e72f54a6fc9613afc04f7ce9198518ae37ff28d73529d77e559614e7dfd218d7ddb14aba21cfc2eb56a58e4401532a5557c82c467ed707de9ed259ded66ae252e8ad9da64db0874acd5beda911cc11261fb7bb35e86f79a6e9c6e8643937193d066992d79c5fb8533e08bff947e297533301e888212cc92ebe978bfacd347525097d369392427e55513caa22069117620cc9ec734fdc8f85effd2f64ad6490905f9820dac3c96984d1eedc71b2ceab293bc1170f460d2007f63fa8af5d9601aa936f841dfb8570428bffb2b6d9c6d61e9b2a399d1c414145b0259e101f5935fc32f2bb32dda8a2048bd155817628d15d40471752c4a002795e980159e00552aade3b29cb31cbb261e17b72ca4b7f595a2715f8698f9ddddc0b051b0e9e0bf5234ef93f20018f0e9e01e803229e8afbaee26a16a347a3d912c05b321e951355464013ffc2e1028584595209598abdf3acce33852a733a1b5b54",
+  "4.9": "9aed4f3b05cdc48d384842d8:4ad9cefc90d5a37dc19c405f7f989f6c:56e2c7334ce5e9a5d41fed6083bfc43d9ddcdee8d5d9aa337fa48f2970bbfbfba3ed65557bf1c737f7da8e0e81c30c3357ef627c83a95a9a92db64f48bfc8f252d74c1f2a514d96750faa9879405ad6e08991a",
+  "4.10": "5a86f98ce06d43081ba9334e:19644479fc76d3a8cf8e53d881b1c36b:0141287a05d9c470947f417bf4477a80baf5e58ed03eae50972756b75b3575c38c244a4efe8fd868efadf95f71aab6e9c1bfcada44a8c8326688f2907bc41cf3a20610a4fc931a51cbea061e656519a3b7c977808447273dcdd7c5ef6ee8ad885fb75cdf4dc344a65690938dca42a93fde841a799595cce62bcc1a10c15561054b79f8d78bb3e20f5d745a506dcdc376277047fe997549b396a3222d58773377b9840583692d1a38118beab87ae4d7b21058dd551525041f1080062c5d1ef778bc74c4c1975edd",
+  "4.11": "a80760467b9b0c7ac37eaa45:9ae13a11613ef6fae67211f6de98816e:140e164690742ec946a1851572a02af8389b2ce3695b8002d7aa79efb6aa4c8f0f6c6d89b4fc3fc5b77c30296f433506d2c51473b52b4f93cde63d6837ddc061b6caf1f29c23fed66ac24a0ec71bfce862b9505743ef6d1341ef3c774542a812442eac395e0511f3bb29169d54d4fb277d654b56d4c8d1fdfe8ccca0242ca64beac5424b0e7abbc3aae5ff861af68a8d4ef63cbb67c24e64c8fa634671ad03b15870f2b8f195f2c488fa52dfc973a05c382b7a0271b7b5b411812517139a7079b49b90617f0a24eb7840dddfe6712b46214b4569f28c6365b7da833e31caaa131344e70bc0f613844a3d26ec1f24bcb3fc5446c6271ce6911144a782ffecbd50b75f4e9b1ed2ccd6c3e177b8f904ddb03a65ac6c2df4256f45c8ca33bc2d1b85d845d94b80ceef2a28c9e3de202384ec327e04bb7a66eb12e57ec899700fd1032014e452670e78c37074677e2c89eebfe9bacd8ee36eb503011df3c88445895a277a1bf8b9a49fd8f953094c6462c3a26cce1de152ae7ffacbf407382966feba77072c0cfc74e2a15786b186e0f4e87caef2370270843372aa741be9559d4e6009ed71dc48984295150b56d6b574639fecf911f73740c830ec1b6cc9d265ed9d1bfa6c74d8b937b40bc5e57cedcbbed1ddaa672ace49c6ca00060bf0deb32d765034a0894cbfd3577b51c5bcbcaecc5866f932a79a700cf67892cde4b8a467683a6b8794e1e11c017e84ea98a61acd08a460c3275a1c3b39738c4564901a6c4ddd",
+  "4.12": "4154aa917c784f6d96f9ba28:e88b121fb6243050807e3c2fd92bfe8d:018d40aabc588719e5c5817dae494f6a30e68dfa8827e9ec95a185f6f0a20504683eb9078f01abd931db9004455901caac53caaffb7ed44d750d280de337b14f84ee7dd9a9a6557605e873cb1c6dc305d269ab3982634584a0fdf5559ee0f02a239558faccff1500ceeb0cdf2b277dd678c4f73eea6fb6a972b37c8fc9554d67de1f0870708da4d4772952d8007f1782a5780b4353e0fbc336680833f13d5a62b05696f07aabfb164e05163c56f84df671d3f182f11cb0b93c6414a63cc0a7eedfc7954ba577deb50a0f25c1ee32835a0f185851f419db97efb84593624d3080bb3deffb3a30570167c440b0a1ed1d4eccf1222288a1e9360a01565d61ee0967c84641dd83",
+  "4.13": "dfbca24f37d74f3a923800cb:7e6a72fa8a365d333d9ad626eb9ab503:50c4f69afd6d86c590e392c79824166ad0ead14e36e9a8aa72f3f21607ab0a5bbbe556abe0ded67668d0a1bc42bc05d8dbd5c9ce3132ef8e350f861d4ec66944eae8fc476ec49f3dfc83880172588940876301f9cd3018a74d36c7f738ecad44040b7a53a7b2f9769b54ff4ddb00bf326a082c256519d163e5af3679af63fb5c918ad1bbcf8ac076eb607b3e8f3f347df97ff4754adc7445",
+  "4.14": "bc4cfe71db5aad14f6b59f07:cf054b2380669983d4cc71b890d99cc1:3561d3637f51102698771c3a234d6c910a95140f9cc076238b6ca79979eee07060dacca5bdfc3da2da39348fae5a5ccd09dcc9cfdefb5b6cf8f836c99a772a1329d8e817123256bbe1c8fc43c47c92bdd0213d7c8a30fe8c4a90857316d10f04d056aa3858d48d76795c25821c7a718ffaa1495a1f83b0f30ed81e652c0880d55587241ab17fb9d69e877eb3ba98b3d0f6e840c50ae72b972983b699189ff0247d711dcc34571abd0cd77502a6bedf67f055d50d29bfe05f187849b0ce4b63bc679df88f091b77216c2aeef9897667f8b6648c3e258a7603f5fbe6d8f56d3a955173740e437293077cfe7eae45c8ea0ac7dba1c96d322562ba505373c287c9977d0cdf89ac1f8ac54753b0a05e912716231df174545de1a610fd8856299b89efc899",
+  "4.15": "595472e70734f93d8d174f47:3318f13c7e5a1eec3b9acca6a7f58b0f:d2e21b84a05e976293b84d2dca64a07ccfd6b5a8ca5199ef3dfd7b227e439267a149cb634d51c1e7d0231c735bd0c522edf593067eddd7d0b9133419f266e9f0a893fdee9624f550e96377eec6704cf0e0af227ebc375df088231739e08b3b84a22fab84172b884e322446a4653f7b9094657d2e7365e2f96904a5807c9e24dbb0be367a83b8e9b7f72a9b7233e335ed480fffa4360dcaa74e20606fdeb0de011f1ef7590ecf41bb76d4b058d2b4a0de09a7ed9515ab72c9a8c6a2e6b44480e8906752a46ded1e9c1efffe3936b0bfdc9d3e2c28bf2040ee5826fe68bfa43dd0f43ed1fcb33e644bbc83229ae7255099764a416d3eab1d1f458a56561bc03b76bdb77e436f5d64d3a35ff12f84c7a897234b58686885f234fcf6e89c0b957fbcd0e69dcdf6a48fb1f499040f2b156038a65472effca8e254155f7268eda00d1db1844834c11c09ec70c28f723dfb5cfd87bcab898e5bb839e433e303cb1f21cd0bab5c7ad4359a532f4ba938e133af4fa4e8fa3efaea3c4547bf734191ab67f7858d4621d1938f8697f61f113835aadf69b7596115445d1cc411c724f9a3c9d87bdb6c17272ebdc05b270d934b47a6c3d1231ef47b42230686300def9f89e701190a90fb0f2c65c064a446bfc190e0a636e20f2022f95a702785eebf42ed57a497efeab4fefee74fd41db88ee338aa2e9aa895f6f16c8ce6cb11bbaee49d9159cd9f8ad52f86e780ad8bf6c3c26799b887073630d98b1392907e3ae03c9e13c9e759936db299327daf4d66fbabbaf4e31e27c97050afcc30295974724b181933e68ed807ed931b9b51ebf63d0f5e8c7188c562c36c01da23a8e5d7ea611e85f291e42f3f17fc492fba0e0fa506cd9211f4dda15c8b39bc736516db0391e588f73d088a9300c0330c986bd969ecea8b4da81157d9c51bb0bc7e40fc96e63688b855f15c25f21a8beb150659134e131339",
+  "4.16": "3b4f5fb65a300b1aad683bb8:e26cc15655c2f163902124aa9b77f575:72dfcc85bc5f8ab0d3f0134fa29d928ef43b0e19b2c578c50955cbd0dc296a61a826637734bfc3d31dd041dd93d374e3b7c4e31762347e1bb7c704c27aeff88b92f53016f51cf49acc1a11a74a0bfebcbf8fff2546509e196ae84293d15b6416be258a019790efe1e4",
+  "4.17": "4abe54a328a553f47cee705e:6c58fd690b9da717a4a3005130658f63:095c843a254a8a1b1b4d7627371d18debf128eeca771d316b792e4fff38bc1057106f967bb6497dee4bd1aef0b1fe5c0477bea7bd21f6f6dbe86d63c4c1f1f628d3671ce3a631f724c2c9ec3687b8cdb2d077186ce3c038194fb52d8d37d530eec0a6fd53af412458d179ab6ca8e5d70f6869ebfc70004b554eab12f4111422439eb70b10b442e68190571d33b26d19cb8d10017b8b6692fc9b2dd52c59833c2f8756f87b3ad1266fb00d30f659d1059",
+  "4.18": "15d9f8790aaee33f77613abb:bf651a18afe23ff35f11e41eb0d87379:feb4af54fe7b47f36e0ac0afbb3986464594b27169d4eb2bc79ae74f4f5a3a6f9413b3a2feae38fa803b22451e1df995da25c26995300341e3ee9c3a9bf08c240c0eb099f452de887779e5d19962fed3c188df2c34405cd13f18f52213e8d7485ad6a133f255139e2f31e5f30a8778202f1c22124ed85caa3d9d21b846ee591502e506ee994d75cda642a0e876f87db83056ba4464a8ad0385f41782ec3705a4cb641c8c31d49f72b97cf01c8b7f64d245eba51afd3ecb071ec4dc99570b15cb2d3a9e0cc509a482a376d2def0a55b2496cf44d8438fc5bcb6ecb8a034f5977b3714615bd2335872e6ac0b3ef44989b254e228be29abe10818fa467506c4b5951f0ed9b1eb004b88da8714adde74625f8e6181833c479ec0c2f9949b5f482d470feb498ca40dcd02ebe7d7b661c617d03d994dc62dbe81b0096b94c3c34e249c75fb80a1f34b26fee886a73450b82770e7e4c1f8b8414ffed84449",
+  "4.19": "56e352721627b2c25407a026:e2b2d62005ebe0db086266ed2c3c8e79:79bf8aebc9f32807463bb7afdcdd479cc05d1f0196636d76774aa6bdc0b489fe3ee2d797556ad25f34eabac1f42b2f7d0a1a484dc3ea4f0e017da30077546d9e041f562edd919763dede9461f3",
+  "4.20": "0e41235f755e6cbebd0d169b:587e3230bdd73defd0ffac91288a5cd6:f5c5af9f412cf7455fd010d953018c952b4eccf35d702c268a403d4a70f998deff6d18623e8a37c26461a71c3e5fc6c08c38784517522a1d56bc17b2ddcf116223fa87980eedac95c2ea62efbfc06a38ef06d9d77e99f3b91a18b205cdae25a73c6eeaa8d0433d0becac070c01dc1771de5602206a03a89237ed93931f20fc1f4c4dad1d438a34ff5ee8ed897e279e744a56ed0a02c9962ba257dc6c73e58a5e804a028b5c516a44903ff12c6f9e6efa8f1e85a455ac34ad7bef63aa",
+  "4.21": "1a92ea1ed37efe32aa253205:376156548c34b5ded357b2fba6e9a4ae:e40a406165d6d3fdbc92b984e2424c77ca8321fa3aba6ca4f10e7adaebdfc1137c62a94c5f2ae78bb8d35120ad3237dd6c9efc98f1674b508a833116a16db79733be3eae9f756478fedf633da712db8b0384f0f2177c32a539afc5db81a34913bd4f4e0e5c3c16a30777b88e8a09fa9cbf19d4811441d5cb584de00fc0f17f22d553a1eb19ee976379caf4a20865e0b966a7a301d8cc49d44f72951c98fa67a36ad6a1d13e6940216a386488fe67ecdbed0b050cacbc3c52ffcf694d56a84eb37d98c958c5bb3049caac9016ffa18016742db6dcdb2d5d8083aa915dda16666aba31147587e3982089624cdb92a9d4cdb17f216fbc35aa068cbcdc5560ee60a75c679b0d2a4235860bb725cccaad311f15332177927fb1991f9997fbec302fb02b5145d18f7a26303e83f89b493b7b94b8d2d841c763ecef6b648d59bc7588f67321292939a81382cfd2",
+  "4.22": "d4b9f9b646532572078746da:721a71379aa1ac36e862125a73b6c614:00ee4c45f5a96593d03b5b70e38fbf0ca8be1b110cb297508698efcd356397a710206a78da042e771b8c3d6f3d543727ff9d135a41b44bbef894ba737be190c16244578c9afd91b3e5278c74707e102508530f9bf961559d6b495c6dc9c14e4af1325b4f3606299d6ea1cadacaea66b080549bfa36d22121f6991bf220a830a8cf6f9cb41704e106098f7b8e0a3fc57c87e3421bdef1b330b74c2dd4e8648c15acf1e6229e98d9ef965e2c2c20b30e074e65c8b06a42479f69aa1c6db7",
+  "4.23": "f7de4ad3456e8ea155eda5ae:f8800ff3432dcf2b9f0ecb3804960616:df6f58e5253b00de6898b9a8a4924e9900e958ceabf1b7c9153643943021333c560fc86bd15cd301b44f3b70fa3b222d773cdb255f38ae1da65666d76e13aeb3c131e455f4ea492ca66495bf03a94b13238c1ef147e3279c1d15781cf1e5ea3aea3449adb137009ca9e50ef706a89712d7bb3fd720aee5c683f4c9c1ed3ab806f4df13604f4f94c961f586d07bded09ee1b67635977870c66e928ffd849da7637c1d53f9de60085dd399b92271c2f8cf5bc0a1c77d55045b2657e06d0585d97bc5e5200bf10b2c927b87c68a706ebbb870f4fcefd72e6486dd96bccb26ed99eb6f83fd5c0ed7b3647731c4d62649bae7f67358bb6a8f1a",
+  "4.24": "21e19c258f70472c371b3451:ac1ab7f36dad0494bbc4994393e95c6c:e5e8a8cbc6cc7b0f578462acd61f2ceb398c0ae754edf748ac526480397d82d7d87a8d74364b0ede17944c0c0c1c4e02c23069b8a3663842984de47d77bb811bf9306a2159d9622aefaecb38fd1f61cc2a127bc7e71a2feacc5771ac9e15e8a6937fc827ffbda8b4cb4d7404ff573fc588371a5a6b990f71c2cafcedffc4c7b211bbec048051f06dddf1748e39954a36c89ea127b5ca8f08192e8e04ce60dd13aa4d1d7cfe46992f3ad9ee8fcd210f11dbed984d3072d1e1ce01931b71ff22a9efeb19e8fc5013c22efc309d4a0e5913a207f16195770ad647cdf148c48a9cf10642b22676aee9cad7d0667c63eaef47334a1935f21b9682e6c1663697a2efd02d5c213b2d5abffc236fa1bc8d0d6c505a0494924f3d85367379eab85cfc12c797015a00d086cbb3ebcd16e4b2f56323a140bf12",
+  "4.25": "5291c4cbd5a2ad630c06ece8:643aacabf96f6ef8d9027ec4a061341c:c241d825a1f3952b23d245e2d4ba876fde72b9d2062e43a6da1128105b90ab0741a90b49af92b5a4d79885d9361e7a0c2bca90908fdbcf7e0f4f7ef4ac550d116df4792cfaeffb2a08887bf1161baa0f6e6509e04055846bf31e97be87f30d24c2a0030e4ca6b03299113ce60ef2326cfa0876565931ce40163cf71b2bf78835cb215ff18a06809ca8bc4dd77ac2618d946b9111cd47c3691ce5a62ec4f5a3e959f8418793de68859df6cc02820dd4c8b51f35af8a7b1ea88685efcb5757",
+  "4.26": "b2e79af21b94cbb9f77d2da5:0bdd4d0119a19d68053c71f86e716e59:0dfca9fce7ae70bd719524b5a65f7a649277c985cfec094bcd0f1d79a64db93af31725098f7d0ff8bba6f6510d444500e3e14e82a20b3a657879fbdbcd66d6232b21e2087acfd4ce7ff11ef813dbedb900865002dd3e7b53c79aeaceb9da93121fca89aace50aeab3479b085f808bc434c8d43876b42a2f1f5ecfb450703790e07edc49d0cd0e1e4b331029174ddbcc15ea6964b75e7236ccb31f32cf1c77d5fc9633dffb81e75025622f846dab6c15edb59b886dca23d5b9283aa7cc7e682979bf0014467ee5b2bc90b71539e9ed5dcc7ac062da2f9862929b1a6ee1a8e90e25e3351bd61100f62686d70e7503484364362421893c0be14997c06307c9a244c13fc057c4304878538fa8a4fb3ae96e7a1cf698e75403f3afa9b36cdce1553de629e966d256dfdd7df03388b4daa758b6201251a4f8fc0563e65c3f1c6ebe350381ec3d21d7824c01f5ea63ceb23c1c0ec9b53dd5df218f2c5813d8d064437ace721d1515546f57894a3d92f443a44833a61fb2d5132eb39ea1a4073bfba66651628879772e301dea8d7740ef4ca0ab3697dad15437badf6fdb59b8d0ec1c2546540a4008d2f8e7188b0a3688947884787179d4f268bdf308b1a4cbf08beaf59695262c6fd4a8067df5cec7492fb064a9630c6c086daf28cf693c64d6fe42be501a19549b645cde518ef01bf87e41fecbd0da199164763a9b7efd948dce17574596302de370c22be5397b720ca8e0adc39264b601035cc6db9fc2d840e4ae46c88b36190d9565ceb6434d7a477d2f75a038a76cfe50a21f1f8606e79066db7565408df51eadafb0370575ff73d12f56c815beb67686b55913412f1ff816ef39aeaa5886b6de8431a390f25d2890665935af7c902ed4df8c61c12a7d16fafa8",
+  "4.27": "ae861fb32df42371890e2c08:aacd800aa0694e6b1d721891a5c051bb:ee9c2c39af90de0bcff88b97fc1751fafe6429fc4443cb793a327026e385c030e1f5cab7e3b4a366e7db42bcbc845bf6ac6ce710f13e9fae84ab386962d33d9e80f12bd174bca18d110d91c6ffc41283bdcec24aa95ce6912ff327b88d21c368c9da48e8649358fe8c885218c9ae193d235f5f75bc71edf570a10dab8b0c083d44040f04b4dc3d5ff967973ee9ee04abba687ef4998fd2",
+  "4.28": "e557be1acf2121259870f391:ce39455731185edec350256df93cd31d:90701afabb9f5aac0bf24fb691d7966844e6973b3dbb0e685c18ddda7e26136fb68bd26406d6204df09d51b62e45292b13f1aab374e0fbb95d90b78076b0be6adff4c7c8fbc89b1b712d44f36772d6229895513e046bb8418c9ca5e900931bceee4baec2f18438524f87cdfe5715c35a9059c32bbbc94030dedd9b371cd4af00b210f0de113532b0f776c6b5b139947c833695e3cabd61fcce89d8e4968a1c2c61ac0db33cd73a2af95a354d7563d459b097e4ad55a6ad9adde7620e4e07715849ed747457785561111ce7dd7edb3683d5ffcf9ac4645f003fedab9cd60eca470c8e7f57f6b9426d6beb98b3b2e5ef0bcf97b725f72c4e0a704f5a19a1b63baa216e48f20a6261b8182eaec50ecd4c8042dd24f0a74a2fc0aea886bea2903788e3d94929a47cb83f9e7d9271e4d5511c72b3a625e2d1ba365a5a78377f6c921b43fe65a6fbab1f83799151e9100f116a1e1e6f203f27174fd587ed1c1d7e9f1ee423a73a3d3e5b6a9c79a3bd4d0e1767f73cbcd9111a22d732f5b04103e51bf2aac6eaa402b407526fc19d5f854f35809981401706c1dcf1b231f3732c43ef9c2ba54e5c2067e334b65a3c31ed2bc56e35f95fed7113a01ae974c940e1f52291a59684e798dd2d1ccc19a4d0f64abff0fd90276212db081610ad74713936e4e6a9eae33008d73a7cdcc280f1c8400ddecedc43de83b0a47b3015f50b8b875a293c8c2e2f7476c783263ba1e3b2141db2b4b3f212d7b564ccf5609660582de65d5a0db2b688fcc3ba7803bf2898389bb77bc9930a45f92103f9514d7c972d6baf2aabf2edfe5d0690955b709968e6b29b412923e166e8ff346ddb7da1604de0a2f6a549d3913e4ae56d9806f5a77badfb6f9e63849d1bbb5f14b8696ff1272cfdbfb3e77f988d4ec35c366ef2af6006f366d378269f48532305705c37758c2e1e3d98a6066d0072ac1fabe7fa8723605df04d3f36306f20b6df654496844fe107e1705f77cb6069e0914d909dc8c0c22a5f7d0722284f44f4fc66b814a38c98b7d6dec27338f19716c4c827bb7640bb95c18d659c5b3827fd106d39041d7d6a951bd2b74b11af16b82282732c9e11ed2d73b455"
 };
