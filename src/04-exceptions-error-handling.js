@@ -374,3 +374,31 @@ export function parseConfigFile(rawConfig) {
   return undefined;
 }
 
+/**
+ * Завдання 4.29: Патерн обгортання винятків (Exception Wrapping з властивістю cause) (Просунутий рівень)
+ * Напишіть функцію wrapExceptionWithCause(actionFn, HighLevelErrorClass, userMessage), яка виконує actionFn(). Якщо виникає будь-яка низькорівнева помилка — перехоплює її і викидає new HighLevelErrorClass(userMessage, { cause: err }). Якщо actionFn успішна — повертає її результат.
+ * Вимоги:
+ * - Огорніть виклик actionFn() у блок try...catch.
+ * - У блоці catch створіть помилку: const wrapped = new HighLevelErrorClass(userMessage, { cause: err });
+ * - Якщо середовище не підтримує options.cause автоматично, встановіть wrapped.cause = err вручну.
+ * - Викиньте throw wrapped.
+ */
+export function wrapExceptionWithCause(actionFn, HighLevelErrorClass, userMessage) {
+  // Обгорніть виняток у високорівневий клас помилки з cause
+  return undefined;
+}
+
+/**
+ * Завдання 4.30: Динамічний базовий клас помилок (this.constructor.name та поліморфізм) (Просунутий рівень)
+ * Напишіть функцію createBaseCustomError(), яка створює та повертає клас CustomAppError extends Error. У конструкторі він викликає super(message), встановлює this.name = this.constructor.name, і якщо передано options.cause або options.code — записує їх у властивості екземпляра.
+ * Вимоги:
+ * - Оголосіть class CustomAppError extends Error { constructor(message, options = {}) { ... } }.
+ * - Встановіть this.name = this.constructor.name (щоб класи-нащадки автоматично мали правильне ім'я).
+ * - Призначте this.code та this.cause за наявності.
+ * - Поверніть клас CustomAppError.
+ */
+export function createBaseCustomError() {
+  // Створіть та поверніть гнучкий базовий клас помилок
+  return undefined;
+}
+

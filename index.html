@@ -648,9 +648,9 @@
 
     <!-- Navigation Tabs -->
     <nav class="tabs-nav">
-      <button class="tab-btn active" data-tab="trainer">⚡ Тренажер (120 завдань)</button>
-      <button class="tab-btn" data-tab="theory">📖 Повна теорія (11 розділів)</button>
-      <button class="tab-btn" data-tab="mass-runner">🧪 Масовий запуск (120 тестів)</button>
+      <button class="tab-btn active" data-tab="trainer">⚡ Тренажер (122 завдання)</button>
+      <button class="tab-btn" data-tab="theory">📖 Повна теорія (12 розділів)</button>
+      <button class="tab-btn" data-tab="mass-runner">🧪 Масовий запуск (122 тести)</button>
       <button class="tab-btn" data-tab="final-cert">🚀 Підсумковий тест (Сертифікація)</button>
     </nav>
 
@@ -760,7 +760,14 @@
 const greet = (name, role = 'user') => {
   return `${name} (${role})`;
 };</code></pre>
-        <p>Мають компактний синтаксис, не мають власного контексту <code>this</code> та об'єкта <code>arguments</code>.</p>
+        <div class="theory-callout">
+          🔍 <strong>Ключові відмінності стрілкових функцій від звичайних:</strong>
+          <ul>
+            <li><strong>Лексичний <code>this</code>:</strong> у стрілкових функцій немає власного <code>this</code>, вони беруть його із зовнішнього оточення на момент створення.</li>
+            <li><strong>Відсутність <code>arguments</code>:</strong> замість застарілого псевдомасиву <code>arguments</code> використовуйте сучасний синтаксис <code>...rest</code>.</li>
+            <li><strong>Не можна викликати через <code>new</code>:</strong> стрілкові функції не мають внутрішнього методу <code>[[Construct]]</code> і прототипу <code>prototype</code>, тому не можуть бути конструкторами класів.</li>
+          </ul>
+        </div>
       </div>
 
       <!-- Section 4 -->
@@ -888,6 +895,28 @@ console.log(counter()); // 2</code></pre>
         <div class="theory-callout" style="border-left-color:var(--color-amber);">
           ⚠️ <strong>Підводний камінь:</strong> Ніколи не пишіть оператори <code>return</code> або <code>throw</code> всередині блоку <code>finally</code>. Вони «перетирають» будь-які значення та скасовують винятки з блоків <code>try</code> та <code>catch</code>!
         </div>
+
+        <h3>4. Синхронність try...catch та асинхронні пастки</h3>
+        <p>
+          Конструкція <code>try...catch</code> працює <strong>виключно синхронно</strong>. Якщо помилка трапляється у запланованому асинхронному коді (наприклад, усередині <code>setTimeout</code>, <code>setInterval</code> або слухача подій <code>addEventListener</code>), зовнішній <code>try...catch</code> її не спіймає, бо рушій вже покинув цей блок!
+        </p>
+        <pre><code class="language-javascript">// ❌ Помилка НЕ буде спіймана, вкладка може впасти:
+try {
+  setTimeout(() => {
+    throw new Error('Збій в асинхронному таймері');
+  }, 100);
+} catch (e) {
+  console.log('Цей блок ніколи не виконається!');
+}
+
+// ✅ Правильно: огортати код усередині самого колбека:
+setTimeout(() => {
+  try {
+    doRiskyAsyncJob();
+  } catch (err) {
+    console.error('Помилку безпечно перехоплено:', err.message);
+  }
+}, 100);</code></pre>
       </div>
 
       <!-- Section 10 -->
@@ -908,18 +937,41 @@ console.log(counter()); // 2</code></pre>
 
         <h3>Власні класи помилок (Custom Error Classes)</h3>
         <p>
-          Для зручної ідентифікації бізнес-помилок створюють власні класи, успадковані від <code>Error</code>:
+          Для зручної ідентифікації бізнес-помилок створюють власні класи, успадковані від <code>Error</code>. Розумний базовий клас автоматично підхоплює назву через <code>this.constructor.name</code>:
         </p>
-        <pre><code class="language-javascript">class ValidationError extends Error {
-  constructor(message, field) {
-    super(message);
-    this.name = 'ValidationError';
-    this.field = field;
+        <pre><code class="language-javascript">class AppBaseError extends Error {
+  constructor(message, options = {}) {
+    super(message, options);
+    this.name = this.constructor.name; // динамічно встановлює ім'я дочірнього класу
   }
 }
 
-// Використання:
-throw new ValidationError('Email вже зайнятий', 'email');</code></pre>
+class ValidationError extends AppBaseError {
+  constructor(message, field) {
+    super(message);
+    this.field = field;
+  }
+}</code></pre>
+
+        <h3>Обгортання винятків (Exception Wrapping) та властивість cause</h3>
+        <p>
+          Низькорівневі технічні помилки (збої мережі, синтаксис JSON) не повинні потрапляти безпосередньо в інтерфейс користувача. Їх обгортають у доменні бізнес-помилки:
+        </p>
+        <pre><code class="language-javascript">class OrderServiceError extends Error {
+  constructor(message, cause) {
+    super(message, { cause });
+    this.name = 'OrderServiceError';
+  }
+}
+
+function processPayment(data) {
+  try {
+    apiClient.charge(data);
+  } catch (rawErr) {
+    // Зберігаємо першопричину у cause для діагностики:
+    throw new OrderServiceError('Не вдалося списати кошти', rawErr);
+  }
+}</code></pre>
 
         <h3>Патерн повторного викидання (Re-throwing)</h3>
         <p>
@@ -955,6 +1007,27 @@ throw new ValidationError('Email вже зайнятий', 'email');</code></pre
         </ul>
       </div>
 
+      <!-- Section 12 -->
+      <div class="theory-section">
+        <h2>12. Глобальне перехоплення помилок та телеметрія</h2>
+        <p>
+          Що відбувається, якщо помилка все ж вислизнула за межі всіх блоків <code>try...catch</code>? У браузері існує глобальний обробник:
+        </p>
+        <pre><code class="language-javascript">window.onerror = function(message, source, lineno, colno, error) {
+  // Відправка діагностичного звіту на сервер моніторингу:
+  sendTelemetryLog({ message, source, lineno, stack: error?.stack });
+  return true; // запобігає виводу стандартної червоної помилки в консоль браузера
+};
+
+// Для асинхронних промісів (Promise rejection):
+window.addEventListener('unhandledrejection', event => {
+  console.warn('Необроблений Promise:', event.reason);
+});</code></pre>
+        <div class="theory-callout">
+          📊 <strong>Принцип роботи сервісів моніторингу (Sentry, LogRocket):</strong> вони автоматично реєструють ці глобальні слухачі, щоб розробники миттєво дізнавалися про збої у реальних користувачів без необхідності опитувати їх вручну.
+        </div>
+      </div>
+
     </div>
 
     <!-- TAB 3: MASS RUNNER -->
@@ -963,11 +1036,11 @@ throw new ValidationError('Email вже зайнятий', 'email');</code></pre
         <span style="font-size:36px; display:inline-block; margin-bottom:12px;">🧪</span>
         <h2 style="font-size:24px; font-weight:800; margin:0 0 10px 0; color:#fff;">Масовий запуск тестів (Mass Suite Runner)</h2>
         <p style="font-size:14px; color:var(--text-muted); max-width:600px; margin:0 auto 24px auto;">
-          Запустіть одночасну валідацію всіх 120 завдань курсу на реальних тестах у захищеній пісочниці для перевірки готовності.
+          Запустіть одночасну валідацію всіх 122 завдань курсу на реальних тестах у захищеній пісочниці для перевірки готовності.
         </p>
 
         <button class="btn-pill btn-pill-primary" id="startMassRunnerBtn" style="padding:12px 28px; font-size:15px;">
-          🚀 Запустити всі 120 тестів
+          🚀 Запустити всі 122 тести
         </button>
 
         <div id="massRunnerProgressWrap" style="display:none; margin-top:24px; text-align:left;">

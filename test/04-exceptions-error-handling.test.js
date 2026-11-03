@@ -27,7 +27,9 @@ import {
   safeArrayTransform,
   validateMatrixSquare,
   createSafeHandler,
-  parseConfigFile
+  parseConfigFile,
+  wrapExceptionWithCause,
+  createBaseCustomError
 } from "../src/04-exceptions-error-handling.js";
 
 describe("Частина 4: Винятки та обробка помилок (try...catch...finally, throw)", () => {
@@ -364,6 +366,18 @@ describe("Частина 4: Винятки та обробка помилок (t
     });
     it("тест 2: (() => { try { parseConfigFile('VALID=true\nBROKEN_LINE\nOTHER=1'); return 'OK'; } catch(e) { return { name: e.name, msg: e.message }; } })()", () => {
       expect((() => { try { parseConfigFile('VALID=true\nBROKEN_LINE\nOTHER=1'); return 'OK'; } catch(e) { return { name: e.name, msg: e.message }; } })()).toEqual({"name":"SyntaxError","msg":"Помилка синтаксису в рядку 2: відсутній знак '='"});
+    });
+  });
+
+  describe("4.29 wrapExceptionWithCause - Патерн обгортання винятків (Exception Wrapping з властивістю cause)", () => {
+    it("тест 1: (() => { class ReadError extends Error {}; try { wrapExceptionWithCause(() => { JSON.parse('{bad json}'); }, ReadError, 'Не вдалося прочитати конфігурацію'); return 'NO_THROW'; } catch(e) { return { isReadError: e instanceof ReadError, msg: e.message, hasCause: Boolean(e.cause), causeName: e.cause ? e.cause.name : null }; } })()", () => {
+      expect((() => { class ReadError extends Error {}; try { wrapExceptionWithCause(() => { JSON.parse('{bad json}'); }, ReadError, 'Не вдалося прочитати конфігурацію'); return 'NO_THROW'; } catch(e) { return { isReadError: e instanceof ReadError, msg: e.message, hasCause: Boolean(e.cause), causeName: e.cause ? e.cause.name : null }; } })()).toEqual({"isReadError":true,"msg":"Не вдалося прочитати конфігурацію","hasCause":true,"causeName":"SyntaxError"});
+    });
+  });
+
+  describe("4.30 createBaseCustomError - Динамічний базовий клас помилок (this.constructor.name та поліморфізм)", () => {
+    it("тест 1: (() => { const Base = createBaseCustomError(); class NetworkTimeoutError extends Base {} const err = new NetworkTimeoutError('Сервер не відповідає', { code: 504, cause: new Error('Socket closed') }); return { isBase: err instanceof Base, isError: err instanceof Error, isChild: err instanceof NetworkTimeoutError, name: err.name, msg: err.message, code: err.code, causeMsg: err.cause.message }; })()", () => {
+      expect((() => { const Base = createBaseCustomError(); class NetworkTimeoutError extends Base {} const err = new NetworkTimeoutError('Сервер не відповідає', { code: 504, cause: new Error('Socket closed') }); return { isBase: err instanceof Base, isError: err instanceof Error, isChild: err instanceof NetworkTimeoutError, name: err.name, msg: err.message, code: err.code, causeMsg: err.cause.message }; })()).toEqual({"isBase":true,"isError":true,"isChild":true,"name":"NetworkTimeoutError","msg":"Сервер не відповідає","code":504,"causeMsg":"Socket closed"});
     });
   });
 
